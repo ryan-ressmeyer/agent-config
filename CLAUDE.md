@@ -17,7 +17,8 @@ Each skill is a directory at the repo root containing:
 ### Skill Categories
 
 - **Process/meta skills**: `skills-prelude`, `designing-plans`, `writing-plans`, `executing-plans`, `dispatching-parallel-agents`, `verification-before-completion`, `writing-skills`, `python-environment`
-- **Scientific domain skills**: `citation-management`, `literature-review`, `scientific-brainstorming`, `scientific-critical-thinking`, `scientific-visualization`, `scientific-writing`, `research-grants`
+- **Literature review system**: `literature-review` (orchestrator), `literature-writer`, `citation-fetch`, `pdf-retrieve`, `paper-summarize`, `database-check`, `database-search`, `theme-synthesize` — see `literature-review-system.md` for design doc
+- **Scientific domain skills**: `citation-management` (legacy), `scientific-brainstorming`, `scientific-critical-thinking`, `scientific-visualization`, `scientific-writing`, `research-grants`
 - **Software engineering skills**: `systematic-debugging`, `test-driven-development`
 
 ### Key Conventions
@@ -32,10 +33,14 @@ Each skill is a directory at the repo root containing:
 
 ```bash
 # All Python scripts use PEP 723 inline metadata — uv handles deps automatically
-uv run citation-management/scripts/doi_to_bibtex.py <doi>
-uv run citation-management/scripts/search_pubmed.py <query>
-uv run literature-review/scripts/generate_pdf.py <args>
-uv run scientific-visualization/scripts/figure_export.py <args>
+# Literature review system scripts:
+uv run citation-fetch/scripts/fetch_metadata.py --doi <doi>
+uv run citation-fetch/scripts/fetch_citation_graph.py --doi <doi> --paper-id <id> --output-dir references/<id>/
+uv run pdf-retrieve/scripts/find_open_access.py --doi <doi>
+uv run paper-summarize/scripts/update_index.py --database references/ --id <id> --title "..."
+uv run paper-summarize/scripts/update_bibtex.py --database references/ --id <id> --entry '...'
+uv run database-check/scripts/check_integrity.py references/
+uv run database-search/scripts/search_database.py "query" --database references/
 ```
 
 ## Rendering Skill Flowcharts
