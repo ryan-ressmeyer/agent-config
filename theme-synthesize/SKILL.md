@@ -7,7 +7,7 @@ description: Use when creating or updating cross-paper thematic synthesis docume
 
 ## Overview
 
-Create or update a thematic synthesis document in `themes/` that traces how an idea, method, or phenomenon evolved across multiple papers. This is a **synthesis**, not a list of summaries — it reads as a coherent narrative.
+Create or update a thematic synthesis document in `themes/` that connects findings across multiple papers on a shared topic. The goal is an objective synthesis that reports what each study found and where findings relate to each other — not an editorial narrative or a list of summaries.
 
 ## When to Use
 
@@ -34,11 +34,11 @@ uv run database-search/scripts/search_database.py --theme <theme-name> --databas
 ### Step 2: Read Summaries
 
 Read each paper's `<id>-summary.md`. Focus on:
-- Questions asked (do they evolve over time?)
-- Methods used (do they improve?)
-- Results (do they converge or conflict?)
-- Inferences (how does understanding shift?)
-- Subject/preparation (does the finding generalize across species/models?)
+- Questions asked
+- Methods used (species, preparation, stimuli)
+- Results (effect sizes, sample sizes, specific numbers)
+- Inferences *as stated by the authors* (not your own interpretation)
+- Subject/preparation (note species for every finding)
 
 ### Step 3: Write the Synthesis
 
@@ -47,39 +47,42 @@ Create `themes/<theme-name>.md` following this structure:
 ```markdown
 # Theme Title — Descriptive Subtitle
 
+## Scope
+State how many papers this theme draws on. Note what perspectives,
+subfields, or alternative viewpoints are NOT represented in the database.
+Be honest about the limited view.
+
 ## Overview
-2-3 sentences framing the core question this theme addresses.
+2-3 sentences framing the core question. Do not claim consensus or
+state "it is now understood" — just frame the question.
 
-## Historical Arc
-Chronological narrative tracing how understanding evolved.
-Group by eras or turning points, not by individual paper.
+## Findings by Study
+Present what each study found, attributed to the authors.
+Use "AuthorName et al. (Year) found/measured/concluded..."
+Do not editorialize or add superlatives.
 
-1. **Early work (Years)** — Who established the foundation? What was the initial framing?
-2. **Key advances (Years)** — What shifted the field? New methods, surprising results?
-3. **Current state (Years)** — Where does understanding stand now?
-
-## Key Findings Across Papers
-Synthesized findings organized by sub-question or claim.
-Compare and contrast across papers. Note:
-- Points of agreement
-- Points of disagreement or tension
-- Methodological differences that might explain discrepancies
-- Species/model differences
+## Points of Contact Across Studies
+Where findings from different papers relate to each other.
+Organize by sub-question or claim, not by paper.
+Always attribute: "Study A found X; Study B found Y in a different preparation."
+Note:
+- Where results are consistent across studies (with species/method noted)
+- Where results differ or create tension
+- Methodological differences that may explain discrepancies
 
 ## Key Figures
-Reference the most illustrative figures from papers in the database:
+Reference figures from papers in the database (if extracted):
 
 LastName & SeniorAuthor (Year), Fig. N — description of what it shows:
 ![Caption](../paper-id/paper-id-figures/figN-description.png)
 
-## Methodological Evolution
-How have the methods for studying this question changed?
-What can newer methods reveal that older ones couldn't?
+## Open Questions From These Papers
+Questions that arise from the papers in the database.
+Do not speculate about answers — just identify the gaps.
 
-## Open Questions
-- What remains unknown?
-- What contradictions are unresolved?
-- What experiments would help?
+## Suggested Papers to Add
+Propose specific types of papers (or specific papers if known)
+that would broaden the theme or address open questions.
 
 ## Papers in This Theme
 - paper-id-1
@@ -96,20 +99,36 @@ Show the draft to the user. Ask:
 
 ## Writing Principles
 
-- **Synthesize, don't summarize.** "Three studies found X" not "Study A found X. Study B also found X."
-- **Show evolution.** How did later work build on or challenge earlier work?
-- **Note species/model differences.** A finding in macaque that hasn't been tested in mouse is different from a finding replicated across species.
-- **Be specific.** Include effect sizes, sample sizes, methodological details where they matter for the narrative.
-- **Reference key figures.** Point to the most compelling visualizations in the database.
-- **Flag gaps.** What should have been studied but wasn't?
+### Objectivity Directives (MANDATORY)
+
+You are working from a small subset of a larger literature. You must stay within the bounds of what the papers in the database actually say.
+
+1. **Report findings, don't narrate history you haven't read.** Do not claim a paper "began the modern understanding" or was "the first to show X" unless it explicitly says so. The database is a subset of the field.
+2. **Attribute claims to specific papers.** Instead of "converging evidence shows X," write "Burr et al. (1994) found X; Reppas et al. (2002) found Y in a different preparation." Every claim needs an author attached.
+3. **Don't synthesize consensus that may not exist.** Avoid phrases like "it is now understood that," "the definitive evidence," or "has progressively narrowed." State what each study found and let the reader draw connections.
+4. **Flag your blind spots explicitly.** State how many papers the theme draws on. Note which perspectives or subfields might be missing from the database. Include a Scope section at the top of every theme.
+5. **Distinguish a paper's own claims from your inferences.** If a paper concludes "the LGN is the most likely site," write "the authors concluded that..." Don't elevate it to established fact.
+6. **Avoid superlatives and certainty language.** Do not use "definitive," "critical," "striking," "the most parsimonious," "key," "crucial," or similar editorializing. Describe what was measured and found.
+7. **Mention limitations only when they bear on interpretation.** Don't catalog every caveat for every paper. Only note limitations when they affect whether a specific claim in the synthesis actually holds.
+8. **Suggest follow-up papers after the theme.** End with a section proposing papers that could broaden the theme or address open questions, rather than speculating about answers yourself.
+
+### General Principles
+
+- **Be specific.** Include effect sizes, sample sizes, species, and methodological details where they matter.
+- **Note species/model differences.** A finding in macaque is not the same as a finding in cat or human — state which species each result comes from.
+- **Reference key figures** from papers in the database when available.
+- **Organize by finding, not by paper** when drawing connections across studies. But attribute each finding to its source.
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
-| Study-by-study summaries | Organize by theme/question, not by paper |
-| Missing chronological context | Show how ideas evolved over time |
-| Ignoring methodological differences | Note when different methods yield different results |
-| No species/model comparison | Always note which subjects were used across studies |
+| Editorializing beyond the papers | Attribute every claim to a specific paper; use "the authors concluded" not "this shows" |
+| Claiming historical firsts | Don't say "first to show X" unless the paper itself says so — you haven't read the whole literature |
+| Synthesizing consensus from a small database | State what N papers found; don't generalize to "the field" |
+| Superlatives and certainty language | Replace "definitive," "striking," "key" with neutral descriptions |
+| Missing scope statement | Always include a Scope section noting how many papers and what perspectives are absent |
+| Cataloging every limitation | Only mention limitations when they affect interpretation of a specific claim |
+| No follow-up suggestions | End with suggested papers to broaden the theme |
 | Forgetting to update theme tags | Run update_index.py for all papers in the theme |
 | Static document | Update when new papers are added to the theme |

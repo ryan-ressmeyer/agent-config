@@ -16,10 +16,9 @@ Each skill is a directory at the repo root containing:
 
 ### Skill Categories
 
-- **Process/meta skills**: `skills-prelude`, `designing-plans`, `writing-plans`, `executing-plans`, `dispatching-parallel-agents`, `verification-before-completion`, `writing-skills`, `python-environment`
-- **Literature review system**: `literature-review` (orchestrator), `literature-writer`, `citation-fetch`, `pdf-retrieve`, `paper-summarize`, `database-check`, `database-search`, `theme-synthesize` — see `literature-review-system.md` for design doc
+- **Process/code skills**: `skills-prelude`, `designing-plans`, `writing-plans`, `executing-plans`, `dispatching-parallel-agents`, `verification-before-completion`, `writing-skills`, `python-environment`, `systematic-debugging`, `test-driven-development` — see `process-skills-system.md` for design doc
+- **Research system**: `literature-review` (orchestrator), `literature-writer`, `manuscript-planning`, `citation-fetch`, `pdf-retrieve`, `paper-summarize`, `database-check`, `database-search`, `theme-synthesize` — see `research-system.md` for design doc
 - **Scientific domain skills**: `citation-management` (legacy), `scientific-brainstorming`, `scientific-critical-thinking`, `scientific-visualization`, `scientific-writing`, `research-grants`
-- **Software engineering skills**: `systematic-debugging`, `test-driven-development`
 
 ### Key Conventions
 

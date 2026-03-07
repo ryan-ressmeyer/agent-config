@@ -7,7 +7,7 @@ description: Use when writing scientific paper sections (introduction, discussio
 
 ## Overview
 
-Use the literature database to assist writing scientific papers. Draws citations exclusively from the database, builds narrative arcs from theme documents, and flags gaps where needed papers are missing.
+Use the literature database to assist writing scientific paper sections. Draws citations exclusively from the database, connects findings across papers, and flags gaps where needed papers are missing. All claims must be grounded in what the cited papers actually found.
 
 ## When to Use
 
@@ -96,11 +96,11 @@ When a figure from the database illustrates a point being discussed:
 
 ### Introduction
 
-- Build from theme documents — they already trace historical arcs
+- Consult theme documents for which papers relate to each other and how
 - Start broad, narrow to the specific question
-- Cite foundational work first, then recent advances
+- Every factual claim needs a citation attributed to specific authors
 - End with the gap your paper fills
-- Every claim needs a citation
+- Do not write "it is well known that" or "extensive work has shown" — state what specific papers found
 
 ### Discussion
 
@@ -114,6 +114,18 @@ When a figure from the database illustrates a point being discussed:
 
 - When methods build on prior work, cite the originals
 - Use QLMRI Methods sections for accurate descriptions of what prior papers did
+
+## Objectivity Directives (MANDATORY)
+
+Scientific writing makes arguments, but those arguments must be grounded in what the cited papers actually reported. You are working from a limited database, not the full literature.
+
+1. **Attribute findings to specific papers.** Write "Burr et al. (1994) found X" not "it has been shown that X" or "X is well established." Every factual claim needs an author attached.
+2. **Don't overstate what a citation supports.** If a paper found something in cat, don't cite it as though the finding applies to all mammals. State what was found and in what preparation.
+3. **Don't claim consensus from your database.** You have a subset of the literature. Don't write "it is widely accepted" or "extensive evidence demonstrates" based on a handful of papers. State what the specific cited papers found.
+4. **Avoid superlatives and certainty language.** Do not write "clearly demonstrates," "conclusively shows," "the most important," "a landmark study," etc. Describe findings neutrally.
+5. **Distinguish authors' conclusions from facts.** "Burr et al. (1994) concluded that suppression occurs before V1" is different from "suppression occurs before V1." Use the former when the claim is an interpretation.
+6. **Don't narrate history you haven't read.** Don't write "the first study to show X" or "pioneering work by" unless the paper itself makes that claim. You haven't read the whole literature.
+7. **Flag what you don't know.** If the database doesn't have papers representing an alternative viewpoint, say so rather than writing as though the available papers tell the whole story.
 
 ## Rules
 
@@ -131,6 +143,9 @@ When a figure from the database illustrates a point being discussed:
 | Citing papers not in the database | Only cite papers in index.yaml — flag gaps instead |
 | Generic citations ("as shown previously") | Specify what was shown and by whom |
 | Ignoring species/model differences | Note when cited evidence is from a different subject |
-| Writing a literature review instead of an argument | The intro/discussion should argue a point, not just review |
 | Using wrong citation keys | Always use the paper ID from the database |
-| Not checking theme documents | Themes contain pre-built narrative arcs — use them |
+| Not checking theme documents | Themes show how papers in the database relate to each other |
+| "It is well established that X" | State what specific papers found — don't claim consensus from a small database |
+| Superlatives ("landmark study," "clearly demonstrates") | Describe findings neutrally without editorializing |
+| Elevating authors' interpretations to fact | "Authors concluded X" not "X is the case" when the claim is an inference |
+| Claiming historical firsts ("the first to show") | Don't assert priority unless the paper itself does — you haven't read the full literature |

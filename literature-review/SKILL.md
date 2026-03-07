@@ -87,7 +87,36 @@ Execute these sub-skills in sequence:
 
 4. **paper-summarize** — Read PDF, write QLMRI summary, update index and bib
    - Read the PDF with the user
-   - Write summary, update `index.yaml` and `references.bib`
+   - Write QLMRI summary to `references/<id>/summary.md`
+   - Update `index.yaml` (note: `--database` takes the **directory**, not the yaml file; `--authors` and `--subject` take **JSON strings**; `--has-pdf`/`--has-summary` take **"true"/"false"** not bare flags):
+     ```bash
+     uv run ~/.claude/skills/paper-summarize/scripts/update_index.py \
+       --database references/ \
+       --id firstauthor-seniorauthor-year \
+       --title "Paper title" \
+       --authors '["Last, First", "Last2, First2"]' \
+       --year 2019 \
+       --journal "Journal Name" \
+       --doi "10.xxx/yyy" \
+       --subject '["macaque"]' \
+       --summary "1-3 sentence summary" \
+       --status summarized \
+       --has-pdf true \
+       --has-summary true
+     ```
+   - Update `references.bib` (pass BibTeX via `--entry` string or `--entry-file`):
+     ```bash
+     uv run ~/.claude/skills/paper-summarize/scripts/update_bibtex.py \
+       --database references/ \
+       --id firstauthor-seniorauthor-year \
+       --entry '@article{firstauthor-seniorauthor-year,
+         author = {Last, First and Last2, First2},
+         title = {Paper title},
+         journal = {Journal Name},
+         year = {2019},
+         doi = {10.xxx/yyy}
+       }'
+     ```
    - Present summary for review
 
 5. **Surface next papers** — Show candidates from citation graph

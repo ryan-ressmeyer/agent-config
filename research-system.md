@@ -1,14 +1,32 @@
-# Literature Review System — Design Document
+# Research System — Design Document
 
 ## Goal
 
-Build a **paper database** incrementally through interactive conversations with an agent. The database captures the historical state of scientific literature around a research topic: PDFs, structured summaries (QLMRI), citation metadata, and cross-paper thematic syntheses.
+Support the full arc of scientific research: from reading papers, through planning analyses and manuscripts, to writing publication-ready prose.
 
-The system is **not** an automation tool — it is a guided learning process. The agent speeds up and organizes the work, but the user drives the pace and reads every paper. One paper at a time.
+Build a **paper database** incrementally through interactive conversations. Use that database — alongside the project's codebase and experimental data — to plan high-impact manuscripts through collaborative dialogue. Then write the prose with proper citations.
 
-The system is composed of focused sub-skills orchestrated by two high-level skills:
-- **`literature-review`** — interactive loop: collect papers, summarize, synthesize, answer questions
-- **`literature-writer`** — load relevant database entries to assist writing papers (intro, discussion, inline citations)
+The system is **not** an automation tool — it is a guided process. The agent speeds up and organizes the work, but the user drives the pace, reads every paper, verifies every interpretation, and makes every strategic decision.
+
+## Three Phases
+
+```
+Phase 1: Literature Review          Phase 2: Manuscript Planning         Phase 3: Writing
+─────────────────────────           ────────────────────────────         ──────────────────
+Build the paper database            Plan the paper from data +           Write prose with
+one paper at a time                 literature, run analyses,            citations from
+                                    iterate on framing                   the database
+
+literature-review (orchestrator)    manuscript-planning                  literature-writer
+├── citation-fetch                  ├── database-search                  ├── database-search
+├── pdf-retrieve                    ├── literature-review*               └── (reads database
+├── paper-summarize                 ├── theme-synthesize                     directly)
+├── database-check                  └── [code tools]
+├── database-search
+└── theme-synthesize                * hands back when gaps found
+```
+
+Phases are not strictly sequential — users move between them as needed. A manuscript plan may reveal literature gaps that send you back to Phase 1. Writing may surface a missing analysis that sends you back to Phase 2.
 
 ---
 
@@ -226,7 +244,7 @@ Smith & Jones (2019), Fig. 2 — best illustration of temporal sharpening:
 
 ---
 
-## Sub-Skills
+## Phase 1 Sub-Skills: Literature Review
 
 ### 1. `citation-fetch`
 
@@ -400,9 +418,74 @@ Smith & Jones (2019), Fig. 2 — best illustration of temporal sharpening:
 
 ---
 
-## High-Level Orchestrator Skills
+## Phase 2: Manuscript Planning
 
-### `literature-review` (Orchestrator)
+### `manuscript-planning`
+
+**Purpose:** Collaborative dialogue to develop a high-impact manuscript plan from data + literature.
+
+**Inputs:** Literature database, project codebase, experiment descriptions, user's research questions
+**Outputs:** Manuscript plan (user-specified format/location) + lab journal (append-only)
+
+**Two artifacts:**
+
+1. **Manuscript plan** — Living outline of the paper. Bullet points and short sentences, not prose. Format and location are user-specified (markdown, LaTeX, etc.). Default: `manuscript-plan.md` in project root.
+
+2. **Lab journal** — Append-only record of everything tried: hypotheses, analyses, results, ad hoc thoughts, dead ends. Freeform entries, kept small. Links to scripts. Default: `lab-journal.md` in project root.
+
+**Core loop:**
+```
+User describes data / experiments / question
+  → Agent explores codebase and literature as needed
+  → Agent and user collaborate on direction and analysis design
+  → Agent writes and runs analysis scripts (via code tools + uv)
+  → Agent presents results and proposed interpretation TO USER
+  → User confirms, corrects, or redirects
+  → Agent logs work in lab journal
+  → Agent updates manuscript plan if warranted
+  → Repeat
+```
+
+**Modes:** Discovery, analysis collaboration, outline structuring, gap identification, future experiments, resume.
+
+**Key principles:**
+- Agent always returns to user for interpretation verification
+- Agent and user co-design analyses before the agent writes code
+- Impact is negotiated — agent asks about target journal/audience, doesn't assume
+- One question at a time during exploratory dialogue
+
+**Interfaces with code tools:** `python-environment`, `systematic-debugging`, `test-driven-development`
+
+**See:** `manuscript-planning/SKILL.md` for full specification.
+
+---
+
+## Phase 3: Writing
+
+### `literature-writer`
+
+**Purpose:** Use the paper database to assist writing scientific papers.
+
+**Inputs:** Section being written (intro, discussion, etc.), topic/claim being made
+**Outputs:** Drafted text with inline citations, suggested references
+
+**Behavior:**
+1. Search database for papers relevant to the section/claim
+2. Load relevant summaries and theme documents
+3. Draft text with proper citations drawn from the database (using BibTeX keys from `references.bib`)
+4. For introductions: build narrative arc from theme documents
+5. For discussions: connect findings to existing literature
+6. For any section: suggest where citations should be inserted
+7. Reference key figures from the database where they support the narrative
+8. Flag claims that lack supporting papers in the database
+
+**Key principle:** Only cite papers that are in the database. If a citation is needed but not in the database, tell the user and offer to add it via the literature-review workflow.
+
+---
+
+## Orchestrator Skills
+
+### `literature-review` (Phase 1 Orchestrator)
 
 **Purpose:** Interactive session for building the paper database. One paper at a time, with the user learning alongside the agent.
 
@@ -437,28 +520,7 @@ User provides topic/paper/question
 
 ---
 
-### `literature-writer`
-
-**Purpose:** Use the paper database to assist writing scientific papers.
-
-**Inputs:** Section being written (intro, discussion, etc.), topic/claim being made
-**Outputs:** Drafted text with inline citations, suggested references
-
-**Behavior:**
-1. Search database for papers relevant to the section/claim
-2. Load relevant summaries and theme documents
-3. Draft text with proper citations drawn from the database (using BibTeX keys from `references.bib`)
-4. For introductions: build narrative arc from theme documents
-5. For discussions: connect findings to existing literature
-6. For any section: suggest where citations should be inserted
-7. Reference key figures from the database where they support the narrative
-8. Flag claims that lack supporting papers in the database
-
-**Key principle:** Only cite papers that are in the database. If a citation is needed but not in the database, tell the user and offer to add it via the literature-review workflow.
-
----
-
-## Skill Dependency Graph
+## Full Skill Dependency Graph
 
 ```
 literature-review (orchestrator)
@@ -470,6 +532,14 @@ literature-review (orchestrator)
 ├── database-search
 └── theme-synthesize
 
+manuscript-planning
+├── database-search
+├── literature-review          (hand off when literature gaps found)
+├── theme-synthesize
+├── python-environment         (all script execution)
+├── systematic-debugging       (when analyses fail)
+└── test-driven-development    (when building analysis pipelines)
+
 literature-writer
 ├── database-search
 └── (reads database directly: index.yaml, references.bib, summaries, themes)
@@ -479,19 +549,21 @@ literature-writer
 
 ## Configuration
 
-### Default Database Location
-`references/` in the current working directory.
+### Default Locations
+- Literature database: `references/` in the current working directory
+- Manuscript plan: `manuscript-plan.md` in project root
+- Lab journal: `lab-journal.md` in project root
 
 ### Override via CLAUDE.md
 ```markdown
-## Literature Database
+## Research System
 Database path: /path/to/my/references
+Manuscript plan: /path/to/manuscript-plan.md
+Lab journal: /path/to/lab-journal.md
 ```
 
 ### Override via User Input
-User can specify at the start of a session: "Use `/path/to/references` as the database."
-
-The database can live as a subfolder within a larger project — the skills only care about the internal structure of the database directory itself.
+User can specify at the start of a session. The database can live as a subfolder within a larger project — the skills only care about the internal structure of the database directory itself.
 
 ---
 
@@ -519,3 +591,7 @@ The database can live as a subfolder within a larger project — the skills only
 6. **Key figure extraction** — When possible, extract important figures from PDFs and embed them in summary and theme documents. This makes the database a visual resource, not just text.
 
 7. **Database location is flexible** — Defaults to `references/` but can be anywhere. Supports being a subfolder in a larger project repo.
+
+8. **Manuscript planning bridges literature and code** — `manuscript-planning` reads the literature database and interfaces with the codebase via existing code tools. It produces a living plan and an append-only lab journal that preserves institutional memory across sessions.
+
+9. **Three-phase flow with feedback loops** — Literature review → manuscript planning → writing, but users move between phases freely. A manuscript plan may reveal literature gaps; writing may surface missing analyses.
