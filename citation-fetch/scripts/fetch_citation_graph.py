@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["requests", "pyyaml"]
+# dependencies = ["requests", "pyyaml", "python-dotenv"]
 # ///
 """
 Fetch citation graph for a paper: references, cited-by, and semantically related papers.
@@ -14,10 +14,36 @@ import re
 import json
 import argparse
 import time
+import fcntl
 from pathlib import Path
 
 import requests
 import yaml
+from dotenv import load_dotenv
+
+load_dotenv()
+
+S2_RATE_LIMIT_FILE = '/tmp/.s2_last_request'
+S2_MIN_INTERVAL = 1.0  # seconds — Semantic Scholar rate limit
+
+
+def s2_wait():
+    """Block until at least S2_MIN_INTERVAL has passed since the last S2 API call."""
+    open(S2_RATE_LIMIT_FILE, 'a').close()
+    with open(S2_RATE_LIMIT_FILE, 'r+') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        try:
+            content = f.read().strip()
+            last_time = float(content) if content else 0.0
+            now = time.time()
+            elapsed = now - last_time
+            if 0 < elapsed < S2_MIN_INTERVAL:
+                time.sleep(S2_MIN_INTERVAL - elapsed)
+            f.seek(0)
+            f.truncate()
+            f.write(str(time.time()))
+        finally:
+            fcntl.flock(f, fcntl.LOCK_UN)
 
 
 class CitationGraphFetcher:
@@ -32,13 +58,13 @@ class CitationGraphFetcher:
         if api_key:
             headers['x-api-key'] = api_key
         self.session.headers.update(headers)
-        self.delay = 1.0 if not api_key else 0.2
 
     def _get_s2_paper_id(self, doi: str) -> str | None:
         """Resolve DOI to Semantic Scholar paper ID."""
         url = f'{self.S2_BASE}/paper/DOI:{doi}'
         params = {'fields': 'paperId,title'}
         try:
+            s2_wait()
             resp = self.session.get(url, params=params, timeout=15)
             if resp.status_code == 200:
                 return resp.json().get('paperId')
@@ -71,13 +97,13 @@ class CitationGraphFetcher:
         s2_id = self._get_s2_paper_id(doi)
         if not s2_id:
             return []
-        time.sleep(self.delay)
         url = f'https://api.semanticscholar.org/recommendations/v1/papers/forpaper/{s2_id}'
         params = {
             'fields': 'title,authors,year,externalIds,abstract',
             'limit': limit,
         }
         try:
+            s2_wait()
             resp = self.session.get(url, params=params, timeout=15)
             if resp.status_code != 200:
                 print(f'S2 recommendations error: {resp.status_code}', file=sys.stderr)
@@ -103,6 +129,7 @@ class CitationGraphFetcher:
             'fields': 'title,authors,year,externalIds,abstract',
         }
         try:
+            s2_wait()
             resp = self.session.get(url, params=params, timeout=15)
             if resp.status_code != 200:
                 return []
@@ -115,6 +142,7 @@ class CitationGraphFetcher:
     def _fetch_list(self, url: str, params: dict, paper_key: str) -> list[dict]:
         """Generic paginated fetch for references/citations."""
         try:
+            s2_wait()
             resp = self.session.get(url, params=params, timeout=30)
             if resp.status_code != 200:
                 print(f'S2 API error: {resp.status_code} for {url}', file=sys.stderr)
@@ -252,7 +280,6 @@ def main():
     ref_entries = [build_entry(p, check_in_database(p, db_entries)) for p in refs]
     write_yaml(out_dir / 'references.yaml', 'references', ref_entries)
     print(f'  Found {len(ref_entries)} references', file=sys.stderr)
-    time.sleep(fetcher.delay)
 
     # ── Citations (papers that cite this paper) ──
     print(f'Fetching citations...', file=sys.stderr)
@@ -260,25 +287,23 @@ def main():
     cite_entries = [build_entry(p, check_in_database(p, db_entries)) for p in cites]
     write_yaml(out_dir / 'cited-by.yaml', 'cited_by', cite_entries)
     print(f'  Found {len(cite_entries)} citing papers', file=sys.stderr)
-    time.sleep(fetcher.delay)
 
     # ── Related (recommendations + keyword search) ──
     print(f'Fetching related papers...', file=sys.stderr)
     # Recommendations
     recs = fetcher.fetch_recommendations(args.doi, limit=args.related_limit)
-    time.sleep(fetcher.delay)
     # Keyword search
     title = args.title
     if not title:
         # Try to get title from refs metadata (first entry often self-referential context)
         # Fall back to using DOI lookup
+        s2_wait()
         title_resp = fetcher.session.get(
             f'{fetcher.S2_BASE}/paper/DOI:{args.doi}',
             params={'fields': 'title'}, timeout=10,
         )
         if title_resp.status_code == 200:
             title = title_resp.json().get('title', '')
-        time.sleep(fetcher.delay)
 
     search_results = fetcher.search_related(title, limit=args.related_limit) if title else []
 

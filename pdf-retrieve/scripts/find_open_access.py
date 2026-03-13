@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["requests"]
+# dependencies = ["requests", "python-dotenv"]
 # ///
 """
 Find open-access PDF URLs for a paper.
@@ -14,8 +14,34 @@ import os
 import json
 import argparse
 import time
+import fcntl
 
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
+S2_RATE_LIMIT_FILE = '/tmp/.s2_last_request'
+S2_MIN_INTERVAL = 1.0  # seconds — Semantic Scholar rate limit
+
+
+def s2_wait():
+    """Block until at least S2_MIN_INTERVAL has passed since the last S2 API call."""
+    open(S2_RATE_LIMIT_FILE, 'a').close()
+    with open(S2_RATE_LIMIT_FILE, 'r+') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        try:
+            content = f.read().strip()
+            last_time = float(content) if content else 0.0
+            now = time.time()
+            elapsed = now - last_time
+            if 0 < elapsed < S2_MIN_INTERVAL:
+                time.sleep(S2_MIN_INTERVAL - elapsed)
+            f.seek(0)
+            f.truncate()
+            f.write(str(time.time()))
+        finally:
+            fcntl.flock(f, fcntl.LOCK_UN)
 
 
 class OpenAccessFinder:
@@ -121,6 +147,7 @@ class OpenAccessFinder:
         if api_key:
             headers['x-api-key'] = api_key
         try:
+            s2_wait()
             resp = self.session.get(url, params=params, headers=headers, timeout=10)
             if resp.status_code != 200:
                 return None
