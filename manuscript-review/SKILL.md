@@ -7,76 +7,70 @@ description: Use when reviewing and editing a manuscript or long-form document, 
 
 ## Overview
 
-Orchestrate the full review and editing cycle for a manuscript. Guides the user through three hierarchical stages — structural, line, and copy editing — using adversarial critique subagents, synthesis, and collaborative revision. The orchestrator manages the conversation; the user makes all editing decisions.
+Collect critiques of a manuscript from multiple sources and levels, synthesize them into a prioritized revision plan, and either save the plan for later execution or hand off to `manuscript-editing` in the same session. This skill handles critique and planning only — it does not edit the manuscript.
 
 ## When to Use
 
 - Reviewing a manuscript draft before submission
-- Systematic editing of a paper, grant, or long-form document
+- Systematic critique of a paper, grant, or long-form document
 - User wants structured feedback on a piece of writing
-- User wants to improve a document through iterative critique and revision
+- User has external reviews (journal comments, collaborator feedback) to synthesize into a plan
+- User wants to plan revisions before executing them
 
-## Stage Hierarchy
-
-Structural issues must be resolved before line editing. Line editing must settle before copy editing. Addressing lower-level issues while higher-level problems exist wastes effort — entire sections may be cut or reorganized.
+## Process Flow
 
 ```dot
-digraph stages {
+digraph manuscript_review {
     rankdir=TB;
     node [shape=box];
 
     start [label="Read manuscript\nCheck for existing reviews/"];
     existing [shape=diamond, label="Existing\nreviews?"];
     ask_resume [label="Ask user:\npick up or start fresh?"];
-    recommend [label="Recommend review stage\n(structural → line → copy)"];
-    user_confirm [shape=diamond, label="User confirms\nstage?"];
+    recommend [label="Recommend critique level\n(structural, line, copy)\nor ingest existing"];
+    user_confirm [shape=diamond, label="User selects\ncritique approach"];
 
     structural [label="STRUCTURAL\nInvoke reverse-outline"];
-    struct_review [label="Present structural critique\nto user"];
-    struct_decide [shape=diamond, label="Structural\nissues?"];
-    struct_edit [label="Collaborate on\nstructural revisions"];
+    line [label="LINE\nPropose section divisions\nDispatch section-critique"];
+    copy [label="COPY\nInvoke copy-review"];
+    ingest [label="INGEST\nRead user-provided\ncritiques/reviews"];
 
-    line [label="LINE EDITING\nPropose section divisions\nUser confirms"];
-    dispatch [label="Dispatch section-critique\nsubagents"];
-    triage [label="Invoke critique-triage\non results"];
-    line_review [label="Present revision plan\nto user"];
-    line_decide [shape=diamond, label="User selects\nissues to address"];
-    line_edit [label="Suggest edits\nUser approves"];
-    line_again [shape=diamond, label="Another\ncritique pass?"];
+    more [shape=diamond, label="More critique\nneeded?"];
+    triage [label="Invoke critique-triage\non all collected critiques"];
+    present [label="Present triaged\nrevision priorities"];
 
-    copy [label="COPY EDITING\nInvoke copy-review"];
-    copy_review [label="Present copy issues\nto user"];
-    copy_edit [label="Suggest fixes\nUser approves"];
-
-    done [label="Review complete" shape=doublecircle];
+    plan [label="Collaboratively build\nrevision plan"];
+    terminal [shape=diamond, label="User decides:\nwrite plan or\nexecute now?"];
+    write_plan [label="Save plan to\nreviews/YYYY-MM-DD/\nrevision-plan.md"];
+    execute [label="Invoke manuscript-editing\nin same session"];
+    done [shape=doublecircle, label="Done"];
 
     start -> existing;
     existing -> ask_resume [label="yes"];
     existing -> recommend [label="no"];
     ask_resume -> recommend;
     recommend -> user_confirm;
+
     user_confirm -> structural [label="structural"];
     user_confirm -> line [label="line"];
     user_confirm -> copy [label="copy"];
+    user_confirm -> ingest [label="existing critiques"];
 
-    structural -> struct_review;
-    struct_review -> struct_decide;
-    struct_decide -> struct_edit [label="yes"];
-    struct_decide -> line [label="no, move to\nline editing"];
-    struct_edit -> recommend [label="re-evaluate\nafter edits"];
+    structural -> more;
+    line -> more;
+    copy -> more;
+    ingest -> more;
 
-    line -> dispatch;
-    dispatch -> triage;
-    triage -> line_review;
-    line_review -> line_decide;
-    line_decide -> line_edit;
-    line_edit -> line_again;
-    line_again -> dispatch [label="yes"];
-    line_again -> copy [label="no, move to\ncopy editing"];
+    more -> recommend [label="yes, add\nanother level"];
+    more -> triage [label="no, synthesize"];
 
-    copy -> copy_review;
-    copy_review -> copy_edit;
-    copy_edit -> done;
+    triage -> present;
+    present -> plan;
+    plan -> terminal;
+    terminal -> write_plan [label="save for later"];
+    terminal -> execute [label="execute now"];
+    write_plan -> done;
+    execute -> done;
 }
 ```
 
@@ -89,66 +83,68 @@ digraph stages {
 3. Check for existing `reviews/` directory alongside the manuscript.
    - If reviews exist: ask the user whether to pick up where they left off or start fresh.
    - If starting fresh: create a new `reviews/YYYY-MM-DD/` directory.
-4. Ask the user which review stage to start with:
+4. Recommend a critique level based on the manuscript's state:
    - **Structural:** Best for early drafts or documents that haven't been structurally reviewed.
    - **Line editing:** For documents with sound structure that need section-level argument review.
    - **Copy editing:** For documents with solid content that need polish.
-5. The user selects the stage. If the user is unsure, suggest starting with structural — it's always safe to confirm the structure is sound before moving deeper.
+   - **Ingest existing:** If the user already has critiques (journal reviews, collaborator comments, files in `reviews/`).
+5. The user selects the approach. The stage hierarchy (structural before line before copy) is a recommendation, not a hard gate — the user decides.
 
-### Structural Stage
+### Critique Collection
 
-The structural stage is exclusively about architecture: argument flow, logical gaps, section organization, redundancy, and balance. It is NOT about minor issues (typos, grammar, formatting, citation errors). Those belong to later stages. Structural review is a heavy synthesis task — all cognitive effort should go toward holding the full argument in mind and evaluating its skeleton. Reporting minor issues wastes that effort and muddies the review's value.
+Critiques can come from any combination of sources. After each round, ask the user if they want to add another level of critique before synthesizing.
 
+**Structural critique:**
 1. Invoke `reverse-outline` on the manuscript (dispatch as subagent).
 2. Present the reverse outline and structural critique to the user.
-3. If structural issues are identified:
-   - Discuss with the user which issues to address.
-   - Suggest specific structural revisions (reordering, cutting, adding sections).
-   - User approves or modifies the suggestions.
-   - After edits are made, re-evaluate: run another structural pass or move to line editing.
-4. If no structural issues: move to line editing.
 
-### Line Editing Stage
+Structural critique is exclusively about architecture: argument flow, logical gaps, section organization, redundancy, and balance. It is NOT about minor issues (typos, grammar, formatting, citation errors). Those belong to later stages.
 
-1. **Propose section divisions.** Analyze the manuscript and propose logical divisions that span distinct ideas. These don't need to match the document's section headers — they should reflect the natural boundaries of the argument. Include the abstract, title, and individual figures/tables as separate reviewable units. Present to the user for confirmation and adjustment.
+**Line editing critique:**
+1. Propose section divisions. Analyze the manuscript and propose logical divisions that span distinct ideas. These don't need to match the document's section headers. Include the abstract, title, and individual figures/tables as separate reviewable units. Present to the user for confirmation.
+2. Dispatch `section-critique` subagents for each confirmed section (in parallel when possible; batch if >10 subagents needed).
 
-2. **Dispatch `section-critique` subagents.** For each confirmed section, dispatch a subagent with:
-   - The full document (for context)
-   - The specific text range to focus on
-   - Instructions to perform internal and external critique passes
-
-3. **Triage.** Once all critique subagents return, invoke `critique-triage` to synthesize results.
-
-4. **Present revision plan.** Show the triaged, prioritized revision plan to the user.
-   - If triage identifies **structural escalations**: recommend returning to the structural stage.
-   - Otherwise: walk through issues by priority.
-
-5. **Collaborative editing.** For each issue the user wants to address:
-   - Suggest a specific edit to the manuscript text.
-   - User approves, modifies, or rejects.
-   - Apply approved edits.
-
-6. **Iterate if needed.** After a round of edits, ask the user if they want another critique pass on the edited sections. If yes, dispatch new `section-critique` subagents (output versioned `-v2`, etc.) and re-triage.
-
-7. **Move to copy editing** when the user is satisfied with the line-level review.
-
-### Copy Editing Stage
-
+**Copy editing critique:**
 1. Invoke `copy-review` on the manuscript (dispatch as subagent).
-   - `copy-review` will activate `style-guide` internally.
-2. Present copy issues to the user.
-3. For each issue:
-   - Suggest specific fix.
-   - User approves or rejects.
-   - Apply approved fixes.
-4. Review complete.
+
+**Ingesting existing critiques:**
+1. Read user-provided critique files (from `reviews/` directory, pasted text, or external documents).
+2. Parse into the same issue format used by the critique subagents (severity, type, location, description).
+
+### Synthesis
+
+Once all critiques are collected:
+
+1. Invoke `critique-triage` to synthesize and prioritize across all collected critiques.
+2. Present the triaged, prioritized results to the user.
+   - If triage identifies structural escalations from line-level critiques: flag these and recommend addressing structural issues first.
+
+### Revision Planning
+
+Collaboratively build a revision plan from the triaged critiques. Work through the issues with the user to determine:
+
+- **What changes to make** — which issues to address, which to defer, which to reject
+- **Execution order** — what to do first, dependencies between changes (e.g., "create the new section before migrating content into it")
+- **Content migration map** — what moves where, what gets cut, what stays
+- **Where new text is needed** vs. where existing prose can be rearranged
+- **Guiding principles** — preserve tone, minimize rewrites, maintain the author's voice, match specific stylistic qualities of the existing text
+
+### Terminal State
+
+Ask the user:
+
+- **Write plan for later execution:** Save to `reviews/YYYY-MM-DD/revision-plan.md`. The plan document must be self-contained, including:
+  - Path to the manuscript
+  - Paths to all review documents and critiques that informed the plan
+  - The revision plan itself (changes, execution order, migration map, guiding principles)
+  - Any context a fresh session would need to execute without re-asking the user
+- **Execute now:** Invoke `manuscript-editing` in the same session, passing the plan.
 
 ### Non-Editable Documents
 
 If the manuscript is a non-editable format (PDF, image):
-- Follow the same critique workflow (structural, line, copy).
-- Instead of suggesting edits to the file, generate a **revision summary** document saved to `reviews/YYYY-MM-DD/revision-summary.md` with all findings organized by stage and priority.
-- The user can then apply revisions to the source document manually.
+- Follow the same critique and planning workflow.
+- The revision plan becomes the primary output, saved to `reviews/YYYY-MM-DD/revision-plan.md`.
 
 ## Subagent Dispatch
 
@@ -161,29 +157,29 @@ For line editing, dispatch section-critique subagents in parallel when possible.
 
 ## Rules
 
-1. **Never edit without user approval.** Every edit is suggested, then confirmed.
-2. **Respect the hierarchy.** Don't start line editing until structural issues are resolved. Don't copy edit until line editing is settled.
-3. **Always save outputs.** All critique, triage, and review artifacts go to `reviews/YYYY-MM-DD/`.
-4. **User drives the conversation.** The orchestrator recommends; the user decides. This applies to stage selection, issue prioritization, and edit approval.
-5. **One stage at a time.** Don't mix structural critique with copy editing suggestions.
-6. **Escalate when triage says to.** If critique-triage identifies structural escalations during line editing, recommend returning to structural review.
+1. **This skill does not edit the manuscript.** It collects critiques and builds revision plans. Editing is done by `manuscript-editing`.
+2. **Always save outputs.** All critique, triage, and plan artifacts go to `reviews/YYYY-MM-DD/`.
+3. **User drives the conversation.** The orchestrator recommends; the user decides. This applies to critique level selection, issue prioritization, and plan scope.
+4. **Plans must be self-contained.** A fresh session with `manuscript-editing` should be able to execute the plan without re-asking the user for context.
+5. **Recommend the stage hierarchy, don't enforce it.** Structural before line before copy is good advice, not a hard gate. The user may have reasons to start elsewhere.
+6. **Escalate when triage says to.** If critique-triage identifies structural escalations during line editing, recommend addressing structural issues before continuing.
 
 ## Skill Dependencies
 
 - `reverse-outline` — structural analysis (dispatched as subagent)
 - `section-critique` — adversarial section critique (dispatched as subagent, potentially in parallel)
 - `critique-triage` — synthesis and prioritization (dispatched as subagent or inline)
-- `copy-review` — copy editing (dispatched as subagent)
-- `style-guide` — activated by `copy-review`, or activated directly whenever the orchestrator suggests text edits to the user.
+- `copy-review` — copy editing critique (dispatched as subagent)
+- `manuscript-editing` — executes revision plans (invoked at terminal state, or in a separate session)
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
-| Jumping to copy editing on an early draft | Start with structural review — don't polish text that might be cut |
-| Editing without asking the user | Every edit needs user approval — suggest, don't apply |
-| Ignoring structural escalations from triage | If triage says structure is broken, go back to structural stage |
-| Dispatching too many parallel subagents | Batch sections if >10 subagents would be needed |
+| Editing the manuscript directly | This skill plans; `manuscript-editing` executes |
+| Enforcing rigid stage order | Recommend the hierarchy, but let the user choose |
+| Writing a plan that requires context not in the document | Plans must be self-contained — include all paths, references, and rationale |
+| Jumping to plan-building before synthesizing critiques | Always triage first to deduplicate and prioritize |
+| Ignoring structural escalations from triage | If triage says structure is broken, flag it prominently |
 | Not checking for existing reviews | Always check on session start — offer to resume |
-| Mixing critique levels in one pass | Keep structural, line, and copy editing strictly separate |
-| Reporting typos/grammar in structural review | Structural review is architecture only — minor issues belong to copy editing |
+| Mixing critique with revision planning | Collect all critiques first, then synthesize, then plan |
