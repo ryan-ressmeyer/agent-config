@@ -59,6 +59,18 @@ These skills govern *how* the other skills get used — planning, execution, and
 | **uv-research-workspace** | Create and manage Python research projects as uv workspaces with git sub-repositories |
 | **git-commits** | Commit message formatting — single line, no Co-Authored-By trailer |
 
+### Obsidian & Web Content
+
+Skills for working with Obsidian vaults and extracting web content.
+
+| Skill | Purpose |
+|-------|---------|
+| **obsidian-cli** | Interact with Obsidian vaults via CLI — read, create, search notes, manage tasks/properties, and develop/debug plugins and themes |
+| **obsidian-markdown** | Create and edit Obsidian Flavored Markdown — wikilinks, embeds, callouts, frontmatter, tags |
+| **obsidian-bases** | Create and edit Obsidian Bases (`.base` files) — views, filters, formulas, summaries for database-like note views |
+| **json-canvas** | Create and edit JSON Canvas (`.canvas`) files — nodes, edges, groups for visual canvases, mind maps, flowcharts |
+| **defuddle** | Extract clean markdown from web pages using Defuddle CLI — use instead of WebFetch for articles, docs, blog posts |
+
 ## Skill Sources
 
 - [obra/superpowers](https://github.com/obra/superpowers) — process skills (designing-plans, planning, debugging, TDD, verification)

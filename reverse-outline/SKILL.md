@@ -48,11 +48,12 @@ Evaluate:
 3. **Redundancies:** Are any two bullets making essentially the same claim? Could they be merged or is one unnecessary?
 4. **Ordering:** Would rearranging any bullets strengthen the argument's progression?
 5. **Balance:** Are some parts of the argument developed in far more detail than others? Is that imbalance intentional or a sign of structural weakness?
+6. **Delayed payoff:** Does the text promise something (a claim, a punchline, an explanation) and then delay delivery? Delayed gratification is acceptable *if* the intervening material maintains tension toward the payoff — the reader should feel the pieces coming together, see how the setup connects to what was promised. It is NOT acceptable to insert a tangential argument between the promise and the payout. The test: does the intervening material make the reader want the payoff *more*, or does it make them forget what was promised?
 
 Output the critique as a structured list of issues, each with:
 - **Location:** Which bullet(s) are involved
 - **Severity:** major | moderate (no minor — if it's minor, it's not structural)
-- **Type:** gap | redundancy | logical-leap | ordering | balance
+- **Type:** gap | redundancy | logical-leap | ordering | balance | delayed-payoff
 - **Issue:** What the problem is
 
 ### Step 4: Save output

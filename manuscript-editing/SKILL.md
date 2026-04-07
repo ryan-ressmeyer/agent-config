@@ -31,7 +31,7 @@ digraph manuscript_editing {
 
     step [label="Next step in plan"];
     needs_draft [shape=diamond, label="Significant new\nor merged text?"];
-    draft [label="Draft in working file\nMark EXISTING/MODIFIED/NEW\nActivate style-guide"];
+    draft [label="Draft in working file\nMark EXISTING/MODIFIED/NEW\nWrite under style-guide"];
     user_review [shape=diamond, label="User approves\ndraft?"];
     revise_draft [label="Revise draft\nper user feedback"];
     integrate [label="Apply changes\nto manuscript"];
@@ -84,7 +84,7 @@ digraph manuscript_editing {
    - If the manuscript is in a git repo with uncommitted changes: warn the user and ask whether to proceed (changes will be mixed) or commit first.
    - If no git repo: fork the manuscript to `{filename}-pre-edit.{ext}` before making any changes, so the original is preserved.
 4. **Present the plan's execution order** to the user. Ask if they want to adjust the order or scope before starting.
-5. **Activate `style-guide`** for use throughout the session when drafting or editing prose.
+5. **Invoke `style-guide` via the Skill tool.** This is mandatory before any drafting or editing begins — it loads the voice principles, blacklist, and Quick Checks that govern all prose produced during the session. Do not skip this step.
 
 ### Step 2: Execute Steps in Plan Order
 
@@ -96,8 +96,10 @@ For each step in the plan:
    - `[EXISTING]` — moved verbatim from the current manuscript
    - `[MODIFIED]` — existing text with edits for new context
    - `[NEW]` — new connective text, framing, or transitions
+
+   All `[MODIFIED]` and `[NEW]` text must be written under the `style-guide` voice principles and blacklist loaded during Setup. This means the draft is clean on first presentation — not written sloppily and fixed later.
 2. **Review.** Present the draft to the user. Explain what's new vs. moved. Flag any decisions that need user input.
-3. **Revise.** Iterate on the draft based on user feedback until approved.
+3. **Revise.** Iterate on the draft based on user feedback until approved. Continue writing under `style-guide` for any new or rewritten text in revisions.
 4. **Integrate.** Apply the approved draft to the manuscript.
 5. **Verify.** Read back the affected region to confirm the edit landed correctly. Check for broken cross-references (`\ref` to removed `\label`s), orphaned content, and formatting issues.
 
@@ -135,13 +137,13 @@ These are baked into the skill's behavior, not suggestions:
 1. **Never overwrite without a recoverable baseline.** The version control check at session start is mandatory. If there is no git repo and no pre-edit fork, do not proceed.
 2. **Never edit without user approval for new text.** Moves and cuts can proceed autonomously; new prose must be drafted and approved.
 3. **Always verify after integrating.** Read back affected regions and check cross-references after every edit.
-4. **Activate `style-guide` for all prose work.** New text and modified text must match the manuscript's voice.
+4. **Invoke `style-guide` before writing any prose.** It must be loaded via the Skill tool during Setup so its voice principles and blacklist govern all `[MODIFIED]` and `[NEW]` text from the moment of drafting. Writing first and checking later is not acceptable.
 5. **Save drafts to `reviews/YYYY-MM-DD/`.** Working drafts are artifacts the user may want to reference later.
 6. **One step at a time.** Complete and confirm each step before moving to the next.
 
 ## Skill Dependencies
 
-- `style-guide` — activated when drafting or editing prose
+- `style-guide` — **must invoke via Skill tool during Setup** before any prose is written or edited
 - `manuscript-review` — produces the plans this skill executes (or user provides a plan)
 
 ## Common Mistakes
@@ -156,3 +158,4 @@ These are baked into the skill's behavior, not suggestions:
 | Applying all changes then asking for review | Review after each step, not at the end |
 | Forgetting to park cut content | Move removed text to a recycle file with a dated comment |
 | Not flagging provenance in drafts | User needs to see what's new vs. moved to focus their review |
+| Drafting prose without invoking `style-guide` first | Invoke via Skill tool during Setup — voice principles must govern writing, not be applied as a post-hoc fix |

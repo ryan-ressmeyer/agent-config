@@ -1,6 +1,6 @@
 ---
 name: style-guide
-description: Use when writing or editing any public-facing text (manuscripts, blogs, emails, grants) to enforce voice standards and eliminate AI writing patterns
+description: **MUST INVOKE** when **writing**, **drafting**, or **editing** any public-facing text (manuscripts, blogs, emails, grants) to enforce voice standards and eliminate AI writing patterns.
 ---
 
 # Style Guide

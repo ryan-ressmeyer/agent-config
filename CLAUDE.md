@@ -28,6 +28,7 @@ Each skill is a directory at the repo root containing:
 - **Research system**: `literature-review` (orchestrator), `literature-writer`, `manuscript-planning`, `citation-fetch`, `pdf-retrieve`, `paper-summarize`, `database-check`, `database-search`, `theme-synthesize` — see `research-system.md` for design doc
 - **Writing**: `style-guide` (voice standards and AI pattern elimination for all public-facing prose)
 - **Scientific domain skills**: `citation-management` (legacy), `scientific-brainstorming`, `scientific-critical-thinking`, `scientific-visualization`, `scientific-writing`, `research-grants`
+- **Obsidian & web content**: `obsidian-cli`, `obsidian-markdown`, `obsidian-bases`, `json-canvas`, `defuddle`
 
 ### Key Conventions
 

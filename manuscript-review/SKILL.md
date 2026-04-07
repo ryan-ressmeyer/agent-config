@@ -133,11 +133,10 @@ Collaboratively build a revision plan from the triaged critiques. Work through t
 
 Ask the user:
 
-- **Write plan for later execution:** Save to `reviews/YYYY-MM-DD/revision-plan.md`. The plan document must be self-contained, including:
-  - Path to the manuscript
-  - Paths to all review documents and critiques that informed the plan
+- **Write plan for later execution:** Save to `reviews/YYYY-MM-DD/revision-plan.md`. The plan document must be self-contained — a fresh session should be able to execute it by reading the plan first, then the linked files, without re-asking the user for context. The plan must include:
+  - **Context files section** (at the top of the plan, before anything else): A numbered list of every file the executing session must read, with specific line ranges for each relevant section of the manuscript and pointers to what each file contributes. This includes the manuscript itself (with line ranges for each section affected by the plan), all review documents and critiques that informed the plan, and any external critique files the user provided. The goal is that a fresh session reads this section first and knows exactly what to load.
+  - **Author directions section**: A summary of all decisions the user made during the planning conversation — what to keep, what to cut, what to reframe, standing stylistic preferences, and any rationale the user provided. These are the user's instructions to the executing session.
   - The revision plan itself (changes, execution order, migration map, guiding principles)
-  - Any context a fresh session would need to execute without re-asking the user
 - **Execute now:** Invoke `manuscript-editing` in the same session, passing the plan.
 
 ### Non-Editable Documents
@@ -160,7 +159,7 @@ For line editing, dispatch section-critique subagents in parallel when possible.
 1. **This skill does not edit the manuscript.** It collects critiques and builds revision plans. Editing is done by `manuscript-editing`.
 2. **Always save outputs.** All critique, triage, and plan artifacts go to `reviews/YYYY-MM-DD/`.
 3. **User drives the conversation.** The orchestrator recommends; the user decides. This applies to critique level selection, issue prioritization, and plan scope.
-4. **Plans must be self-contained.** A fresh session with `manuscript-editing` should be able to execute the plan without re-asking the user for context.
+4. **Plans must be self-contained.** A fresh session with `manuscript-editing` should be able to execute the plan by reading it first, then the linked context files, without re-asking the user. This means every plan starts with a context files section (paths + line ranges) and an author directions section (all user decisions from the planning conversation).
 5. **Recommend the stage hierarchy, don't enforce it.** Structural before line before copy is good advice, not a hard gate. The user may have reasons to start elsewhere.
 6. **Escalate when triage says to.** If critique-triage identifies structural escalations during line editing, recommend addressing structural issues before continuing.
 
@@ -178,7 +177,7 @@ For line editing, dispatch section-critique subagents in parallel when possible.
 |---------|-----|
 | Editing the manuscript directly | This skill plans; `manuscript-editing` executes |
 | Enforcing rigid stage order | Recommend the hierarchy, but let the user choose |
-| Writing a plan that requires context not in the document | Plans must be self-contained — include all paths, references, and rationale |
+| Writing a plan that requires context not in the document | Plans must open with a context files section (paths + line ranges) and author directions section (all user decisions) |
 | Jumping to plan-building before synthesizing critiques | Always triage first to deduplicate and prioritize |
 | Ignoring structural escalations from triage | If triage says structure is broken, flag it prominently |
 | Not checking for existing reviews | Always check on session start — offer to resume |
