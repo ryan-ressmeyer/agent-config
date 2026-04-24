@@ -1,9 +1,15 @@
 ---
 marp: true
-theme: default
+theme: flexoki-dark
 paginate: true
 math: katex
 ---
+
+<!-- Locked-in visual style: Flexoki palette + Inter variable font, bundled under
+     ./themes. Swap to `theme: flexoki-light` in the frontmatter for a light deck.
+     Requires ./themes and ./.marprc.yml — copied from the skill's assets. -->
+
+<!-- _class: title -->
 
 # [Talk Title]
 
@@ -14,33 +20,47 @@ SPEAKER NOTES
 - Pause 2 seconds before first word.
 - Open with ABT core statement (see storyline.md).
 
-TRANSITION OUT: [opening sentence of the talk — from assertions.md]
+TRANSITION OUT: [opening sentence of the talk]
 -->
 
 ---
 
-## [Assertion 2 — full sentence from assertions.md]
+<!-- ============================================================
+     STAGE 3 SLIDE (structure + speech, no figure yet)
+     Use this shape until the whole storyline has been walked through.
+     Titles: short directive clauses, 3–8 words, one line on the slide.
+     ============================================================ -->
 
-![width:700px](figures/TODO-figure-2.png)
+## [Short directive title]
 
 <!--
-FIGURE: [what this figure should contain, from assertions.md]
+FIGURE: [what this figure should show, axes, panels, annotations, what
+the audience should notice first — pulled from the relevant storyline beat]
 
 SPEAKER NOTES
-- [notes from assertions.md]
+- [specific number / pacing cue / skeptic pre-empt]
+- [phrasing for a hard-to-explain concept]
+- [anything easy to forget in the moment]
 
-TRANSITION IN: [from assertions.md]
-TRANSITION OUT: [from assertions.md]
+TRANSITION IN: [one sentence the speaker says before this slide]
+TRANSITION OUT: [one sentence the speaker says moving to the next slide]
 -->
 
 ---
 
-## [Assertion 3 — full sentence from assertions.md]
+<!-- ============================================================
+     STAGE 4 SLIDE (figure placeholder added to the Stage 3 shape)
+     In the second pass, replace the top of each slide with an
+     image tag above the existing FIGURE: description comment.
+     ============================================================ -->
 
-![width:700px](figures/TODO-figure-3.png)
+## [Short directive title]
+
+![width:700px](figures/TODO-descriptive-name.png)
 
 <!--
-FIGURE: [description]
+FIGURE: [same description as Stage 3 — kept as a comment so the user
+knows what to produce for the placeholder above]
 
 SPEAKER NOTES
 - [notes]
@@ -51,7 +71,9 @@ TRANSITION OUT: [...]
 
 ---
 
-<!-- Repeat for every slide in assertions.md. For progressive reveals, duplicate the slide with incrementing figure filenames (TODO-foo-panel1.png, TODO-foo-panel2.png) or mark intended CSS-fragment build points with `<!-- BUILD: ... -->` comments. -->
+<!-- For progressive reveals: duplicate the slide with incrementing figure
+     filenames (TODO-foo-panel1.png, TODO-foo-panel2.png) or mark intended
+     CSS-fragment build points with `<!-- BUILD: ... -->` comments. -->
 
 ---
 

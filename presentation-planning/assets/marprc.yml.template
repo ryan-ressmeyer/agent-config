@@ -1,0 +1,12 @@
+# Marp CLI configuration template — copied to the presentation root as `.marprc.yml`.
+#
+# - themeSet registers the local ./themes directory so `theme: flexoki-dark` or
+#   `theme: flexoki-light` resolve from slides.md frontmatter.
+# - allowLocalFiles: true is required so the bundled Inter woff2 files load via
+#   @font-face when rendering to PDF/PPTX. Without it marp-cli blocks the local
+#   font URL and the deck silently falls back to a system sans-serif.
+themeSet:
+  - ./themes
+allowLocalFiles: true
+options:
+  html: true

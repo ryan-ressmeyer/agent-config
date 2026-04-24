@@ -7,7 +7,7 @@ description: "Use when planning a scientific talk before drafting slides, when p
 
 ## Overview
 
-Develop a scientific talk through four sequential, reviewable stages — **Frame → Storyline → Assertions → Slides** — producing a separate artifact file at each stage. The slide deck is the *last* artifact, not the first.
+Develop a scientific talk through four sequential, reviewable stages — **Frame → Storyline → Slide draft (speech) → Slides (visuals)** — producing an artifact at each stage. The slide deck is the *last* artifact, not the first, and it is built in two passes: first the structure and spoken flow (titles, speaker notes, transitions) with no figures, then the visuals layered on top.
 
 **Core principle: the talk is not the slides.** The talk is a spoken performance the speaker will rehearse; the slides are visual aids that support it. Skipping straight to slides optimizes the wrong artifact and produces word-heavy decks that duplicate what the speaker will say instead of supplementing it.
 
@@ -46,15 +46,17 @@ Adding "something tangible alongside the questions" is the most common first-tur
 
 ## Artifacts
 
-All five files live in a user-specified presentation directory (default: `./presentation/`). Ask the user at Frame-stage start where to save them and what the presentation is called.
+All files live in a user-specified presentation directory (default: `./presentation/`). Ask the user at Frame-stage start where to save them and what the presentation is called.
 
 | File | Stage | Content |
 |------|-------|---------|
 | `frame.md` | 1 | Audience composition, goal, one-sentence core message, prerequisite knowledge map |
 | `storyline.md` | 2 | ABT core statement, narrative arc (hook → conflict → resolution), ordered beats with stepping stones that earn each prerequisite |
-| `assertions.md` | 3 | Per-slide assertion title, single visual description, verbal transitions in/out, speaker notes |
-| `slides.md` | 4 | Marp markdown with speaker notes as HTML comments, build/fragment placeholders, figure placeholders |
+| `slides.md` | 3 | Marp markdown: slide titles (short clauses), speaker notes and transitions as HTML comments, **no figures yet** — figure slots marked with a `FIGURE:` description comment |
+| `slides.md` | 4 | Same file, second pass: figure placeholders (`![](figures/TODO-...png)`), progressive-reveal markers, visual polish |
 | `rehearsal-notes.md` | post-4 | User-written record of what felt off during rehearsal; seeds the next edit pass |
+
+Stages 3 and 4 are two passes over the same `slides.md`. This is deliberate: the first pass fixes the spoken structure of the talk (what the speaker says, in what order, with what transitions); the second pass fits visuals to that structure. Maintaining a separate per-slide "assertion list" file in parallel duplicates `slides.md` and drifts out of sync, so there is no separate artifact for it.
 
 ## Core Loop
 
@@ -68,9 +70,9 @@ digraph presentation_planning {
     cp1 [shape=diamond, label="User signs off\non frame.md?"];
     storyline [label="Stage 2: Storyline\n(ABT, arc, stepping stones)"];
     cp2 [shape=diamond, label="User signs off\non storyline.md?"];
-    assertions [label="Stage 3: Assertion list\n(per-slide title, visual, transitions, notes)"];
-    cp3 [shape=diamond, label="User signs off\non assertions.md?"];
-    slides [label="Stage 4: Marp skeleton\n(slides.md with placeholders)"];
+    slides_draft [label="Stage 3: Slide draft (speech)\nslides.md: titles, speaker notes,\ntransitions — NO figures"];
+    cp3 [shape=diamond, label="User signs off\non slides.md draft?"];
+    slides_visuals [label="Stage 4: Slide visuals\nsame slides.md: figure placeholders,\nbuilds, visual polish"];
     rehearse [label="Suggest rehearsal.\nUser practices aloud."];
     edit [label="Iterate via\npresentation-editing"];
 
@@ -80,11 +82,11 @@ digraph presentation_planning {
     cp1 -> storyline [label="yes"];
     storyline -> cp2;
     cp2 -> storyline [label="no"];
-    cp2 -> assertions [label="yes"];
-    assertions -> cp3;
-    cp3 -> assertions [label="no"];
-    cp3 -> slides [label="yes"];
-    slides -> rehearse;
+    cp2 -> slides_draft [label="yes"];
+    slides_draft -> cp3;
+    cp3 -> slides_draft [label="no"];
+    cp3 -> slides_visuals [label="yes"];
+    slides_visuals -> rehearse;
     rehearse -> edit;
 }
 ```
@@ -113,33 +115,41 @@ Read `references/storyline-guide.md`. Produce:
 3. **Stepping stones** — for each prerequisite from the Frame, specify *where in the narrative it gets earned as forward motion*, not as "Background" filler. Every concept the audience will encounter must be introduced as a step of the argument before it is relied on.
 4. **Order check** — does the narrative run chronologically ("we did X, then Y failed, so we did Z")? If yes, re-plan. Lab-notebook order is the #1 failure mode; flashback/novel order holds attention.
 
-### Stage 3: Assertion list
-**Output:** `assertions.md`
+### Stage 3: Slide draft — structure and speech
+**Output:** `slides.md` (first pass — no figures yet)
 
-Read `references/assertion-guide.md`. For each slide in the deck, produce:
+Read `references/marp-conventions.md`. Convert the storyline into a Marp skeleton focused on the **spoken performance**, not visuals. Each slide gets:
 
 | Field | Content |
 |-------|---------|
-| Assertion title | Declarative full sentence stating the takeaway ("LGN RFs elongate along the saccade axis", not "RF results") |
-| Visual | One image/figure/schematic described in prose — what it shows, what axes, what the audience should look at |
-| Transition in | One sentence the speaker says *before* this slide |
-| Transition out | One sentence the speaker says *moving to* the next slide |
-| Speaker notes | 2–4 bullet points: specific phrasing, key numbers, things easy to forget, skeptic-question pre-empts |
+| Title | A short, direct clause — a noun phrase or compact sentence fragment, usually 3–8 words. One line on the slide; never wrapping to a second line except for rare deliberate effect. Non-colloquial. ("Perisaccadic RF anisotropy", not "LGN RFs get elongated when the eye moves") |
+| Figure slot | An HTML-comment `FIGURE:` description: what the figure should show, what axes, what the audience should look at first. No image tag yet. |
+| Transition in | One sentence the speaker says *before* this slide — in a `TRANSITION IN:` line inside the speaker-notes comment |
+| Transition out | One sentence the speaker says *moving to* the next slide — in a `TRANSITION OUT:` line |
+| Speaker notes | 2–4 bullets in the comment: specific phrasing, key numbers, pacing cues, skeptic pre-empts |
 
-One message per slide. If you find yourself writing a second assertion, split the slide.
+One message per slide. If a slide is carrying two takeaways, split it.
 
-### Stage 4: Slide skeleton
-**Output:** `slides.md`
+**Copy the locked-in visual style at the start of Stage 3** (the theme is needed the moment `slides.md` exists, even without figures, so rendering and layout work can be previewed):
 
-Read `references/marp-conventions.md`. Convert the assertion list into Marp markdown:
+```
+cp -r <skill-dir>/assets/themes  <presentation-dir>/themes
+cp    <skill-dir>/assets/marprc.yml.template  <presentation-dir>/.marprc.yml
+```
 
-- Assertion titles as slide headings (`##` or `#`).
-- Speaker notes as HTML comments (Marp convention: `<!-- note content -->`).
-- Figures as placeholders: `![](figures/TODO-descriptive-name.png)` — do NOT invent figure content.
-- Build/fragment placeholders where progressive reveal is needed: `<!-- BUILD: reveal panel 2 -->`.
-- Include a Marp frontmatter block with theme directives but leave actual theme CSS to be filled in later.
+See the **Locked-in visual style** section below. Do not re-author any of this.
 
-After writing `slides.md`, **suggest** (do not require) that the user rehearse the talk out loud, time it, and note what felt off. This seeds `rehearsal-notes.md` and the next edit pass via `presentation-editing`.
+### Stage 4: Slide visuals
+**Output:** same `slides.md`, second pass
+
+Now layer visuals on top of the spoken structure:
+
+- Replace each `FIGURE:` comment with a placeholder image tag: `![width:700px](figures/TODO-descriptive-name.png)`. Keep the description as a comment directly below the tag so the user knows what to produce.
+- Add progressive-reveal markers where the storyline calls for build-up: duplicate slides (Pattern A) or annotate with `<!-- BUILD: ... -->` comments (Pattern B). See `references/marp-conventions.md`.
+- Check sizing hints, per-slide class directives (dark backgrounds for microscopy, etc.), and the summary/acknowledgments slides.
+- Do not invent figure content. Every figure is a placeholder the user will fill in.
+
+After Stage 4, **suggest** (do not require) that the user rehearse the talk out loud, time it, and note what felt off. This seeds `rehearsal-notes.md` and the next edit pass via `presentation-editing`.
 
 ## Rationalizations That Skip Stages
 
@@ -160,11 +170,11 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 
 - You wrote a slide before `storyline.md` exists.
 - You wrote an outline that starts "Background:" or "Methods:" or proceeds in experiment chronology.
-- A slide title is a noun phrase ("Results of Protein X") instead of a complete sentence ("Protein X represses Gene Y").
+- A slide title is a vague catch-all ("Results", "Benchmarks") or a full declarative sentence that wraps to two lines ("Protein X represses Gene Y in postmitotic neurons, as shown by qPCR"). Aim for a short directive clause ("Protein X represses Gene Y").
 - A slide has more than one takeaway.
 - A concept appears on a slide without having been earned earlier in the storyline.
 - There are no speaker notes.
-- You produced `slides.md` without `assertions.md`.
+- You added figure placeholders during Stage 3 (visuals belong to Stage 4).
 
 ## Common Mistakes
 
@@ -175,6 +185,8 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 | Inventing figure content in `slides.md` | Placeholders only. The user supplies actual figures. |
 | Adding a "Background" slide | Prerequisites are earned as stepping stones within the forward narrative, not dumped as setup. Rework the storyline. |
 | Forgetting speaker notes | Notes are a first-class output at Stage 3, not an afterthought. |
+| Writing full-sentence slide titles that wrap to a second line | Short directive clauses. A 3–8 word noun phrase or fragment. Declarative sentences are for the *storyline* and the *spoken transitions*, not the visible title. The rare exception — a deliberate rhetorical headline — is reserved for high-stakes landing slides. |
+| Maintaining a separate per-slide assertion file in parallel with `slides.md` | Don't. The slide file is the per-slide record; drifting two files out of sync is the failure mode. Put speaker notes and transitions in HTML comments on each slide. |
 | Prescribing home slides universally | Home slides help long talks with clearly separable sections. For shorter or single-thread talks, verbal signposting suffices. Use the principle, not the device. |
 | Auto-rehearsing for the user | Rehearsal is the user's job. The skill suggests, does not block. |
 
@@ -189,8 +201,7 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 - `references/principles.md` — the seven principles across Naegle, McConnell, Alley, Alon, Tufte, Doumont, Crivellaro, Kenny
 - `references/frame-guide.md` — Stage 1 elicitation script
 - `references/storyline-guide.md` — Stage 2 narrative craft
-- `references/assertion-guide.md` — Stage 3 assertion-evidence rubric
-- `references/marp-conventions.md` — Stage 4 Marp syntax, speaker notes, fragments
+- `references/marp-conventions.md` — Stages 3 and 4: Marp syntax, slide titles, speaker notes, transitions, figure placeholders, fragments
 
 ## Asset templates
 
@@ -198,13 +209,29 @@ Each stage has a template in `assets/` that shows the expected shape of the outp
 
 - `assets/frame.md.template` — Stage 1 skeleton
 - `assets/storyline.md.template` — Stage 2 skeleton
-- `assets/assertions.md.template` — Stage 3 skeleton (per-slide rubric rows)
-- `assets/slides.md.template` — Stage 4 Marp skeleton with frontmatter, title slide, summary, and acknowledgments
+- `assets/slides.md.template` — Stages 3 and 4: Marp skeleton with frontmatter, title slide, per-slide title/notes/transitions pattern, `FIGURE:` placeholders for Stage 3, summary, and acknowledgments
+- `assets/themes/` — locked-in visual style (Flexoki + Inter); copy verbatim to `<presentation>/themes/`
+- `assets/marprc.yml.template` — marp-cli config; copy to `<presentation>/.marprc.yml`
+
+## Locked-in visual style
+
+The skill ships a fixed visual identity so every presentation in this house style looks the same on every rendering machine, without per-talk CSS authoring:
+
+- **Color scheme:** [Flexoki](https://stephango.com/flexoki) by Steph Ango. Full palette (base + 8 accent ramps, each 50–950) exposed as CSS custom properties. Two themes: `flexoki-dark` (paper-black bg, 400 accents) and `flexoki-light` (paper bg, 600 accents). Canonical values verified against `kepano/flexoki/css/flexoki.css` — do not hand-edit.
+- **Typeface:** [Inter](https://rsms.me/inter/) by Rasmus Andersson. Variable font (`InterVariable.woff2` + italic) bundled in `assets/themes/fonts/` and loaded via `@font-face`, so the deck renders with Inter even on machines where Inter is not installed and without internet at render time.
+- **Rendering:** `assets/marprc.yml.template` sets `allowLocalFiles: true` so marp-cli loads the local woff2. Without that flag, Chromium silently falls back to a system sans-serif and the deck looks wrong.
+
+**Do not:**
+- Author a per-talk theme. Pick `flexoki-dark` or `flexoki-light` in the frontmatter; extend via semantic handles (e.g. `--rgc`, `--lgn`) on top of the palette if the talk needs them.
+- Swap in a different font. Inter is the locked-in typeface.
+- Skip copying `.marprc.yml` — without it the font won't load.
+
+See `assets/themes/README.md` for the full documentation that ships with each presentation.
 
 ## Session Start
 
 When invoked, the agent should:
 
-1. Check whether any of the five artifact files already exist in the current directory or a user-specified subdirectory.
+1. Check whether any of the artifact files (`frame.md`, `storyline.md`, `slides.md`, `rehearsal-notes.md`) already exist in the current directory or a user-specified subdirectory.
 2. If **resuming**: read existing artifacts, summarize current stage, ask what to work on.
 3. If **starting fresh**: ask the user what the talk is (occasion, approximate length, approximate date) and where to save the artifacts. Then begin Stage 1.

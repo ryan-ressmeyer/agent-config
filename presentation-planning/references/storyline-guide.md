@@ -6,19 +6,30 @@ Stage 2 produces `storyline.md`. It is the talk's skeleton — the order in whic
 
 ## The ABT core statement
 
-Before the arc, settle the one sentence the whole talk is making. Use Randy Olson's ABT pattern (via Crivellaro):
+Before the arc, settle the one sentence the whole talk is making. Use Randy Olson's ABT pattern (via Crivellaro). **ABT is a structure of three roles, not a fill-in-the-blank with three fixed words.** The roles are what matters:
 
-> **AND** [shared context the audience already accepts] — **BUT** [the conflict / gap / problem that makes this interesting] — **THEREFORE** [what the speaker did or concluded]
+> **[Setup-what]** [shared context the audience already accepts] — **AND / SO** — **[Setup-why]** [why that context is important / what's at stake] — **BUT** [the conflict / gap / problem that makes this interesting] — **THEREFORE** [what the speaker did or concluded]
 
-Example (from Crivellaro):
+The Setup is two sub-clauses joined by an **explicit, audible conjunction** — never just a comma, never elision. The conjunction is what tells the audience "we are now moving from *what we're talking about* to *why it matters*," and that move is the load-bearing job of the Setup. Two conjunctions are admissible:
+
+- **AND** — when the *why it matters* is an additional fact alongside the *what* (parallel relationship). This is the default.
+- **SO** — when the *why it matters* is a consequence of the *what* (causal relationship). Use when SO reads more naturally than AND; do not weaken to a comma or a new sentence.
+
+The Pivot should almost always be a literal **BUT** (or HOWEVER) — the audience needs an audible turn for the conflict to register. The Resolution should almost always be a literal **THEREFORE** (or SO, in its causal sense). Connectors are the audience's handrails through the sentence; do not file them off.
+
+Example (from Crivellaro), canonical form:
 > Bird egg shapes vary widely, AND this is thought to be driven by life-history adaptation, BUT we lack a global synthesis of how egg shape actually evolves, THEREFORE we analyzed 49,175 eggs across 1,400 species and found that flight capability is the primary driver of egg shape variation.
 
-The BUT is where the attention is. If removing the BUT leaves a sensible sentence ("Bird egg shapes vary widely, and this is driven by adaptation; we analyzed eggs"), the talk has no conflict and will not hold the audience.
+Same statement with a SO in the Setup, which can read more naturally when the "why it matters" clause is a *consequence* of the "what" rather than a parallel fact about it:
+> Bird egg shapes vary widely, SO understanding what drives that variation tells us how life history shapes morphology, BUT we lack a global synthesis, THEREFORE we analyzed 49,175 eggs across 1,400 species and found that flight capability is the primary driver.
+
+The Pivot is where the attention is. If removing the BUT leaves a sensible sentence ("Bird egg shapes vary widely, and this is driven by adaptation; we analyzed eggs"), the talk has no conflict and will not hold the audience.
 
 A well-formed ABT should:
 - Be utterable in ~30 seconds.
-- Contain exactly one BUT.
-- Restate the Frame's core message — but with the shared context and conflict made explicit.
+- Have exactly one Pivot (one BUT / one turn).
+- Have a Setup that does *both* jobs: establish shared context *and* make the stakes legible. A Setup that only states the *what* without the *why it matters* is the most common ABT failure — the audience accepts the context but doesn't yet care about it, so the Pivot lands on no one.
+- Restate the Frame's core message — but with the shared context, the stakes, and the conflict made explicit.
 
 ---
 

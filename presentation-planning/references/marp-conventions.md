@@ -1,6 +1,148 @@
-# Stage 4: Marp Conventions
+# Stages 3 and 4: Slide Authoring in Marp
 
-Stage 4 produces `slides.md` — a Marp markdown file that converts the assertion list into a skeleton deck. The deck is a skeleton because actual figures and theme CSS are filled in later. The speaker notes, assertion titles, transitions, and structural build markers all come through from Stage 3.
+Stages 3 and 4 produce and refine a single `slides.md` file. Stage 3 fixes the spoken structure of the talk — titles, speaker notes, and transitions — with **no figures**. Stage 4 layers figure placeholders, progressive reveals, and visual polish on top of that structure.
+
+This two-pass workflow exists because the talk is a spoken performance. If visuals are drafted at the same time as spoken flow, the visuals colonize the iteration: the user tweaks the picture instead of the argument. Decoupling them keeps the argument first.
+
+---
+
+## Per-slide unit
+
+Every slide is one unit of argument, with three parts:
+
+1. **Title** — a short directive clause stating what the slide is about.
+2. **Evidence** — one visual that proves the claim. In Stage 3 this is a `FIGURE:` description comment; in Stage 4 it becomes a placeholder image tag.
+3. **Spoken frame** — what the speaker says on approach and on departure, plus the moment-of-delivery notes they need. Lives in HTML comments.
+
+If any of the three is missing, the slide isn't done. If the evidence supports two distinct claims, the slide is two slides.
+
+---
+
+## The title
+
+**A short, direct clause.** Typically a noun phrase or compact sentence fragment, 3–8 words, one line on the rendered slide. Non-colloquial. The *full declarative claim* belongs in the speaker's mouth (transitions and notes), not on the slide.
+
+### Good
+
+- *"Perisaccadic RF anisotropy"*
+- *"Gene Y repression by Protein X"*
+- *"Vulkan pipeline latency"*
+- *"Why classical models fail here"*
+
+### Bad (topical — fails the "what is this slide about" test)
+
+- *"Results"*
+- *"Regulation"*
+- *"Benchmarks"*
+
+### Bad (full declarative sentence — wraps to two lines, crowds the figure)
+
+- *"LGN receptive fields elongate along the saccade axis during free viewing."*
+- *"Protein X represses Gene Y in postmitotic neurons, as shown by qPCR and ChIP-seq."*
+
+### Bad (hedged or colloquial)
+
+- *"RFs may kind of be affected sometimes"*
+- *"A really cool thing about LGN"*
+
+### The rare exception
+
+For a deliberate rhetorical landing slide (often the hook or the closing claim), a full declarative sentence as title can work — the sentence *is* the slide. Use this once or twice in a talk, never as the default.
+
+---
+
+## The visual
+
+**One image per slide, chosen to prove exactly the claim named in the title.**
+
+### Stage 3: figure description only
+
+In the first pass, every slide has a `FIGURE:` HTML comment instead of an image tag:
+
+```markdown
+---
+
+## Perisaccadic RF anisotropy
+
+<!--
+FIGURE: scatter of along-axis vs. orthogonal RF extent for all 347 units.
+Unity line dashed. Marginal histograms on both axes. Color by animal.
+Audience should notice in ~2 s that most points lie above the unity line.
+-->
+
+<!--
+SPEAKER NOTES
+- [notes]
+
+TRANSITION IN: [...]
+TRANSITION OUT: [...]
+-->
+```
+
+This keeps the user's attention on the argument. No image work happens until Stage 4.
+
+### Stage 4: placeholder image tag
+
+In the second pass, replace the `FIGURE:` description with a placeholder tag, keeping the description directly below it so the user knows what to produce:
+
+```markdown
+![width:700px](figures/TODO-rf-anisotropy-scatter.png)
+
+<!--
+FIGURE: scatter of along-axis vs. orthogonal RF extent for all 347 units.
+Unity line dashed. Marginal histograms on both axes. Color by animal.
+Audience should notice in ~2 s that most points lie above the unity line.
+-->
+```
+
+### Visual rules (both passes)
+
+- **If you will not explain it, delete it.** Every axis, label, and legend entry must correspond to something the speaker will say.
+- **Never paste a published figure untouched.** Crop, relabel, recolor. The published figure was optimized for a reader with infinite time; the talk figure is optimized for a 60-second glance.
+- **Build up complex figures** via progressive reveals (see below).
+- **No red-green pairs. No 3D chart effects. No gridlines unless they carry meaning.**
+- **Never invent figure content.** Every figure in `slides.md` is a placeholder the user fills in.
+
+---
+
+## The spoken frame
+
+Lives entirely in HTML comments on the slide. Marp renders HTML comments as presenter notes in presenter mode.
+
+### Structure
+
+```markdown
+<!--
+SPEAKER NOTES
+- Specific numbers: n = 347 units across 3 monkeys.
+- Pause after the title. Let the scatter land.
+- If asked "is this just retinal motion?" forward-reference the passive-replay control.
+
+TRANSITION IN: So under passive fixation, the RFs look classical. What happens when the monkey is freely viewing?
+TRANSITION OUT: The anisotropy is clear in the population. Is it present in single units, trial by trial?
+-->
+```
+
+### Transition in
+
+One sentence the speaker says **before** revealing this slide. A question or setup that the current slide answers — the bridge from the previous slide.
+
+### Transition out
+
+One sentence the speaker says **while moving to** the next slide. Both lands this slide's claim and sets up the next.
+
+**Transitions are spoken, not read.** They never appear on the slide surface. Putting them on the slide duplicates what the speaker says and violates the "slide is not a teleprompter" rule.
+
+### Speaker notes
+
+2–4 bullets of *what the speaker needs in the moment but wouldn't want to say by rote*:
+
+- Specific numbers that are easy to misremember.
+- Pre-empts for the skeptic question the speaker expects here.
+- Pacing cues ("pause after 'is not a passive relay'").
+- Phrasing for a hard-to-explain concept.
+
+Notes are **not** a script. They are what the speaker glances at while speaking.
 
 ---
 
@@ -13,7 +155,7 @@ A Marp file is a markdown document with YAML frontmatter that enables Marp rende
 ```markdown
 ---
 marp: true
-theme: default
+theme: flexoki-dark
 paginate: true
 math: katex
 ---
@@ -22,116 +164,93 @@ math: katex
 | Directive | Purpose |
 |-----------|---------|
 | `marp: true` | Required — enables Marp rendering. |
-| `theme: default` | Placeholder. A custom theme (light + dark pair) will be wired in later. |
+| `theme: flexoki-dark` | Locked-in house theme. Alternative: `flexoki-light`. Do not use `default`. |
 | `paginate: true` | Page numbers. |
 | `math: katex` | Enables KaTeX math rendering (for equations). |
 
-Leave the theme as `default` in Stage 4. Custom theme CSS is a later concern.
+### Locked-in visual style
+
+The skill ships `assets/themes/flexoki-dark.css`, `assets/themes/flexoki-light.css`, bundled Inter woff2 files, and a `marprc.yml.template`. These are **not** Stage 3 or 4 authoring decisions — they are copied verbatim into every new presentation at the start of Stage 3:
+
+```
+cp -r <skill>/assets/themes  <presentation>/themes
+cp    <skill>/assets/marprc.yml.template  <presentation>/.marprc.yml
+```
+
+The presentation then has:
+
+```
+<presentation>/
+├── themes/
+│   ├── flexoki-dark.css
+│   ├── flexoki-light.css
+│   └── fonts/
+│       ├── InterVariable.woff2
+│       └── InterVariable-Italic.woff2
+├── .marprc.yml          # registers themes/, enables allowLocalFiles
+└── slides.md            # frontmatter picks flexoki-dark or flexoki-light
+```
+
+**Critical:** `.marprc.yml` must set `allowLocalFiles: true`. Without it, Chromium blocks the local woff2 URL during rendering and the deck falls back to a system sans-serif silently.
+
+### Picking a theme
+
+- `flexoki-dark` — default. Paper-black background, base-200 text, 400-series accents. Best for projected talks in darkened rooms. Kinder to photographic figures and fluorescence microscopy.
+- `flexoki-light` — paper (#FFFCF0) background, base-900 text, 600-series accents. Best for bright rooms and decks that will also be printed or shared as PDFs.
+
+Swap themes by editing one line in frontmatter. Do not hand-edit palette values or author a per-talk theme. If the talk needs more semantic handles (e.g. `--rgc`, `--lgn`), define them in the slides.md `<style>` block using existing `var(--*)` references.
 
 ### Per-slide directives
 
-Marp allows per-slide configuration via HTML comments prefixed with an underscore:
-
 ```markdown
 ---
-<!-- _class: dark -->       <!-- apply the "dark" class to this slide only -->
+<!-- _class: dark -->
 <!-- _backgroundColor: #000 -->
-<!-- _color: #fff -->
 
 # Fluorescence image slide
 ```
 
-Use these sparingly during Stage 4. Specify classes only where Stage 3 called for them (e.g., a dark background for a microscopy slide).
+Use sparingly. Apply classes only where the slide's content actually requires it (e.g., a dark background for a microscopy slide).
 
 ---
 
-## Speaker notes
-
-**Marp renders HTML comments as presenter notes in presenter mode.** Use the comment form:
+## Slide template
 
 ```markdown
-## LGN receptive fields elongate along the saccade axis
+---
 
-![width:800px](figures/TODO-rf-anisotropy-scatter.png)
+## [Short directive title — 3–8 words]
+
+![width:700px](figures/TODO-descriptive-name.png)   <!-- Stage 4 only -->
 
 <!--
+FIGURE: [what this figure should contain, axes, annotations, what the audience looks at first]
+
 SPEAKER NOTES
-- Along-axis / orthogonal extent ratio: ~1.4 across n=347 units.
-- Pause after "along the saccade axis" — let it land.
-- If asked "is this just motion smear?" point forward to Dive 3 passive-replay control.
+- [specific number / pacing cue / skeptic pre-empt]
+- [...]
+
+TRANSITION IN: [one sentence spoken before this slide]
+TRANSITION OUT: [one sentence spoken moving to the next slide]
 -->
 ```
 
-Lift speaker notes directly from Stage 3's `assertions.md`. Do not invent new ones.
+In Stage 3 the `![width:...](...)` line is omitted; only the `FIGURE:` comment appears. In Stage 4 the image tag is added above the comment.
 
 ---
 
-## Slide structure template
+## Progressive reveals (builds) — Stage 4
 
-Each slide in the skeleton has a consistent shape:
-
-```markdown
----
-
-## [Assertion title — full sentence from assertions.md]
-
-![width:700px](figures/TODO-descriptive-name.png)
-
-<!--
-SPEAKER NOTES
-- [note 1]
-- [note 2]
-
-TRANSITION IN: [one sentence from assertions.md]
-TRANSITION OUT: [one sentence from assertions.md]
--->
-```
-
-### Why transitions live in speaker notes (not on-slide text)
-
-Transitions are spoken, not read. Putting them on the slide duplicates what the speaker says and violates the "slide is not a teleprompter" rule. They belong in presenter-only notes.
-
----
-
-## Figure placeholders
-
-**Never invent figure content.** Use placeholder image paths the user can swap out:
-
-```markdown
-![width:700px](figures/TODO-rf-anisotropy-scatter.png)
-```
-
-Describe what the figure should contain in a comment directly below the placeholder, pulled from `assertions.md`:
-
-```markdown
-![width:700px](figures/TODO-rf-anisotropy-scatter.png)
-
-<!--
-FIGURE: scatter of along-axis vs. orthogonal RF extent for all 347 units.
-Unity line dashed. Marginal histograms on both axes. Color by animal.
-Most points lie above the unity line — that is the takeaway the audience
-should see in ~2 seconds.
--->
-```
-
-### Figure directory convention
-
-Create a `figures/` subdirectory next to `slides.md`. Place a `figures/README.md` listing each `TODO-*.png` filename and what the figure should be. This becomes the user's checklist of figures to produce.
-
----
-
-## Progressive reveals (builds)
-
-Marp's support for progressive reveals is weaker than Keynote/PowerPoint, but three patterns work:
+Marp's support for progressive reveals is weaker than Keynote/PowerPoint, but three patterns work.
 
 ### Pattern A — one-reveal-per-slide (simplest, always works)
 
-Duplicate the slide, adding one element at a time. The audience sees a sequence of near-identical slides, each adding a panel. Use when the build has 2–4 stages.
+Duplicate the slide, adding one element at a time.
 
 ```markdown
 ---
 
-## The anisotropy emerges 30–50 ms after saccade onset
+## Anisotropy time course
 
 ![width:700px](figures/TODO-anisotropy-timecourse-panel1.png)
 
@@ -139,137 +258,96 @@ Duplicate the slide, adding one element at a time. The audience sees a sequence 
 
 ---
 
-## The anisotropy emerges 30–50 ms after saccade onset
+## Anisotropy time course
 
 ![width:700px](figures/TODO-anisotropy-timecourse-panel2.png)
 
 <!-- BUILD: panel 2 — add shaded 95% CI -->
 ```
 
-### Pattern B — CSS fragments (fewer slide duplicates)
-
-Marp supports fragment-style reveal via a CSS class applied by the theme. Wait for the theme to be defined. For now, mark the intended build points with comments:
+### Pattern B — CSS fragments
 
 ```markdown
----
-
-## The anisotropy emerges 30–50 ms after saccade onset
-
 ![width:700px](figures/TODO-anisotropy-timecourse.png)
 
 <!-- BUILD: reveal panel 2 (shaded CI) on advance -->
 <!-- BUILD: reveal annotation arrows on next advance -->
 ```
 
-The `BUILD:` comments are purely informational at Stage 4. They become real fragments when the theme is wired up or when the user swaps to Pattern A.
+`BUILD:` comments are informational markers at Stage 4; they become real fragments when the theme is wired for it or when the user swaps to Pattern A.
 
 ### Pattern C — pre-rendered animated figure
-
-For figures where the animation is essential (e.g., a reconstructed eye trace moving across a scene), export as a short autoplay video or GIF. Marp renders MP4/GIF via standard image markdown:
 
 ```markdown
 ![width:700px](figures/TODO-eye-trace-animation.mp4)
 ```
 
-Defer until the user's visual-elements tooling is integrated.
+Flag Pattern C to the user so they know they need to pre-render.
 
 ### Which to use
 
-- Default to Pattern A for Stage 4 skeletons. It is robust and doesn't depend on theme CSS.
+- Default to Pattern A.
 - Mark Pattern B sites with `BUILD:` comments for later CSS-driven builds.
-- Flag Pattern C figures to the user so they know they need to pre-render.
+- Flag Pattern C figures to the user.
 
 ---
 
-## slides.md shape
+## Figure directory convention
 
-```markdown
----
-marp: true
-theme: default
-paginate: true
-math: katex
----
-
-# [Talk title]
-
-## [Speaker name, affiliation, occasion]
-
-<!--
-SPEAKER NOTES
-- Pause 2 seconds before first word.
-- Open with ABT core statement (see storyline.md).
--->
+Create a `figures/` subdirectory next to `slides.md`. At the end of Stage 4, place a `figures/README.md` listing each `TODO-*.png` filename and what the figure should be — this becomes the user's checklist of figures to produce.
 
 ---
 
-## [Assertion 2 from assertions.md]
+## Per-slide self-check (both stages)
 
-![width:700px](figures/TODO-figure-2.png)
+Before declaring a slide done:
 
-<!--
-SPEAKER NOTES
-- [notes from assertions.md]
+- [ ] Title is a short directive clause, one line on the rendered slide.
+- [ ] One claim per slide (no "and" joining two distinct takeaways).
+- [ ] Visual described precisely enough that the user can tell whether their existing figure fits or a new one is needed.
+- [ ] Every axis/label/panel on the visual has a sentence the speaker will say about it. Otherwise, the element is cut or the slide is built progressively.
+- [ ] Transition-in and transition-out are one sentence each.
+- [ ] Speaker notes contain at least one of: a specific number, a skeptic pre-empt, or a pacing cue.
+- [ ] The slide is a step in the Storyline arc — trace it back to a beat or dive.
 
-TRANSITION IN: [from assertions.md]
-TRANSITION OUT: [from assertions.md]
--->
+### Stage 4 only
 
----
-
-## [Assertion 3]
-
-[...continue for all slides in assertions.md...]
-
----
-
-## Summary
-
-- [One-sentence recap of Dive 1 result]
-- [One-sentence recap of Dive 2 result]
-- [One-sentence recap of Dive 3 result]
-- **[Restate ABT core statement]**
-
-<!--
-SPEAKER NOTES
-- Leave this slide up for Q&A. Do NOT click forward to Acknowledgments.
-- Do NOT say "thank you" or apologize. Pause, then sit down / take the first question.
--->
+- [ ] Every `FIGURE:` comment now has a `![](figures/TODO-*.png)` tag above it.
+- [ ] Progressive-reveal points are marked (duplicated slides or `BUILD:` comments).
+- [ ] Summary and acknowledgments slides present.
+- [ ] `figures/README.md` lists every `TODO-*` filename.
 
 ---
 
-## Acknowledgments
+## Slide-count sanity check
 
-[To be filled in.]
+Rough rule: **60–90 seconds per slide** for a technical talk, including transitions and pauses. A 30-minute talk is therefore ~20–30 slides, not 50.
 
-<!--
-Click to this slide only after Q&A has wound down.
--->
+If the deck is producing more slides than the time budget allows, the talk either has too many dives or individual dives are over-built. Revisit Storyline and prune.
+
+---
+
+## Rendering the deck
+
+The deck should be renderable at any point during Stages 3 and 4 — rendering is the fastest way to catch title overflow, figure sizing, and layout bugs. Render whenever it helps verify the work; don't wait until Stage 4 is "done."
+
+```
+npx @marp-team/marp-cli slides.md --pdf    # visual-hygiene pass
+npx @marp-team/marp-cli slides.md --html   # delivery format; preserves fragments/transitions
 ```
 
----
+marp-cli auto-discovers `.marprc.yml` in the current directory, so theme registration and `allowLocalFiles` are picked up automatically. Do not invent additional CLI flags.
 
-## Rendering the skeleton
-
-The user will render the deck themselves. Mention in the closing message:
-
-> Render to PDF for a quick visual-hygiene pass (catches text overflow, sizing issues):
-> ```
-> npx @marp-team/marp-cli slides.md --pdf
-> ```
->
-> Render to HTML for actual delivery (preserves fragments and transitions):
-> ```
-> npx @marp-team/marp-cli slides.md --html
-> ```
-
-Do not attempt to render the deck yourself in Stage 4.
+**When to render:**
+- After writing an initial batch of Stage 3 slides, to confirm titles don't wrap and speaker-note comments aren't leaking onto the slide face.
+- After Stage 4 figure placeholders are added, to confirm sizing directives work.
+- Any time the user reports something looks wrong — render, open the PDF, and verify directly rather than guessing.
 
 ---
 
 ## Post-Stage-4 rehearsal suggestion
 
-After writing `slides.md`, close with a **suggestion** (not a requirement):
+After Stage 4, close with a **suggestion** (not a requirement):
 
 > The skeleton is ready. The next productive step is to rehearse the talk aloud once, with the deck visible, speaking the transitions from the notes rather than reading them. Time it. Note any slide where you stumbled, any transition that felt forced, any moment where you wanted a slide you don't have.
 >

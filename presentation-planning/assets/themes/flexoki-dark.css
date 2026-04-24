@@ -1,0 +1,293 @@
+/* @theme flexoki-dark
+ *
+ * Marp theme based on the Flexoki color scheme by Steph Ango.
+ * https://stephango.com/flexoki  |  https://github.com/kepano/flexoki
+ *
+ * Typeface: Inter by Rasmus Andersson — https://rsms.me/inter/
+ * Variable font bundled locally so rendering is reproducible on any machine
+ * with marp-cli + Chromium (requires `allowLocalFiles: true` in .marprc.yml).
+ *
+ * Dark mode: paper-black background, base-200 text, 400-series accents.
+ *
+ * Full Flexoki palette is exposed as CSS custom properties on :root —
+ * every base ramp and every accent in 50-950 — so any color in the scheme
+ * is one `var(--<name>-<shade>)` away.
+ *
+ * Semantic paper-palette handles (override in frontmatter if you want a
+ * different mapping per-talk):
+ *   --rgc       : red-400        (retinal / excitatory input)
+ *   --lgn       : blue-400       (relay / gated output)
+ *   --transmit  : purple-400     (transmission probability)
+ */
+
+@import 'default';
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  src: url('./fonts/InterVariable.woff2') format('woff2-variations'),
+       url('./fonts/InterVariable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: block;
+  src: url('./fonts/InterVariable-Italic.woff2') format('woff2-variations'),
+       url('./fonts/InterVariable-Italic.woff2') format('woff2');
+}
+
+:root {
+  /* =========================================================================
+   * Flexoki base (monochrome) — full ramp
+   * ========================================================================= */
+  --paper:      #FFFCF0;
+  --base-50:    #F2F0E5;
+  --base-100:   #E6E4D9;
+  --base-150:   #DAD8CE;
+  --base-200:   #CECDC3;
+  --base-300:   #B7B5AC;
+  --base-400:   #9F9D96;
+  --base-500:   #878580;
+  --base-600:   #6F6E69;
+  --base-700:   #575653;
+  --base-800:   #403E3C;
+  --base-850:   #343331;
+  --base-900:   #282726;
+  --base-950:   #1C1B1A;
+  --base-black: #100F0F;
+
+  /* =========================================================================
+   * Flexoki accents — full ramps (50-950) for each of 8 hues
+   * ========================================================================= */
+
+  /* Red */
+  --red-50:  #FFE1D5;  --red-100: #FFCABB;  --red-150: #FDB2A2;
+  --red-200: #F89A8A;  --red-300: #E8705F;  --red-400: #D14D41;
+  --red-500: #C03E35;  --red-600: #AF3029;  --red-700: #942822;
+  --red-800: #6C201C;  --red-850: #551B18;  --red-900: #3E1715;
+  --red-950: #261312;
+
+  /* Orange */
+  --orange-50:  #FFE7CE;  --orange-100: #FED3AF;  --orange-150: #FCC192;
+  --orange-200: #F9AE77;  --orange-300: #EC8B49;  --orange-400: #DA702C;
+  --orange-500: #CB6120;  --orange-600: #BC5215;  --orange-700: #9D4310;
+  --orange-800: #71320D;  --orange-850: #59290D;  --orange-900: #40200D;
+  --orange-950: #27180E;
+
+  /* Yellow */
+  --yellow-50:  #FAEEC6;  --yellow-100: #F6E2A0;  --yellow-150: #F1D67E;
+  --yellow-200: #ECCB60;  --yellow-300: #DFB431;  --yellow-400: #D0A215;
+  --yellow-500: #BE9207;  --yellow-600: #AD8301;  --yellow-700: #8E6B01;
+  --yellow-800: #664D01;  --yellow-850: #503D02;  --yellow-900: #3A2D04;
+  --yellow-950: #241E08;
+
+  /* Green */
+  --green-50:  #EDEECF;  --green-100: #DDE2B2;  --green-150: #CDD597;
+  --green-200: #BEC97E;  --green-300: #A0AF54;  --green-400: #879A39;
+  --green-500: #768D21;  --green-600: #66800B;  --green-700: #536907;
+  --green-800: #3D4C07;  --green-850: #313D07;  --green-900: #252D09;
+  --green-950: #1A1E0C;
+
+  /* Cyan */
+  --cyan-50:  #DDF1E4;  --cyan-100: #BFE8D9;  --cyan-150: #A2DECE;
+  --cyan-200: #87D3C3;  --cyan-300: #5ABDAC;  --cyan-400: #3AA99F;
+  --cyan-500: #2F968D;  --cyan-600: #24837B;  --cyan-700: #1C6C66;
+  --cyan-800: #164F4A;  --cyan-850: #143F3C;  --cyan-900: #122F2C;
+  --cyan-950: #101F1D;
+
+  /* Blue */
+  --blue-50:  #E1ECEB;  --blue-100: #C6DDE8;  --blue-150: #ABCFE2;
+  --blue-200: #92BFDB;  --blue-300: #66A0C8;  --blue-400: #4385BE;
+  --blue-500: #3171B2;  --blue-600: #205EA6;  --blue-700: #1A4F8C;
+  --blue-800: #163B66;  --blue-850: #133051;  --blue-900: #12253B;
+  --blue-950: #101A24;
+
+  /* Purple */
+  --purple-50:  #F0EAEC;  --purple-100: #E2D9E9;  --purple-150: #D3CAE6;
+  --purple-200: #C4B9E0;  --purple-300: #A699D0;  --purple-400: #8B7EC8;
+  --purple-500: #735EB5;  --purple-600: #5E409D;  --purple-700: #4F3685;
+  --purple-800: #3C2A62;  --purple-850: #31234E;  --purple-900: #261C39;
+  --purple-950: #1A1623;
+
+  /* Magenta */
+  --magenta-50:  #FEE4E5;  --magenta-100: #FCCFDA;  --magenta-150: #F9B9CF;
+  --magenta-200: #F4A4C2;  --magenta-300: #E47DA8;  --magenta-400: #CE5D97;
+  --magenta-500: #B74583;  --magenta-600: #A02F6F;  --magenta-700: #87285E;
+  --magenta-800: #641F46;  --magenta-850: #4F1B39;  --magenta-900: #39172B;
+  --magenta-950: #24131D;
+
+  /* =========================================================================
+   * Semantic assignments — dark mode
+   * (swap here rather than editing the palette)
+   * ========================================================================= */
+  --bg:          var(--base-black);
+  --bg-elev:     var(--base-950);
+  --text:        var(--base-200);
+  --text-strong: var(--base-100);
+  --text-mute:   var(--base-500);
+  --rule:        var(--base-800);
+  --link:        var(--blue-400);
+  --accent:      var(--orange-400);
+
+  /* Paper-palette semantic handles */
+  --rgc:      var(--red-400);
+  --lgn:      var(--blue-400);
+  --transmit: var(--purple-400);
+}
+
+/* --- Slide canvas --- */
+section {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';  /* Inter stylistic alts: disambiguated 1/I/l, alt a, alt g */
+  font-size: 28px;
+  line-height: 1.45;
+  padding: 60px 80px;
+  letter-spacing: 0.005em;
+}
+
+/* --- Headings --- */
+h1, h2, h3, h4 {
+  color: var(--text-strong);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+h1 { font-size: 1.9em; margin-bottom: 0.4em; }
+h2 { font-size: 1.4em; margin-bottom: 0.6em; border-bottom: 1px solid var(--rule); padding-bottom: 0.25em; }
+h3 { font-size: 1.05em; color: var(--text); font-weight: 500; }
+h4 { font-size: 0.95em; color: var(--text-mute); font-weight: 400; }
+
+/* Title slide — opt in via `<!-- _class: title -->` */
+section.title {
+  background: var(--bg);
+  text-align: left;
+  padding: 100px 100px;
+}
+section.title h1 {
+  font-size: 2.3em;
+  color: var(--paper);
+  margin-bottom: 1.2em;
+  border: none;
+}
+section.title h2,
+section.title h3,
+section.title h4 {
+  border: none;
+  color: var(--text);
+  margin: 0.1em 0;
+  font-weight: 400;
+}
+section.title h3 { color: var(--text); }
+section.title h4 { color: var(--text-mute); }
+
+/* --- Body text --- */
+p, li { color: var(--text); }
+strong { color: var(--text-strong); }
+em { color: var(--accent); font-style: italic; }
+
+/* --- Lists --- */
+ul, ol { padding-left: 1.4em; }
+li + li { margin-top: 0.35em; }
+li::marker { color: var(--text-mute); }
+
+/* --- Blockquotes — used as VISUAL placeholders in skeleton decks --- */
+blockquote {
+  background: var(--bg-elev);
+  border-left: 3px solid var(--accent);
+  color: var(--text-mute);
+  padding: 0.9em 1.2em;
+  margin: 0.8em 0;
+  font-size: 0.85em;
+  border-radius: 2px;
+}
+blockquote strong { color: var(--accent); }
+blockquote em { color: var(--text-mute); }
+blockquote p { margin: 0.4em 0; }
+
+/* --- Code --- */
+code {
+  background: var(--base-900);
+  color: var(--cyan-400);
+  padding: 0.1em 0.35em;
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--base-950);
+  border: 1px solid var(--base-800);
+  border-radius: 3px;
+  padding: 0.9em 1.1em;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--text);
+}
+
+/* --- Links --- */
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--base-800);
+}
+a:hover { border-bottom-color: var(--link); }
+
+/* --- Tables --- */
+table {
+  border-collapse: collapse;
+  font-size: 0.85em;
+  width: auto;
+}
+th, td {
+  border: 1px solid var(--base-800);
+  padding: 0.45em 0.75em;
+}
+th {
+  background: var(--base-900);
+  color: var(--text-strong);
+  font-weight: 600;
+  text-align: left;
+}
+
+/* --- Horizontal rule (between sections, not slides) --- */
+hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 1.2em 0;
+}
+
+/* --- Math (KaTeX) --- */
+.katex { color: var(--text-strong); font-size: 1.05em; }
+
+/* --- Pagination --- */
+section::after {
+  color: var(--text-mute);
+  font-size: 0.7em;
+  font-weight: 400;
+}
+
+/* --- Images --- */
+img {
+  background: transparent;
+  border-radius: 2px;
+}
+
+/* --- Utility classes (use via `<!-- _class: NAME -->`) --- */
+section.section     { background: var(--bg-elev); }
+section.section h1  { color: var(--accent); border: none; font-size: 2.4em; }
+
+/* Span helpers — use inline:
+ *   <span class="rgc">RGC</span>, <span class="lgn">LGN relay</span>,
+ *   <span class="transmit">transmission</span>
+ */
+.rgc      { color: var(--rgc);      font-weight: 600; }
+.lgn      { color: var(--lgn);      font-weight: 600; }
+.transmit { color: var(--transmit); font-weight: 600; }
