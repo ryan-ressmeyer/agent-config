@@ -49,6 +49,38 @@ TRANSITION OUT: [one sentence the speaker says moving to the next slide]
 ---
 
 <!-- ============================================================
+     QUESTION PIVOT SLIDE
+     One slide between the Conflict beat and the first data dive,
+     for any first-person research talk. The speaker stops summarizing
+     the field and explicitly names the question they went after.
+     The heading is the question, verbatim. Optional small inset
+     depicting the approach allows the spoken beat to be two
+     sentences: "I asked X. I did it using Y."
+     Skip only for pure tutorial/review/meta talks.
+     See storyline-guide.md "The Question Pivot".
+     ============================================================ -->
+
+## [The question, verbatim — phrased as a question, not a topic]
+
+<!--
+FIGURE (optional): compact inset of the approach/technique. Subordinate
+to the question visually. Omit if the technique needs its own slide(s)
+to earn — better to leave the pivot clean than to crowd it.
+
+SPEAKER NOTES
+- Pause before delivering. Let the question land.
+- Spoken form: "I asked: [the question]. I did it using [the approach]."
+  (Second sentence omitted if no inset.)
+- Do NOT preview the result. Do NOT re-summarize the prior-work review.
+- Pacing: ~30 s. The pause does as much work as the words.
+
+TRANSITION IN: [closes the Conflict beat — "...and that's the question I went after."]
+TRANSITION OUT: [opens Dive 1's approach — "to answer this, we needed to..."]
+-->
+
+---
+
+<!-- ============================================================
      STAGE 4 SLIDE (figure placeholder added to the Stage 3 shape)
      In the second pass, replace the top of each slide with an
      image tag above the existing FIGURE: description comment.
@@ -97,3 +129,9 @@ SPEAKER NOTES
 <!--
 Click to this slide only after Q&A has wound down.
 -->
+
+<!-- Loads the video controller for data-play-from-start / data-play-then-advance
+     attributes. Passes through to slides.html via `options.html: true` in
+     .marprc.yml; inert during PDF render. Keep marp-video-controls.js in this
+     directory (copied from the skill's assets/). -->
+<script src="./marp-video-controls.js"></script>

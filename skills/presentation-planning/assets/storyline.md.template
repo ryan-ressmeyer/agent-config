@@ -13,7 +13,19 @@
 ### Conflict (~[M] min)
 - [What the field's current answer is, and why it is insufficient]
 - [Any prerequisite earned here]
-- Beat closes on: [one-sentence setup for the resolution]
+- Beat closes on: [one-sentence setup for the Question Pivot]
+
+### Question Pivot (~30 s, one slide)
+
+<!-- For first-person research talks (job talk, defense, seminar, lab meeting,
+     conference talk): the explicit moment the speaker stops summarizing the
+     field and names the question they went after. Skip only for pure
+     tutorial/review/meta talks. See storyline-guide.md "The Question Pivot". -->
+
+- The question (verbatim, as it will appear on the slide): [single declarative question, in audience-earned vocabulary]
+- Spoken delivery: ["I asked: ___. I did it using ___." — one sentence each, the second optional if the technique is non-trivial enough to warrant the next slide instead]
+- Slide form: [question-as-heading; optional small inset of the approach if the technique compresses to one image]
+- Beat closes on: [one-sentence setup for Dive 1 — typically "to answer this, we needed to ___"]
 
 ### Resolution — dives
 

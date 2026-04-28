@@ -111,7 +111,7 @@ Interview the user to capture four things. Use `references/frame-guide.md` for t
 Read `references/storyline-guide.md`. Produce:
 
 1. **ABT core statement** (AND / BUT / THEREFORE — Olson, via Crivellaro).
-2. **Arc outline** — hook, conflict, resolution, meaning. The resolution decomposes into one or more "data dives," each a mini-argument (sub-question → one piece of evidence → one-sentence result → bridge). Let the core claim's structure determine the count — one dive if the talk rests on a single body of evidence, more as the argument actually splits. Do not hit a 3–5 quota just because it is typical.
+2. **Arc outline** — hook, conflict, **question pivot**, resolution, meaning. The Question Pivot is one slide / ~30 s where the speaker explicitly names the question they went after — required for any first-person research talk (job talk, defense, seminar, lab meeting, conference talk). Skip only for pure tutorial/review/meta talks. The resolution decomposes into one or more "data dives," each a mini-argument (sub-question → one piece of evidence → one-sentence result → bridge). Let the core claim's structure determine the count — one dive if the talk rests on a single body of evidence, more as the argument actually splits. Do not hit a 3–5 quota just because it is typical.
 3. **Stepping stones** — for each prerequisite from the Frame, specify *where in the narrative it gets earned as forward motion*, not as "Background" filler. Every concept the audience will encounter must be introduced as a step of the argument before it is relied on.
 4. **Order check** — does the narrative run chronologically ("we did X, then Y failed, so we did Z")? If yes, re-plan. Lab-notebook order is the #1 failure mode; flashback/novel order holds attention.
 
@@ -130,14 +130,17 @@ Read `references/marp-conventions.md`. Convert the storyline into a Marp skeleto
 
 One message per slide. If a slide is carrying two takeaways, split it.
 
-**Copy the locked-in visual style at the start of Stage 3** (the theme is needed the moment `slides.md` exists, even without figures, so rendering and layout work can be previewed):
+**Copy the locked-in visual style and build wiring at the start of Stage 3** (the theme is needed the moment `slides.md` exists, even without figures, so rendering and layout work can be previewed):
 
 ```
-cp -r <skill-dir>/assets/themes  <presentation-dir>/themes
-cp    <skill-dir>/assets/marprc.yml.template  <presentation-dir>/.marprc.yml
+cp -r <skill-dir>/assets/themes                  <presentation-dir>/themes
+cp    <skill-dir>/assets/marprc.yml.template     <presentation-dir>/.marprc.yml
+cp    <skill-dir>/assets/build.sh.template       <presentation-dir>/build.sh
+cp    <skill-dir>/assets/marp-video-controls.js  <presentation-dir>/marp-video-controls.js
+chmod +x <presentation-dir>/build.sh
 ```
 
-See the **Locked-in visual style** section below. Do not re-author any of this.
+See the **Locked-in visual style** section below. Do not re-author any of this. `build.sh` runs marp-cli for both PDF and HTML output. The `slides.md` template loads `marp-video-controls.js` via a `<script src>` tag at the bottom of the file, which marp-cli passes through to `slides.html` (because `.marprc.yml` sets `options.html: true`), enabling the `data-play-from-start` / `data-play-then-advance` video attributes at delivery time. See `references/marp-conventions.md` (Animated figures) for the markup contract.
 
 ### Stage 4: Slide visuals
 **Output:** same `slides.md`, second pass
@@ -175,6 +178,7 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 - A concept appears on a slide without having been earned earlier in the storyline.
 - There are no speaker notes.
 - You added figure placeholders during Stage 3 (visuals belong to Stage 4).
+- For a first-person research talk: there is no Question Pivot slide between the Conflict beat and the first data dive. The audience never gets the cue that the contribution has begun.
 
 ## Common Mistakes
 
@@ -212,6 +216,8 @@ Each stage has a template in `assets/` that shows the expected shape of the outp
 - `assets/slides.md.template` — Stages 3 and 4: Marp skeleton with frontmatter, title slide, per-slide title/notes/transitions pattern, `FIGURE:` placeholders for Stage 3, summary, and acknowledgments
 - `assets/themes/` — locked-in visual style (Flexoki + Inter); copy verbatim to `<presentation>/themes/`
 - `assets/marprc.yml.template` — marp-cli config; copy to `<presentation>/.marprc.yml`
+- `assets/build.sh.template` — marp-cli driver; copy to `<presentation>/build.sh` (and `chmod +x`)
+- `assets/marp-video-controls.js` — JS controller for `data-play-from-start` / `data-play-then-advance` video attributes; copy to `<presentation>/marp-video-controls.js`. See `references/marp-conventions.md` (Animated figures).
 
 ## Locked-in visual style
 

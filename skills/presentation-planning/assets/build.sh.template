@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Build slides.md into slides.pdf and slides.html.
+# slides.md references marp-video-controls.js via a <script src> tag, which
+# passes through to the rendered HTML thanks to `options.html: true` in
+# .marprc.yml and the --html flag below. See ../themes/, ./.marprc.yml, and
+# the marp-conventions reference (Animated figures section) for the markup
+# contract.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+# --- Project-specific pre-build steps (e.g. regenerating animations) go here.
+# Example:
+#   MP4="assets/some_animation.mp4"
+#   SCRIPT="scripts/generate_some_animation.py"
+#   if [[ ! -f "$MP4" || "$SCRIPT" -nt "$MP4" ]]; then
+#       uv run "$SCRIPT"
+#   fi
+
+# --- Render PDF (visual-hygiene pass) and HTML (delivery format).
+npx --yes @marp-team/marp-cli@latest \
+    --allow-local-files --html \
+    slides.md -o slides.pdf
+
+npx --yes @marp-team/marp-cli@latest \
+    --allow-local-files --html \
+    slides.md -o slides.html

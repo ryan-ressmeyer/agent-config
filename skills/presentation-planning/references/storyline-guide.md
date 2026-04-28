@@ -37,14 +37,37 @@ A well-formed ABT should:
 
 A scientific talk is structured as a hero's journey where the **question** is the hero (Alon). Not the speaker, not the lab, not the method — the question.
 
-### Four-beat arc (works for 20–40 minute talks)
+### Five-beat arc (works for 20–40 minute talks)
 
 | Beat | Content | Time share (rough) |
 |------|---------|---------------------|
 | 1. Hook | The fundamental question the audience already cares about (or can be made to care about in 60 seconds). Phrased as a problem, not a topic. | 10–15% |
 | 2. Conflict | Why the question is hard. What's wrong with the field's current answer. What tool or idea has been missing. | 10–15% |
-| 3. Resolution | The speaker's work, told as a sequence of "data dives" that together answer the core question. | 60–70% |
-| 4. Meaning | What the world looks like now that the core message is true. Implications, open questions, a final restatement of the ABT. | 10–15% |
+| 3. Question Pivot | One slide, ~30 s. The speaker explicitly names *the* question they went after and (optionally) the approach in one breath. The structural cue that the talk has moved from summarizing the field to presenting the speaker's own contribution. | 2–5% |
+| 4. Resolution | The speaker's work, told as a sequence of "data dives" that together answer the core question. | 55–70% |
+| 5. Meaning | What the world looks like now that the core message is true. Implications, open questions, a final restatement of the ABT. | 10–15% |
+
+### The Question Pivot
+
+For any first-person research talk — job talk, defense, departmental seminar, lab meeting, conference talk — the audience needs an audible, visible moment where the speaker stops summarizing what the field knows and starts telling them what *they* did. Without this beat, the talk slides from "the field's current answer is incomplete" directly into method and evidence, and the audience never gets the cue that the contribution has begun. The work then diffuses across many slides instead of landing as a single planted landmark — particularly costly when the speaker is being evaluated (job talks, defenses, fellowship interviews).
+
+The Pivot is structurally tiny — typically one slide, ~30 seconds — but rhetorically load-bearing. Treat it as a first-class beat, not a transition.
+
+**Form:**
+
+- A single declarative question (the question the speaker went after) as the slide heading. First-person framing in the spoken delivery: *"I asked: how does X implement Y?"*, *"We wanted to know whether Z…"*. The question must use vocabulary the audience has already earned in Hook + Conflict — not introduce new terms.
+- Optional: a small visual inset depicting the approach/technique, so the spoken beat becomes two short sentences — *"I asked X. I did it using Y."* This lets the next slide(s) earn *why* the approach works rather than introducing the approach cold.
+- The Pivot does **not** preview the result. It plants the question and (optionally) the approach. Results belong in the dives.
+- The Pivot does **not** rehearse the prior-work review. The Conflict beat already did that work; restating it here dilutes the pivot.
+
+**When to skip:** pure tutorial talks, review talks, and meta-talks (about a method, a field, a controversy) often do not have a "this is the question I went after" beat because the speaker isn't presenting their own contribution. In those cases, omit it. For everything else, include it.
+
+**Failure modes:**
+
+- *Pivot dissolved into method slides.* The audience meets the approach, the analysis, and finally the result without ever being told what question all of that is answering. Insert a one-slide pivot before the first method slide.
+- *Pivot fused with Conflict.* The "what's missing" slide ends with "so we wondered…" and the next slide is already a method. The wondering has no slide of its own. Split it out — give the question its own slide.
+- *Pivot crowded with technique.* The slide carries the question, the approach, the species, the rig, the analysis pipeline, and a teaser of the result. Strip to the question; if you want the approach in the same beat, an inset is the cap.
+- *Pivot phrased as a topic, not a question.* "The retinogeniculate synapse during saccades" is a topic; "How does LGN implement perisaccadic gating?" is a question. The Pivot must be a question — that is what marks it as a *contribution* slide rather than a *background* slide.
 
 ### The data dives
 
@@ -189,5 +212,7 @@ If any answer is wrong, the order needs rework. Kenny's framing: a speech is a f
 - A dive is actually two dives (two sub-questions, two results).
 - Dives are ordered chronologically.
 - The Meaning beat is "Future Directions" with no restatement of the core message.
+- For a first-person research talk: there is no Question Pivot beat. The Conflict ends, and the next thing on the page is a method or a result. The audience never gets the "I went after this" cue.
+- The Question Pivot is phrased as a topic ("The retinogeniculate synapse"), not a question ("How does LGN implement perisaccadic gating?").
 
 Until all of these are clear, stay in Stage 2.

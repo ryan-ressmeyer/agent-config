@@ -292,6 +292,70 @@ Flag Pattern C to the user so they know they need to pre-render.
 
 ---
 
+## Animated figures (videos) — Stage 4
+
+For videos that should *play under speaker control* (not start automatically the moment the slide appears), the deck ships a small JS controller — `marp-video-controls.js` — copied alongside `themes/` and `.marprc.yml` at Stage 3. The slides template loads it via a `<script src="./marp-video-controls.js"></script>` tag at the bottom of `slides.md`, which passes through to the rendered HTML thanks to `options.html: true` in `.marprc.yml` and the `--html` flag in `build.sh`. It enables two HTML attributes on `<video>` tags:
+
+| Attribute | Behavior |
+|-----------|----------|
+| `data-play-from-start` | Autoplay from frame 0 each time the slide becomes active. Pause + rewind when the slide goes inactive. Use when the speaker wants the video already running on arrival. |
+| `data-play-then-advance` | Show frame 0 on entry. The next advance keypress on this slide *plays the video* (and is consumed — does not advance). The press after that advances normally. Going back resets the played flag. Use when the speaker wants to land on a still frame, deliver a setup line, then trigger playback at a deliberate moment. |
+
+**Prefer `data-play-then-advance`** for any video the speaker introduces verbally. It collapses what would otherwise be two duplicate slides (one paused, one autoplay) into one slide. The previous duplicate-slide pattern is now a code smell — replace it.
+
+### Markup
+
+```markdown
+---
+
+## The eye jumps ~3 times a second
+
+<video src="assets/free-viewing-eye.webm" data-play-then-advance loop muted playsinline
+       style="width: 80%; max-height: 65vh; display: block; margin: 0 auto;"></video>
+
+<!--
+SPEAKER NOTES
+- Land on the still frame and deliver the transition-in line.
+- Press advance once to start the video — let it run silently for ~3 s.
+- ...
+
+TRANSITION IN: "..."
+TRANSITION OUT: "..."
+-->
+```
+
+Required attributes on the `<video>` tag:
+
+- `muted` — required for programmatic playback under browser autoplay policy.
+- `playsinline` — keeps the video inline rather than going fullscreen on some browsers.
+- `loop` — usually wanted; the video keeps looping while the slide is shown.
+- One of `data-play-from-start` or `data-play-then-advance`.
+
+Inline `style="width: ...; max-height: ...; display: block; margin: 0 auto;"` is the canonical layout. The width and max-height keep the element sized correctly even if the resource is briefly unloaded.
+
+### Build wiring
+
+The deck root must contain three files (all copied at Stage 3 from the skill's `assets/`):
+
+```
+<presentation>/
+├── themes/                    # locked-in visual style
+├── .marprc.yml                # registers themes/, allowLocalFiles, html: true
+├── marp-video-controls.js     # video controller — loaded by <script src> in slides.md
+└── build.sh                   # marp-cli driver
+```
+
+`slides.md` ends with `<script src="./marp-video-controls.js"></script>`. Because `.marprc.yml` sets `options.html: true` and `build.sh` passes `--html`, marp-cli emits the `<script>` tag verbatim into `slides.html`, which loads the controller at runtime. The script is inert during PDF rendering. Editing `marp-video-controls.js` takes effect on the next deck reload — no rebuild step required.
+
+### Common pitfalls
+
+- **Selector by class only, never by element.** Marp wraps each slide in `<svg><foreignObject><section>…</section></foreignObject></svg>`, and bespoke applies `bespoke-marp-active` / `bespoke-marp-slide` to the `<svg>`, not the `<section>`. Selecting `section.bespoke-marp-active` matches nothing. The shipped controller already gets this right; do not "simplify" it.
+- **Do not call `v.load()` before `v.play()`.** `load()` unloads the current resource, drops the element's intrinsic aspect ratio for one frame, and produces a visible layout reflow (video collapses to the HTML5 default 300×150, surrounding content shifts). `currentTime = 0` is sufficient.
+- **The keydown listener uses capture phase.** Bespoke binds advance keys at the bubble phase on `document`. The controller registers with `{ capture: true }` and calls `stopImmediatePropagation()` to consume the press. Capture is required — bubble would arrive too late.
+- **PDF export does not animate.** Videos play in `slides.html` only. The PDF shows the first frame.
+
+---
+
 ## Figure directory convention
 
 Create a `figures/` subdirectory next to `slides.md`. At the end of Stage 4, place a `figures/README.md` listing each `TODO-*.png` filename and what the figure should be — this becomes the user's checklist of figures to produce.
