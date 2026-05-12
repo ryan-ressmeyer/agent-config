@@ -87,8 +87,16 @@ ansa search "binocular rivalry temporal dynamics"
 # Structured query
 ansa query '{"type":"paper","where":{"year":{"ge":2020}},"order_by":"year","limit":20}'
 
-# Semantic neighbors of a paper
+# Semantic neighbors of a paper (embedding cosine over title+abstract)
 ansa paper similar <UUID>
+
+# Citation neighbors: papers this one cites, and papers that cite it.
+# Use `/api/nodes/<UUID>/neighbors` and filter to edge type `cites`.
+# Edges are auto-extracted on import from cached Crossref reference lists
+# (Phase F); they cover DOI-tagged references only. References to papers
+# not yet in the graph land as `cite_candidate` nodes — visible in the
+# web detail page's "Pending citations" panel, or via:
+ansa query '{"type":"cite_candidate","limit":50}'
 ```
 
 Read summaries (scratchpads) before answering — they're the user's own notes and outrank abstracts. Fetch a paper's scratchpad with `ansa paper scratchpad <UUID>`.
@@ -143,7 +151,7 @@ Always echo the resolved UUID + citekey + title back to the user before doing an
 ## Key behaviors
 
 - **One paper at a time.** Never batch-summarize. The user should engage with each paper.
-- **Surface candidates after each add.** After a successful import, run `ansa paper similar <new-UUID>` and offer the user 3–5 neighbors that aren't already in the graph.
+- **Surface candidates after each add.** After a successful import, run `ansa paper similar <new-UUID>` and offer the user 3–5 neighbors that aren't already in the graph. Citation neighbors (the `cites` edges materialized from the new paper's Crossref references) are also worth a glance — they often surface foundational papers the user might want to pull in.
 - **Respect the user's pace.** Present options; let them choose what's next.
 - **Only cite what's in the graph.** When answering questions, cite by citekey + UUID. Flag when a question requires papers not in the graph.
 - **No new HTTP endpoints from this skill.** If a workflow wants something ansa doesn't expose, note the gap and ask — that's a Phase F+ change to ansa-kg, not orchestrator work.
@@ -156,4 +164,4 @@ Always echo the resolved UUID + citekey + title back to the user before doing an
 | Resolving a citekey/title silently — no user confirmation | Echo UUID + citekey + title before any mutation |
 | Citing papers by title only | Use citekeys (`vaswani2017attention`), which match the graph and any downstream BibTeX |
 | Trying to read `references/<id>/<id>.pdf` | That layout is gone. Everything is `ansa` over HTTP. |
-| Building citation graphs by hand | Deferred to Phase F — `cites` edges aren't populated by importers yet. Use `ansa paper similar` for now. |
+| Building citation graphs by hand | Done automatically: `cites` edges are extracted from cached Crossref refs on import (Phase F). For backfill / re-extraction use `ansa paper cites extract --id <UUID>` or `--all`. Dangling references live as `cite_candidate` nodes until the target paper is imported. |
