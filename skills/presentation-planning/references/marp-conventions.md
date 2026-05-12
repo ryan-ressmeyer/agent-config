@@ -1,8 +1,10 @@
-# Stages 3 and 4: Slide Authoring in Marp
+# Stages 3–5: Slide Authoring in Marp
 
-Stages 3 and 4 produce and refine a single `slides.md` file. Stage 3 fixes the spoken structure of the talk — titles, speaker notes, and transitions — with **no figures**. Stage 4 layers figure placeholders, progressive reveals, and visual polish on top of that structure.
+> **Where the spoken frame lives.** During slide construction (Stages 3 and 4), the spoken frame lives **inline on each slide** as a `<!-- SPEAKER NOTES … TRANSITION IN/OUT -->` comment block. This is the canonical source during construction — keeping the spoken frame visible next to the slide it belongs to is the whole point. At Stage 5, after visuals have settled, the verbatim script is written in `script.md` as `## @<selector>` blocks and the inline scaffolding is deleted. From Stage 5 onward, `script.md` is the source of truth and `tools/compile.py` strips any leftover inline blocks with a warning. See the **Build system** section in `SKILL.md`.
 
-This two-pass workflow exists because the talk is a spoken performance. If visuals are drafted at the same time as spoken flow, the visuals colonize the iteration: the user tweaks the picture instead of the argument. Decoupling them keeps the argument first.
+Stage 3 produces a no-image `slides.md` skeleton: titles, `FIGURE:` description comments, inline scaffolding notes. Stage 4 layers visuals — image tags pointing into the deck's `assets/` directory, progressive reveals, polish — while continuing to revise slide order, titles, and inline notes as visuals reveal what works. Stage 5 writes `script.md` once the deck is visually settled.
+
+The skeleton-first sequencing exists because the talk is a spoken performance. Drafting figures before titles and a spoken frame lets the visuals colonize the iteration: the user tweaks the picture instead of the argument. Once a skeleton exists, visuals and flow co-iterate productively in Stage 4 — the structure is no longer hostage to whichever figure was drawn first.
 
 ---
 
@@ -11,8 +13,8 @@ This two-pass workflow exists because the talk is a spoken performance. If visua
 Every slide is one unit of argument, with three parts:
 
 1. **Title** — a short directive clause stating what the slide is about.
-2. **Evidence** — one visual that proves the claim. In Stage 3 this is a `FIGURE:` description comment; in Stage 4 it becomes a placeholder image tag.
-3. **Spoken frame** — what the speaker says on approach and on departure, plus the moment-of-delivery notes they need. Lives in HTML comments.
+2. **Evidence** — one visual that proves the claim. In Stage 3 this is a `FIGURE:` description comment; in Stage 4 it becomes a placeholder image tag pointing into `assets/`.
+3. **Spoken frame** — what the speaker says on approach and on departure, plus the moment-of-delivery notes they need. Lives inline as `<!-- SPEAKER NOTES / TRANSITION IN / TRANSITION OUT -->` comment blocks during Stages 3–4; migrates into `script.md` blocks at Stage 5.
 
 If any of the three is missing, the slide isn't done. If the evidence supports two distinct claims, the slide is two slides.
 
@@ -83,10 +85,10 @@ This keeps the user's attention on the argument. No image work happens until Sta
 
 ### Stage 4: placeholder image tag
 
-In the second pass, replace the `FIGURE:` description with a placeholder tag, keeping the description directly below it so the user knows what to produce:
+In the second pass, replace the `FIGURE:` description with a placeholder tag pointing into the deck's `assets/` directory, keeping the description directly below it so the user knows what to produce:
 
 ```markdown
-![width:700px](figures/TODO-rf-anisotropy-scatter.png)
+![width:700px](assets/TODO-rf-anisotropy-scatter.png)
 
 <!--
 FIGURE: scatter of along-axis vs. orthogonal RF extent for all 347 units.
@@ -102,6 +104,14 @@ Audience should notice in ~2 s that most points lie above the unity line.
 - **Build up complex figures** via progressive reveals (see below).
 - **No red-green pairs. No 3D chart effects. No gridlines unless they carry meaning.**
 - **Never invent figure content.** Every figure in `slides.md` is a placeholder the user fills in.
+- **Never stretch images.** Aspect ratio must be preserved. On `<img>` tags, do not combine `width: X%` with `max-height: Ypx` — when the natural height at that width exceeds the max, the browser clamps height while leaving width fixed and the image is squished. Use `max-width` + `max-height` (with `width: auto; height: auto`) so both bounds preserve intrinsic aspect ratio. Canonical sizing for an inline image:
+
+  ```html
+  <img src="..." alt="..."
+       style="max-width: 80%; max-height: 468px; width: auto; height: auto; display: block; margin: 0 auto;">
+  ```
+
+  Only one constrained dimension (`width: 80%` alone, or `height: 432px` alone) is also safe. Two constrained dimensions on `<img>` is the failure mode. Videos behave the same way in principle, but typically render at their intrinsic aspect ratio inside the box; still prefer `max-width` + `max-height` if a video aspect mismatch ever appears.
 
 ---
 
@@ -170,7 +180,7 @@ math: katex
 
 ### Locked-in visual style
 
-The skill ships `assets/themes/flexoki-dark.css`, `assets/themes/flexoki-light.css`, bundled Inter woff2 files, and a `marprc.yml.template`. These are **not** Stage 3 or 4 authoring decisions — they are copied verbatim into every new presentation at the start of Stage 3:
+The skill ships `assets/themes/flexoki-dark.css`, `assets/themes/flexoki-light.css`, bundled Inter woff2 files, and a `marprc.yml.template`. These are **not** authoring decisions — they are copied verbatim into every new presentation at the start of Stage 3:
 
 ```
 cp -r <skill>/assets/themes  <presentation>/themes
@@ -221,7 +231,7 @@ Use sparingly. Apply classes only where the slide's content actually requires it
 
 ## [Short directive title — 3–8 words]
 
-![width:700px](figures/TODO-descriptive-name.png)   <!-- Stage 4 only -->
+![width:700px](assets/TODO-descriptive-name.png)   <!-- Stage 4 onward -->
 
 <!--
 FIGURE: [what this figure should contain, axes, annotations, what the audience looks at first]
@@ -235,7 +245,7 @@ TRANSITION OUT: [one sentence spoken moving to the next slide]
 -->
 ```
 
-In Stage 3 the `![width:...](...)` line is omitted; only the `FIGURE:` comment appears. In Stage 4 the image tag is added above the comment.
+In Stage 3 the `![width:...](...)` line is omitted; only the `FIGURE:` comment appears. The inline `SPEAKER NOTES` / `TRANSITION IN/OUT` block is the canonical spoken frame throughout Stages 3–4. In Stage 4 the image tag is added above the FIGURE comment. At Stage 5 the inline `SPEAKER NOTES` / `TRANSITION` block is removed from the slide and rewritten as a `## @<selector>` block in `script.md`.
 
 ---
 
@@ -252,7 +262,7 @@ Duplicate the slide, adding one element at a time.
 
 ## Anisotropy time course
 
-![width:700px](figures/TODO-anisotropy-timecourse-panel1.png)
+![width:700px](assets/TODO-anisotropy-timecourse-panel1.png)
 
 <!-- BUILD: panel 1 — raw time course only -->
 
@@ -260,7 +270,7 @@ Duplicate the slide, adding one element at a time.
 
 ## Anisotropy time course
 
-![width:700px](figures/TODO-anisotropy-timecourse-panel2.png)
+![width:700px](assets/TODO-anisotropy-timecourse-panel2.png)
 
 <!-- BUILD: panel 2 — add shaded 95% CI -->
 ```
@@ -268,7 +278,7 @@ Duplicate the slide, adding one element at a time.
 ### Pattern B — CSS fragments
 
 ```markdown
-![width:700px](figures/TODO-anisotropy-timecourse.png)
+![width:700px](assets/TODO-anisotropy-timecourse.png)
 
 <!-- BUILD: reveal panel 2 (shaded CI) on advance -->
 <!-- BUILD: reveal annotation arrows on next advance -->
@@ -279,7 +289,7 @@ Duplicate the slide, adding one element at a time.
 ### Pattern C — pre-rendered animated figure
 
 ```markdown
-![width:700px](figures/TODO-eye-trace-animation.mp4)
+![width:700px](assets/TODO-eye-trace-animation.mp4)
 ```
 
 Flag Pattern C to the user so they know they need to pre-render.
@@ -311,7 +321,7 @@ For videos that should *play under speaker control* (not start automatically the
 ## The eye jumps ~3 times a second
 
 <video src="assets/free-viewing-eye.webm" data-play-then-advance loop muted playsinline
-       style="width: 80%; max-height: 65vh; display: block; margin: 0 auto;"></video>
+       style="width: 80%; max-height: 468px; display: block; margin: 0 auto;"></video>
 
 <!--
 SPEAKER NOTES
@@ -331,7 +341,23 @@ Required attributes on the `<video>` tag:
 - `loop` — usually wanted; the video keeps looping while the slide is shown.
 - One of `data-play-from-start` or `data-play-then-advance`.
 
-Inline `style="width: ...; max-height: ...; display: block; margin: 0 auto;"` is the canonical layout. The width and max-height keep the element sized correctly even if the resource is briefly unloaded.
+Inline `style="width: ...; max-height: ...; display: block; margin: 0 auto;"` is the canonical layout for `<video>` (videos render at intrinsic aspect ratio inside that box). For `<img>`, use `max-width` + `max-height` with `width: auto; height: auto;` instead — see "Never stretch images" in the Visual rules section above. The width and max-height keep the element sized correctly even if the resource is briefly unloaded.
+
+### Sizing units — never use `vh`/`vw`
+
+Marp's slide `<section>` is a fixed-size canvas (default **1280×720 px**, 16:9). The HTML renderer scales the whole slide as a unit to fit the browser. But `vh`/`vw` resolve against the **browser viewport**, not the slide — so an element styled `height: 65vh` re-sizes when the deck is opened on a different display while the slide canvas around it is scaled differently. The result: layout drifts between machines/resolutions.
+
+Always size figures, videos, and other inline media with **px values matched to the 720 px slide height** (or `%` of an explicitly-sized parent). Reference conversions for the default 1280×720 canvas:
+
+| viewport intent | px on 720-tall slide |
+|---|---|
+| 65vh | 468px |
+| 60vh | 432px |
+| 55vh | 396px |
+| 50vh | 360px |
+| 40vh | 288px |
+
+If the deck overrides the canvas size via `theme` CSS (`@page { size: ... }` or a `section { width/height: ... }` rule), recompute against the overridden height. Percent widths (e.g. `width: 80%`) are fine — they resolve against the slide, not the viewport.
 
 ### Build wiring
 
@@ -358,11 +384,11 @@ The deck root must contain three files (all copied at Stage 3 from the skill's `
 
 ## Figure directory convention
 
-Create a `figures/` subdirectory next to `slides.md`. At the end of Stage 4, place a `figures/README.md` listing each `TODO-*.png` filename and what the figure should be — this becomes the user's checklist of figures to produce.
+Create an `assets/` subdirectory next to `slides.md` and place all figure and video files there. `tools/slide_summary.py` lists every `TODO-*` filename across the deck — enough of a checklist that no separate `README.md` is required. (The skill's own `assets/` directory — where these templates live — is unrelated; only the deck-local `assets/` matters at render time.)
 
 ---
 
-## Per-slide self-check (both stages)
+## Per-slide self-check (Stages 3–4)
 
 Before declaring a slide done:
 
@@ -370,16 +396,22 @@ Before declaring a slide done:
 - [ ] One claim per slide (no "and" joining two distinct takeaways).
 - [ ] Visual described precisely enough that the user can tell whether their existing figure fits or a new one is needed.
 - [ ] Every axis/label/panel on the visual has a sentence the speaker will say about it. Otherwise, the element is cut or the slide is built progressively.
-- [ ] Transition-in and transition-out are one sentence each.
-- [ ] Speaker notes contain at least one of: a specific number, a skeptic pre-empt, or a pacing cue.
+- [ ] Inline `TRANSITION IN:` and `TRANSITION OUT:` are one sentence each.
+- [ ] Inline `SPEAKER NOTES` contain at least one of: a specific number, a skeptic pre-empt, or a pacing cue.
 - [ ] The slide is a step in the Storyline arc — trace it back to a beat or dive.
 
 ### Stage 4 only
 
-- [ ] Every `FIGURE:` comment now has a `![](figures/TODO-*.png)` tag above it.
+- [ ] Every `FIGURE:` comment now has a `![](assets/TODO-*.png)` tag above it.
 - [ ] Progressive-reveal points are marked (duplicated slides or `BUILD:` comments).
 - [ ] Summary and acknowledgments slides present.
-- [ ] `figures/README.md` lists every `TODO-*` filename.
+- [ ] `uv run tools/slide_summary.py slides.md` lists every `TODO-*` filename without surprises.
+
+### Stage 5 only
+
+- [ ] Every slide id is covered by a `## @<selector>` block in `script.md`.
+- [ ] Inline `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks have been removed from `slides.md`.
+- [ ] `./build.sh` runs clean (no warnings about stripped inline comments).
 
 ---
 
@@ -393,28 +425,27 @@ If the deck is producing more slides than the time budget allows, the talk eithe
 
 ## Rendering the deck
 
-The deck should be renderable at any point during Stages 3 and 4 — rendering is the fastest way to catch title overflow, figure sizing, and layout bugs. Render whenever it helps verify the work; don't wait until Stage 4 is "done."
+The deck should be renderable at any point during Stages 3–5 — rendering is the fastest way to catch title overflow, figure sizing, and layout bugs. Render whenever it helps verify the work; don't wait until a stage is "done."
 
 ```
-npx @marp-team/marp-cli slides.md --pdf    # visual-hygiene pass
-npx @marp-team/marp-cli slides.md --html   # delivery format; preserves fragments/transitions
+./build.sh           # compile slides.md + script.md, render PDF + HTML
+./build.sh -o name   # override the output basename
 ```
 
-marp-cli auto-discovers `.marprc.yml` in the current directory, so theme registration and `allowLocalFiles` are picked up automatically. Do not invent additional CLI flags.
+`build.sh` invokes `tools/compile.py` to splice `script.md` into `slides.md` (a no-op if `script.md` does not yet exist or is empty — which is the normal state during Stages 3–4), then runs marp-cli for HTML and PDF. **Do not** call `npx @marp-team/marp-cli slides.md --pdf` directly: at Stage 5 onward that renders the raw, unspliced `slides.md` and the deck ships with no speaker notes. marp-cli auto-discovers `.marprc.yml`, so theme registration and `allowLocalFiles` are picked up automatically.
 
 **When to render:**
-- After writing an initial batch of Stage 3 slides, to confirm titles don't wrap and speaker-note comments aren't leaking onto the slide face.
+- After writing an initial batch of Stage 3 slides, to confirm titles don't wrap and inline scaffolding comments aren't leaking onto the slide face.
 - After Stage 4 figure placeholders are added, to confirm sizing directives work.
+- After Stage 5 migration, to confirm `script.md` is the source and no inline-comment warnings appear.
 - Any time the user reports something looks wrong — render, open the PDF, and verify directly rather than guessing.
 
 ---
 
-## Post-Stage-4 rehearsal suggestion
+## Post-Stage-5 rehearsal suggestion
 
-After Stage 4, close with a **suggestion** (not a requirement):
+After Stage 5, close with a **suggestion** (not a requirement):
 
-> The skeleton is ready. The next productive step is to rehearse the talk aloud once, with the deck visible, speaking the transitions from the notes rather than reading them. Time it. Note any slide where you stumbled, any transition that felt forced, any moment where you wanted a slide you don't have.
->
-> When you come back, use `presentation-editing` with your rehearsal notes in hand.
+> The skeleton is ready. The next productive step is to rehearse the talk aloud once, with the deck visible, speaking the transitions from the notes rather than reading them. Time it. Note any slide where you stumbled, any transition that felt forced, any moment where you wanted a slide you don't have. Capture the notes in `rehearsal-notes.md` and bring them back to iterate.
 
 Do not block progress on rehearsal — the user will decide when they're ready.

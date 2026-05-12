@@ -9,41 +9,48 @@ math: katex
      ./themes. Swap to `theme: flexoki-light` in the frontmatter for a light deck.
      Requires ./themes and ./.marprc.yml — copied from the skill's assets. -->
 
+<!-- The spoken frame lives inline on each slide as a SPEAKER NOTES /
+     TRANSITION IN / TRANSITION OUT comment block throughout Stages 3 and 4.
+     At Stage 5, after visuals have settled, the verbatim script is written
+     in script.md as ## @<slide-id> blocks, and the inline blocks are
+     deleted from this file. A slide id is auto-derived from the slugified
+     first heading; to override (when titles repeat across build slides),
+     add a real HTML comment directive near the heading of the form
+       _id: my-slug
+     inside <!- - ... - -> (delimiters spaced here so this outer comment
+     doesn't terminate early; in your slides.md use the standard
+     <!-- _id: my-slug --> form). -->
+
 <!-- _class: title -->
 
 # [Talk Title]
 
 ## [Speaker name, affiliation, occasion]
 
-<!--
-SPEAKER NOTES
-- Pause 2 seconds before first word.
-- Open with ABT core statement (see storyline.md).
-
-TRANSITION OUT: [opening sentence of the talk]
--->
-
 ---
 
 <!-- ============================================================
-     STAGE 3 SLIDE (structure + speech, no figure yet)
+     STAGE 3 SLIDE (structure + spoken frame, no figure yet)
      Use this shape until the whole storyline has been walked through.
      Titles: short directive clauses, 3–8 words, one line on the slide.
+     FIGURE: comments describe what the figure should show; replaced
+     with image tags in Stage 4. The inline SPEAKER NOTES / TRANSITION
+     IN / TRANSITION OUT comment block IS the canonical spoken frame
+     during Stages 3 and 4. It migrates into script.md at Stage 5.
      ============================================================ -->
 
 ## [Short directive title]
 
-<!--
-FIGURE: [what this figure should show, axes, panels, annotations, what
-the audience should notice first — pulled from the relevant storyline beat]
+<!-- FIGURE: what this figure should show, axes, panels, annotations, what
+     the audience should notice first — pulled from the relevant storyline beat. -->
 
+<!--
 SPEAKER NOTES
 - [specific number / pacing cue / skeptic pre-empt]
-- [phrasing for a hard-to-explain concept]
-- [anything easy to forget in the moment]
+- [one more bullet]
 
-TRANSITION IN: [one sentence the speaker says before this slide]
-TRANSITION OUT: [one sentence the speaker says moving to the next slide]
+TRANSITION IN: [one sentence the speaker says before this slide appears]
+TRANSITION OUT: [one sentence the speaker says while moving to the next slide]
 -->
 
 ---
@@ -57,45 +64,29 @@ TRANSITION OUT: [one sentence the speaker says moving to the next slide]
      depicting the approach allows the spoken beat to be two
      sentences: "I asked X. I did it using Y."
      Skip only for pure tutorial/review/meta talks.
-     See storyline-guide.md "The Question Pivot".
      ============================================================ -->
 
 ## [The question, verbatim — phrased as a question, not a topic]
 
-<!--
-FIGURE (optional): compact inset of the approach/technique. Subordinate
-to the question visually. Omit if the technique needs its own slide(s)
-to earn — better to leave the pivot clean than to crowd it.
-
-SPEAKER NOTES
-- Pause before delivering. Let the question land.
-- Spoken form: "I asked: [the question]. I did it using [the approach]."
-  (Second sentence omitted if no inset.)
-- Do NOT preview the result. Do NOT re-summarize the prior-work review.
-- Pacing: ~30 s. The pause does as much work as the words.
-
-TRANSITION IN: [closes the Conflict beat — "...and that's the question I went after."]
-TRANSITION OUT: [opens Dive 1's approach — "to answer this, we needed to..."]
--->
+<!-- FIGURE (optional): compact inset of the approach/technique. Subordinate
+     to the question visually. Omit if the technique needs its own slide(s)
+     to earn — better to leave the pivot clean than to crowd it. -->
 
 ---
 
 <!-- ============================================================
-     STAGE 4 SLIDE (figure placeholder added to the Stage 3 shape)
-     In the second pass, replace the top of each slide with an
-     image tag above the existing FIGURE: description comment.
+     STAGE 4 SLIDE (figure placeholder added; inline scaffolding kept)
      ============================================================ -->
 
 ## [Short directive title]
 
-![width:700px](figures/TODO-descriptive-name.png)
+![width:700px](assets/TODO-descriptive-name.png)
+
+<!-- FIGURE: same description as Stage 3 — kept so the user knows what to produce. -->
 
 <!--
-FIGURE: [same description as Stage 3 — kept as a comment so the user
-knows what to produce for the placeholder above]
-
 SPEAKER NOTES
-- [notes]
+- [updated as flow changes against the real visual]
 
 TRANSITION IN: [...]
 TRANSITION OUT: [...]
@@ -105,7 +96,10 @@ TRANSITION OUT: [...]
 
 <!-- For progressive reveals: duplicate the slide with incrementing figure
      filenames (TODO-foo-panel1.png, TODO-foo-panel2.png) or mark intended
-     CSS-fragment build points with `<!-- BUILD: ... -->` comments. -->
+     CSS-fragment build points with `<!-- BUILD: ... -->` comments.
+     Each build slide is a real slide; at Stage 5 reference all of them as
+     a range in script.md (e.g. `## @foo-build-1..foo-build-3`) so a single
+     block covers the whole sequence. -->
 
 ---
 
@@ -114,24 +108,14 @@ TRANSITION OUT: [...]
 - [One-sentence recap of each dive's result — one bullet per dive]
 - **[Restate ABT core statement]**
 
-<!--
-SPEAKER NOTES
-- Leave this slide up for Q&A. Do NOT click forward to Acknowledgments.
-- Do NOT say "thank you" or apologize. Pause, then take the first question.
--->
-
 ---
 
 ## Acknowledgments
 
 [To be filled in — collaborators, funding, advisors.]
 
-<!--
-Click to this slide only after Q&A has wound down.
--->
-
 <!-- Loads the video controller for data-play-from-start / data-play-then-advance
-     attributes. Passes through to slides.html via `options.html: true` in
+     attributes. Passes through to the compiled HTML via `options.html: true` in
      .marprc.yml; inert during PDF render. Keep marp-video-controls.js in this
      directory (copied from the skill's assets/). -->
 <script src="./marp-video-controls.js"></script>

@@ -7,7 +7,7 @@ description: "Use when planning a scientific talk before drafting slides, when p
 
 ## Overview
 
-Develop a scientific talk through four sequential, reviewable stages — **Frame → Storyline → Slide draft (speech) → Slides (visuals)** — producing an artifact at each stage. The slide deck is the *last* artifact, not the first, and it is built in two passes: first the structure and spoken flow (titles, speaker notes, transitions) with no figures, then the visuals layered on top.
+Develop a scientific talk through five sequential, reviewable stages — **Frame → Storyline → Slide structure → Visuals (with flow iteration) → Verbatim script** — producing an artifact at each stage. The slide deck is the *last* compiled artifact, not the first. Slide construction proceeds from a no-image skeleton, through visuals that co-evolve with the spoken flow, and finally to a verbatim `script.md` written once the deck is visually settled.
 
 **Core principle: the talk is not the slides.** The talk is a spoken performance the speaker will rehearse; the slides are visual aids that support it. Skipping straight to slides optimizes the wrong artifact and produces word-heavy decks that duplicate what the speaker will say instead of supplementing it.
 
@@ -22,8 +22,6 @@ This skill is designed to be **collaborative by construction**: each stage ends 
 - User is revising a talk they've given before for a new audience
 
 **Don't use when:**
-- User wants pure slide editing on an existing polished deck → `presentation-editing`
-- User wants a critique of an existing deck → `presentation-review`
 - User asks a one-off question about presentation technique (fonts, colors, timing) → answer directly, don't invoke the full skill
 
 ## The Iron Rule
@@ -52,11 +50,25 @@ All files live in a user-specified presentation directory (default: `./presentat
 |------|-------|---------|
 | `frame.md` | 1 | Audience composition, goal, one-sentence core message, prerequisite knowledge map |
 | `storyline.md` | 2 | ABT core statement, narrative arc (hook → conflict → resolution), ordered beats with stepping stones that earn each prerequisite |
-| `slides.md` | 3 | Marp markdown: slide titles (short clauses), speaker notes and transitions as HTML comments, **no figures yet** — figure slots marked with a `FIGURE:` description comment |
-| `slides.md` | 4 | Same file, second pass: figure placeholders (`![](figures/TODO-...png)`), progressive-reveal markers, visual polish |
-| `rehearsal-notes.md` | post-4 | User-written record of what felt off during rehearsal; seeds the next edit pass |
+| `slides.md` | 3 | Marp skeleton: titles (short clauses), per-slide `<!-- _class: ... -->` directives, `FIGURE:` description comments, and inline `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks as the primary note vehicle during construction. **No image tags yet.** |
+| `slides.md` + `assets/` | 4 | Same `slides.md`, expanded: figure placeholders (`![](assets/TODO-...png)`) and real visuals in the deck's `assets/` directory. Slide order, titles, and inline scaffolding notes are revised as visuals reveal what works. |
+| `script.md` | 5 | Verbatim spoken script, routed to slides by `## @<selector>` blocks (`@slug` or `@a..b` ranges). Authored once the deck is visually settled; inline scaffolding notes migrate here in one pass. One block can cover several slides — that's the point. `(→)` markers are presenter cues. |
+| `rehearsal-notes.md` | post-5 | User-written record of what felt off during rehearsal; seeds the next edit pass |
 
-Stages 3 and 4 are two passes over the same `slides.md`. This is deliberate: the first pass fixes the spoken structure of the talk (what the speaker says, in what order, with what transitions); the second pass fits visuals to that structure. Maintaining a separate per-slide "assertion list" file in parallel duplicates `slides.md` and drifts out of sync, so there is no separate artifact for it.
+`slides.md` and `script.md` are the **canonical sources**; `build.sh` compiles them into the Marp deck (see Build system below). Until Stage 5, the canonical speaker notes are the inline `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks on the slides themselves — `script.md` does not yet exist (or exists empty). At Stage 5 the inline scaffolding migrates into `script.md` as `## @<selector>` blocks, and from that point on `script.md` is the source of truth — same speaker note often attaches to several build-slides at once, and editing them in one place is the whole point.
+
+## Build system
+
+Two canonical files → one compiled output:
+
+- **`slides.md`** — slide content. Each slide auto-gets a stable id from the slugified first heading; declare `<!-- _id: my-slug -->` near the heading to override (required when titles repeat without builds). Marp directives (`<!-- _class: ... -->`, `<!-- _backgroundColor: ... -->`, ...) are preserved. Once `script.md` exists, `<!-- @ author note -->` comments are stripped silently and any other inline HTML comment (including stray `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks left over from Stage 3-4) is stripped *with a warning* (script.md is then the source of truth).
+- **`script.md`** — verbatim spoken script as `## @<selector>` blocks. Selectors: `@slug` or `@slug-a..slug-b` (inclusive range in slides.md order), comma-separated. The block body becomes the note for every slide in the selection, so one block covers an arc of builds. `(→)` and `(play)` are presenter cues; preserved verbatim, ignored by the compiler. Authored at Stage 5 — until then, render the deck directly from `slides.md` (compiler emits a no-op if `script.md` is absent or empty).
+- **`build.sh`** — compiles `slides.md` + `script.md` → `${OUTPUT_NAME}.md`, then renders HTML + PDF via Marp CLI. Override with `./build.sh -o other-name`.
+- **`tools/compile.py`** — splicer (slides + script → Marp deck).
+- **`tools/slide_summary.py`** — emits a one-line-per-slide index (id, title, image alts, video sources). Use this as the low-token agent overview of the deck.
+- **`tools/script_format.py`** — validates selectors; reorders blocks to slides.md order; inserts `## @id` TODO blocks for any uncovered slide. `--dry-run` previews; `--init` scaffolds from scratch (use at Stage 5 start).
+
+During Stages 3-4, run `./build.sh` after every edit to verify rendering; speaker notes are read off the inline scaffolding. At Stage 5, run `uv run tools/script_format.py --init` to scaffold `script.md` from current slide ids, then migrate inline notes into the blocks. After any later structural change to `slides.md`, run `uv run tools/script_format.py --dry-run` to surface broken selectors and apply the reorder without `--dry-run`.
 
 ## Core Loop
 
@@ -70,11 +82,12 @@ digraph presentation_planning {
     cp1 [shape=diamond, label="User signs off\non frame.md?"];
     storyline [label="Stage 2: Storyline\n(ABT, arc, stepping stones)"];
     cp2 [shape=diamond, label="User signs off\non storyline.md?"];
-    slides_draft [label="Stage 3: Slide draft (speech)\nslides.md: titles, speaker notes,\ntransitions — NO figures"];
-    cp3 [shape=diamond, label="User signs off\non slides.md draft?"];
-    slides_visuals [label="Stage 4: Slide visuals\nsame slides.md: figure placeholders,\nbuilds, visual polish"];
+    structure [label="Stage 3: Slide structure\nslides.md: titles, FIGURE: comments,\ninline scaffolding notes — NO images"];
+    cp3 [shape=diamond, label="User signs off\non skeleton?"];
+    visuals [label="Stage 4: Visuals + flow iteration\nbuild out assets/, adjust slide order\nand inline notes as visuals reveal what works"];
+    cp4 [shape=diamond, label="User signs off\non visual deck?"];
+    script [label="Stage 5: Verbatim script\nscript.md: ## @<selector> blocks;\ninline scaffolding migrates here"];
     rehearse [label="Suggest rehearsal.\nUser practices aloud."];
-    edit [label="Iterate via\npresentation-editing"];
 
     invoke -> frame;
     frame -> cp1;
@@ -82,12 +95,14 @@ digraph presentation_planning {
     cp1 -> storyline [label="yes"];
     storyline -> cp2;
     cp2 -> storyline [label="no"];
-    cp2 -> slides_draft [label="yes"];
-    slides_draft -> cp3;
-    cp3 -> slides_draft [label="no"];
-    cp3 -> slides_visuals [label="yes"];
-    slides_visuals -> rehearse;
-    rehearse -> edit;
+    cp2 -> structure [label="yes"];
+    structure -> cp3;
+    cp3 -> structure [label="no"];
+    cp3 -> visuals [label="yes"];
+    visuals -> cp4;
+    cp4 -> visuals [label="no"];
+    cp4 -> script [label="yes"];
+    script -> rehearse;
 }
 ```
 
@@ -97,6 +112,12 @@ Each stage has its own reference guide. Read the relevant reference before start
 
 ### Stage 1: Frame
 **Output:** `frame.md`
+
+Copy the template into the presentation directory at the start of the stage, then fill in the bracketed placeholders as the interview proceeds:
+
+```
+cp <skill-dir>/assets/frame.md.template <presentation-dir>/frame.md
+```
 
 Interview the user to capture four things. Use `references/frame-guide.md` for the full elicitation script.
 
@@ -108,6 +129,12 @@ Interview the user to capture four things. Use `references/frame-guide.md` for t
 ### Stage 2: Storyline
 **Output:** `storyline.md`
 
+Copy the template at the start of the stage:
+
+```
+cp <skill-dir>/assets/storyline.md.template <presentation-dir>/storyline.md
+```
+
 Read `references/storyline-guide.md`. Produce:
 
 1. **ABT core statement** (AND / BUT / THEREFORE — Olson, via Crivellaro).
@@ -115,44 +142,80 @@ Read `references/storyline-guide.md`. Produce:
 3. **Stepping stones** — for each prerequisite from the Frame, specify *where in the narrative it gets earned as forward motion*, not as "Background" filler. Every concept the audience will encounter must be introduced as a step of the argument before it is relied on.
 4. **Order check** — does the narrative run chronologically ("we did X, then Y failed, so we did Z")? If yes, re-plan. Lab-notebook order is the #1 failure mode; flashback/novel order holds attention.
 
-### Stage 3: Slide draft — structure and speech
-**Output:** `slides.md` (first pass — no figures yet)
+### Stage 3: Slide structure (skeleton)
+**Output:** `slides.md` — titles, `FIGURE:` comments, inline scaffolding notes, no image tags
 
-Read `references/marp-conventions.md`. Convert the storyline into a Marp skeleton focused on the **spoken performance**, not visuals. Each slide gets:
+Read `references/marp-conventions.md`. Convert the storyline into a no-image Marp skeleton focused on the **spoken performance**.
 
-| Field | Content |
-|-------|---------|
-| Title | A short, direct clause — a noun phrase or compact sentence fragment, usually 3–8 words. One line on the slide; never wrapping to a second line except for rare deliberate effect. Non-colloquial. ("Perisaccadic RF anisotropy", not "LGN RFs get elongated when the eye moves") |
-| Figure slot | An HTML-comment `FIGURE:` description: what the figure should show, what axes, what the audience should look at first. No image tag yet. |
-| Transition in | One sentence the speaker says *before* this slide — in a `TRANSITION IN:` line inside the speaker-notes comment |
-| Transition out | One sentence the speaker says *moving to* the next slide — in a `TRANSITION OUT:` line |
-| Speaker notes | 2–4 bullets in the comment: specific phrasing, key numbers, pacing cues, skeptic pre-empts |
-
-One message per slide. If a slide is carrying two takeaways, split it.
-
-**Copy the locked-in visual style and build wiring at the start of Stage 3** (the theme is needed the moment `slides.md` exists, even without figures, so rendering and layout work can be previewed):
+**Copy the locked-in visual style, tools, and build wiring at the start of Stage 3** so the deck is renderable from the first slide:
 
 ```
 cp -r <skill-dir>/assets/themes                  <presentation-dir>/themes
+cp -r <skill-dir>/assets/tools                   <presentation-dir>/tools
 cp    <skill-dir>/assets/marprc.yml.template     <presentation-dir>/.marprc.yml
 cp    <skill-dir>/assets/build.sh.template       <presentation-dir>/build.sh
+cp    <skill-dir>/assets/slides.md.template      <presentation-dir>/slides.md
 cp    <skill-dir>/assets/marp-video-controls.js  <presentation-dir>/marp-video-controls.js
 chmod +x <presentation-dir>/build.sh
 ```
 
-See the **Locked-in visual style** section below. Do not re-author any of this. `build.sh` runs marp-cli for both PDF and HTML output. The `slides.md` template loads `marp-video-controls.js` via a `<script src>` tag at the bottom of the file, which marp-cli passes through to `slides.html` (because `.marprc.yml` sets `options.html: true`), enabling the `data-play-from-start` / `data-play-then-advance` video attributes at delivery time. See `references/marp-conventions.md` (Animated figures) for the markup contract.
+`script.md` is **not** copied yet — it's authored in Stage 5. Edit `build.sh` to set `OUTPUT_NAME` to the presentation name. See **Locked-in visual style** below. Do not re-author the theme/tools wiring.
 
-### Stage 4: Slide visuals
-**Output:** same `slides.md`, second pass
+In `slides.md`, each slide gets:
 
-Now layer visuals on top of the spoken structure:
+| Field | Content |
+|-------|---------|
+| Title | A single short directive clause naming what the slide shows. See `references/marp-conventions.md` ("The title"). |
+| Figure slot | An HTML-comment `FIGURE:` description: what the figure should show, what axes, what the audience should look at first. No image tag yet. |
+| Inline scaffolding | An HTML comment block containing `SPEAKER NOTES` (2–4 bullets) and `TRANSITION IN:` / `TRANSITION OUT:` sentences. This is the primary note vehicle during construction — it lives on the slide so the spoken frame is visible alongside the slide's content. It migrates to `script.md` at Stage 5. |
+| Id (optional) | `<!-- _id: my-slug -->` if the auto-id from the title is awkward, or if multiple slides share a title (build sequences need explicit ids on at least one). |
 
-- Replace each `FIGURE:` comment with a placeholder image tag: `![width:700px](figures/TODO-descriptive-name.png)`. Keep the description as a comment directly below the tag so the user knows what to produce.
+One message per slide. If a slide is carrying two takeaways, split it.
+
+### Stage 4: Visuals and flow iteration
+**Output:** same `slides.md`, expanded — plus the deck's `assets/` directory populated with figures and videos
+
+Now build out visuals. Unlike the prior structure-only pass, slide order, titles, and inline scaffolding notes are **explicitly in scope to revise here** — visuals reveal mismatches that the storyline-on-paper couldn't surface (a figure carries two takeaways and the slide needs to split; a transition sentence stops working once the audience can see the image; a dive needs an extra setup slide). Co-iterate.
+
+- Replace each `FIGURE:` comment with a placeholder image tag: `![width:700px](assets/TODO-descriptive-name.png)`. Keep the description directly below the tag so the user knows what to produce. Visuals live in the deck's `assets/` directory.
 - Add progressive-reveal markers where the storyline calls for build-up: duplicate slides (Pattern A) or annotate with `<!-- BUILD: ... -->` comments (Pattern B). See `references/marp-conventions.md`.
 - Check sizing hints, per-slide class directives (dark backgrounds for microscopy, etc.), and the summary/acknowledgments slides.
-- Do not invent figure content. Every figure is a placeholder the user will fill in.
+- Adjust the inline scaffolding notes as flow changes. The spoken frame stays in sync with the visible deck through this stage.
+- Do not invent figure content. Every figure is a placeholder the user supplies (or a render script you've been pointed at).
+- Run `./build.sh` regularly to verify rendering. The compiler treats inline scaffolding as canonical until `script.md` exists.
 
-After Stage 4, **suggest** (do not require) that the user rehearse the talk out loud, time it, and note what felt off. This seeds `rehearsal-notes.md` and the next edit pass via `presentation-editing`.
+### Stage 5: Verbatim script
+**Output:** `script.md` — the spoken script as `## @<selector>` blocks
+
+Once the visual deck is settled, write the verbatim script. Migrate the inline scaffolding into `script.md` in one pass; from this point on, `script.md` is the source of truth and any inline blocks left in `slides.md` are stripped at compile time with a warning.
+
+```
+uv run tools/script_format.py --init     # scaffolds script.md with one TODO block per slide id
+```
+
+(`assets/script.md.template` is a conventions reference, not a starter file — `--init` writes the scaffold directly from the current `slides.md`.)
+
+For each `## @<selector>` block:
+- Body is the prose the speaker reads aloud while the named slide(s) are on screen.
+- `(→)` marks where the presenter advances (rehearsal cue; compiler ignores).
+- `(play)` marks an in-slide video trigger (presenter cue; compiler ignores).
+- `TRANSITION IN:` / `TRANSITION OUT:` lines at block boundaries are the sentences the speaker says entering and leaving the arc.
+- Merge adjacent blocks into ranges (`## @a..d`) where the same prose covers a continuous build sequence.
+
+When the migration is complete, delete the inline `SPEAKER NOTES` / `TRANSITION IN/OUT` comments from `slides.md`. Run `./build.sh` to confirm the compiled deck reads from `script.md`.
+
+After Stage 5, **suggest** (do not require) that the user rehearse the talk out loud, time it, and note what felt off. This seeds `rehearsal-notes.md` and the next edit pass.
+
+## Close the loop on every change
+
+Whenever you edit a figure-producing script (e.g. a render script that emits PNG/MP4 assets), `slides.md`, or `script.md`, run the regeneration AND the deck build before handing back, so the user can review the rendered artifact rather than the diff:
+
+1. If you edited a render/asset script: run it (`uv run scripts/<...>.py` or whatever entry point the project uses) so the on-disk asset reflects the change.
+2. If you added or removed slides in `slides.md` **and `script.md` already exists** (Stage 5 onward): run `uv run tools/script_format.py --dry-run` to see which `script.md` blocks need re-routing, then run without `--dry-run` to apply the reorder and seed TODO blocks for new gaps. Before Stage 5 this is a no-op — `script.md` doesn't exist yet.
+3. If you edited `slides.md`, `script.md`, or any asset that the deck embeds: run `./build.sh` from the presentation directory to regenerate the compiled `.md`, PDF, and HTML.
+4. If a step fails, debug it — do not punt the failure back to the user with "please re-run X."
+
+This applies to all edits during Stages 3–5 and post-rehearsal iteration. Stopping at "edits applied" forces the user to do the mechanical regen step themselves; that is the failure mode this rule exists to prevent.
 
 ## Rationalizations That Skip Stages
 
@@ -176,8 +239,9 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 - A slide title is a vague catch-all ("Results", "Benchmarks") or a full declarative sentence that wraps to two lines ("Protein X represses Gene Y in postmitotic neurons, as shown by qPCR"). Aim for a short directive clause ("Protein X represses Gene Y").
 - A slide has more than one takeaway.
 - A concept appears on a slide without having been earned earlier in the storyline.
-- There are no speaker notes.
-- You added figure placeholders during Stage 3 (visuals belong to Stage 4).
+- A slide has no spoken frame on it (no inline scaffolding in Stages 3-4; no `script.md` block in Stage 5+).
+- You added image tags during Stage 3 (visuals belong to Stage 4).
+- You wrote `script.md` before the visual deck was signed off (script belongs to Stage 5, after flow has stabilized against real visuals).
 - For a first-person research talk: there is no Question Pivot slide between the Conflict beat and the first data dive. The audience never gets the cue that the contribution has begun.
 
 ## Common Mistakes
@@ -188,16 +252,16 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 | Writing prose in `storyline.md` | Bullets and one-sentence beats. Prose belongs in rehearsal, not planning. |
 | Inventing figure content in `slides.md` | Placeholders only. The user supplies actual figures. |
 | Adding a "Background" slide | Prerequisites are earned as stepping stones within the forward narrative, not dumped as setup. Rework the storyline. |
-| Forgetting speaker notes | Notes are a first-class output at Stage 3, not an afterthought. |
-| Writing full-sentence slide titles that wrap to a second line | Short directive clauses. A 3–8 word noun phrase or fragment. Declarative sentences are for the *storyline* and the *spoken transitions*, not the visible title. The rare exception — a deliberate rhetorical headline — is reserved for high-stakes landing slides. |
-| Maintaining a separate per-slide assertion file in parallel with `slides.md` | Don't. The slide file is the per-slide record; drifting two files out of sync is the failure mode. Put speaker notes and transitions in HTML comments on each slide. |
+| Forgetting the spoken frame | Inline scaffolding `SPEAKER NOTES` / `TRANSITION IN/OUT` is a first-class output at Stage 3, not an afterthought. Without it the skeleton is just titles. |
+| Slide titles that fail the title rules (long sentences, two clauses, "E.g." prefixes, vague catch-alls) | See `references/marp-conventions.md` ("The title") for the canonical rules and good/bad examples. |
+| Writing `script.md` during Stage 3 or 4 | The script is Stage 5. During construction the canonical notes live inline on the slides. Writing the verbatim script before visuals settle produces script you'll throw away when the flow shifts under you. |
+| Leaving inline scaffolding in `slides.md` after Stage 5 | Once `script.md` exists, the inline `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks should be deleted from `slides.md`. `compile.py` strips any that remain with a warning — `script.md` is the source of truth from Stage 5 onward. |
+| Repeating the same speaker note inline across every build slide of a sequence | Acceptable during Stages 3-4 (scaffolding); at Stage 5 collapse into a single `## @first-build..last-build` block. One block, many slides. |
 | Prescribing home slides universally | Home slides help long talks with clearly separable sections. For shorter or single-thread talks, verbal signposting suffices. Use the principle, not the device. |
 | Auto-rehearsing for the user | Rehearsal is the user's job. The skill suggests, does not block. |
 
 ## Skill Dependencies
 
-- `presentation-editing` — hand off after `slides.md` exists and user has rehearsed
-- `presentation-review` — hand off for rubric-based critique of a draft deck
 - `manuscript-planning` / `literature-review` — if the talk is built from a manuscript or literature that lives in the codebase, read those artifacts for context before Frame
 
 ## References
@@ -205,7 +269,7 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 - `references/principles.md` — the seven principles across Naegle, McConnell, Alley, Alon, Tufte, Doumont, Crivellaro, Kenny
 - `references/frame-guide.md` — Stage 1 elicitation script
 - `references/storyline-guide.md` — Stage 2 narrative craft
-- `references/marp-conventions.md` — Stages 3 and 4: Marp syntax, slide titles, speaker notes, transitions, figure placeholders, fragments
+- `references/marp-conventions.md` — Stages 3–5: Marp syntax, slide titles, the spoken frame (inline scaffolding and `script.md` blocks), figure placeholders, fragments, videos
 
 ## Asset templates
 
@@ -213,31 +277,27 @@ Each stage has a template in `assets/` that shows the expected shape of the outp
 
 - `assets/frame.md.template` — Stage 1 skeleton
 - `assets/storyline.md.template` — Stage 2 skeleton
-- `assets/slides.md.template` — Stages 3 and 4: Marp skeleton with frontmatter, title slide, per-slide title/notes/transitions pattern, `FIGURE:` placeholders for Stage 3, summary, and acknowledgments
+- `assets/slides.md.template` — Stages 3 and 4: Marp skeleton with frontmatter, title slide, per-slide title/figure/scaffolding-notes pattern, `FIGURE:` placeholders for Stage 3, summary, and acknowledgments.
+- `assets/script.md.template` — Stage 5 conventions reference for `script.md` (block-routing syntax, presenter cues). At Stage 5, do **not** copy this file — run `tools/script_format.py --init` to scaffold directly from current slide ids. The template is documentation, not a starter file.
+- `assets/tools/` — `compile.py`, `slide_summary.py`, `script_format.py`, `parser.py`. Copy the whole directory verbatim into `<presentation>/tools/`. PEP 723 inline-script style — `uv run` resolves deps.
 - `assets/themes/` — locked-in visual style (Flexoki + Inter); copy verbatim to `<presentation>/themes/`
 - `assets/marprc.yml.template` — marp-cli config; copy to `<presentation>/.marprc.yml`
-- `assets/build.sh.template` — marp-cli driver; copy to `<presentation>/build.sh` (and `chmod +x`)
+- `assets/build.sh.template` — compile + render driver; copy to `<presentation>/build.sh` (and `chmod +x`). Edit `OUTPUT_NAME` to the presentation name.
 - `assets/marp-video-controls.js` — JS controller for `data-play-from-start` / `data-play-then-advance` video attributes; copy to `<presentation>/marp-video-controls.js`. See `references/marp-conventions.md` (Animated figures).
 
 ## Locked-in visual style
 
-The skill ships a fixed visual identity so every presentation in this house style looks the same on every rendering machine, without per-talk CSS authoring:
-
-- **Color scheme:** [Flexoki](https://stephango.com/flexoki) by Steph Ango. Full palette (base + 8 accent ramps, each 50–950) exposed as CSS custom properties. Two themes: `flexoki-dark` (paper-black bg, 400 accents) and `flexoki-light` (paper bg, 600 accents). Canonical values verified against `kepano/flexoki/css/flexoki.css` — do not hand-edit.
-- **Typeface:** [Inter](https://rsms.me/inter/) by Rasmus Andersson. Variable font (`InterVariable.woff2` + italic) bundled in `assets/themes/fonts/` and loaded via `@font-face`, so the deck renders with Inter even on machines where Inter is not installed and without internet at render time.
-- **Rendering:** `assets/marprc.yml.template` sets `allowLocalFiles: true` so marp-cli loads the local woff2. Without that flag, Chromium silently falls back to a system sans-serif and the deck looks wrong.
-
-**Do not:**
-- Author a per-talk theme. Pick `flexoki-dark` or `flexoki-light` in the frontmatter; extend via semantic handles (e.g. `--rgc`, `--lgn`) on top of the palette if the talk needs them.
-- Swap in a different font. Inter is the locked-in typeface.
-- Skip copying `.marprc.yml` — without it the font won't load.
-
-See `assets/themes/README.md` for the full documentation that ships with each presentation.
+The skill ships a fixed visual identity (Flexoki palette + Inter typeface) so every presentation looks the same on every rendering machine, without per-talk CSS authoring. The Stage 3 copy block above wires it in; do not author per-talk themes or swap fonts. See `references/marp-conventions.md` ("Locked-in visual style") for the canonical reference, and `assets/themes/README.md` for what ships alongside each deck.
 
 ## Session Start
 
 When invoked, the agent should:
 
-1. Check whether any of the artifact files (`frame.md`, `storyline.md`, `slides.md`, `rehearsal-notes.md`) already exist in the current directory or a user-specified subdirectory.
-2. If **resuming**: read existing artifacts, summarize current stage, ask what to work on.
+1. Check whether any of the artifact files (`frame.md`, `storyline.md`, `slides.md`, `script.md`, `rehearsal-notes.md`) already exist in the current directory or a user-specified subdirectory.
+2. If **resuming**: read existing artifacts. Run `uv run tools/slide_summary.py slides.md` (if `slides.md` exists) to get a low-token deck overview before re-reading any larger file. Identify the current stage from what's on disk:
+   - `slides.md` exists, no image tags → Stage 3.
+   - `slides.md` has image tags but no `script.md` → Stage 4.
+   - `script.md` exists → Stage 5 or later.
+
+   Summarize current stage and ask what to work on.
 3. If **starting fresh**: ask the user what the talk is (occasion, approximate length, approximate date) and where to save the artifacts. Then begin Stage 1.

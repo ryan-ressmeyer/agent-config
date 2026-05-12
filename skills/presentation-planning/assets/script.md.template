@@ -1,0 +1,44 @@
+<!--
+script.md — verbatim spoken script, routed to slides.
+
+Authored at Stage 5, after the visual deck has been signed off. Until then,
+the spoken frame lives inline on each slide as a SPEAKER NOTES /
+TRANSITION IN / TRANSITION OUT comment block; this file does not exist.
+At Stage 5, scaffold this file with `tools/script_format.py --init`, migrate
+the inline blocks into ## @<selector> blocks here, and delete the inline
+blocks from slides.md.
+
+Each block:
+    ## @<selector>[, @<selector>...]
+    <prose>
+
+Selectors:
+  - @slug                     one slide (id matches a slide in slides.md)
+  - @slug-a..slug-b           inclusive range in slides.md document order
+  - @a, @c..e, @g             multiple selectors, comma-separated
+
+The block's prose becomes the speaker notes for every slide in its selection,
+so a single block can cover a continuous narrative spanning several builds.
+
+Conventions inside blocks:
+  - (right-arrow) is a presenter rehearsal cue. Compiler ignores it.
+  - (play) marks an in-slide video trigger. Compiler ignores it.
+  - Author-only notes use a `<!-- @ ... -->` HTML comment where `@` is the
+    first non-whitespace character after the opening `<!--`. These are
+    stripped silently at compile time. Plain `<!-- ... -->` comments are
+    preserved.
+
+To scaffold this file after writing slides.md, run:
+
+    uv run tools/script_format.py --init --force
+
+That writes one block per slide with `TODO:` placeholders, in slides.md order.
+Then merge adjacent blocks into ranges where the narrative flows continuously
+across builds.
+
+Delete this header comment and replace with your first block, e.g.:
+
+    ## @your-first-slide-id
+
+    Opening sentence; ABT statement.
+-->
