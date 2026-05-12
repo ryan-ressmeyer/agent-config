@@ -34,7 +34,7 @@ gather context → (clarify if ambiguous) → present a plan → get approval �
 
 Plans scale to the work:
 
-- **Trivial (single obvious edit):** one or two sentences naming the change and the verification. No headings needed.
+- **Trivial (one or a few obvious edits):** one or two sentences naming the change and the verification. No headings needed.
 - **Multi-step:** use the prescribed skeleton below.
 
 Prescribed skeleton (multi-step work):
@@ -50,13 +50,13 @@ Scale each section to its complexity. A one-line "Risks: none" is fine. A one-li
 
 ### 4. Execute with checkpoints
 
-- Work through the approved plan. Report progress at natural checkpoints (batches of 2–5 steps, or at section boundaries).
+- Work through the approved plan as written. Don't deviate without approval.
 - If a new blocker, ambiguity, or design question appears mid-execution, stop and surface it. Don't guess past it.
 - If the plan needs to change, say so before deviating.
 
 ### 5. Verify before claiming done
 
-- Run the verification commands named in the plan. Show the output.
+- Run the verification named in the plan. Show the output.
 - No "should work" or "done" without fresh evidence. `verification-before-completion` skill covers the discipline.
 
 ### Floor: when does this apply?
@@ -108,7 +108,7 @@ When you invoke a skill, say so briefly: "Using `<skill-name>` to <purpose>." Th
 
 ## Common starting points
 
-- Building or extending a paper database → `literature-review`, `paper-summarize`, `pdf-retrieve`, `citation-fetch`
+- Building or extending the literature knowledge graph → `ansa-literature-review` (orchestrator), `paper-summarize`, `theme-synthesize`
 - Writing a manuscript → `manuscript-planning`, `literature-writer`, `manuscript-review`, `style-guide`
 - Implementing a feature or bugfix → `test-driven-development` (failing test first, always)
 - Bug or unexpected behavior → `systematic-debugging` before proposing fixes

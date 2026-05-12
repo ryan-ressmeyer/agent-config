@@ -1,134 +1,217 @@
 ---
 name: theme-synthesize
-description: Use when creating or updating cross-paper thematic synthesis documents that trace how ideas evolved across multiple papers in the literature database
+description: Use when creating or updating a cross-paper thematic synthesis in ansa. A theme is a `collection` of `kind=theme` whose members are the papers; the synthesis itself is a `note` attached to that collection. Use when the user asks to synthesize across papers, find themes, or update an existing theme as new papers arrive.
 ---
 
 # Theme Synthesize
 
 ## Overview
 
-Create or update a thematic synthesis document in `themes/` that connects findings across multiple papers on a shared topic. The goal is an objective synthesis that reports what each study found and where findings relate to each other — not an editorial narrative or a list of summaries.
+Create or update a thematic synthesis across multiple papers in the ansa graph. The model:
 
-## When to Use
+- A **theme** is a `collection` with `properties.kind = "theme"`.
+- Member papers are connected via `in_collection` edges.
+- The **synthesis text** is a single `note` attached to the collection via `note_of` (collection → note).
 
-- User asks about patterns or themes across papers in the database
-- Enough papers (3+) share a theme tag and no synthesis exists yet
-- A new paper was added that significantly changes an existing theme narrative
-- User explicitly asks to synthesize or connect papers on a topic
+There is one synthesis note per theme. Updating a theme means PUTting a new body to the same note — not appending a second note.
 
-## Database Context
+The synthesis is an **objective report** of what each study found and how findings relate — not an editorial narrative, not a list of summaries, not a claim about field consensus.
 
-Theme documents live at `references/themes/<theme-name>.md`. Each theme document lists the papers it covers in its YAML frontmatter — this is the sole source of truth for theme-paper associations (individual paper entries in `index.yaml` do NOT have theme tags).
+## When to use
+
+- User asks to synthesize across a specific list of papers.
+- User asks about patterns or themes in the graph and 3+ papers share a topic without an existing theme.
+- A new paper is added that materially changes an existing theme.
+- User explicitly asks to update theme `<name>`.
+
+## Inputs
+
+You need:
+
+1. **Theme name** (short, kebab-case if the user hasn't specified).
+2. **A set of paper UUIDs**, supplied as:
+   - An explicit list from the user, **or**
+   - A search query (`ansa search "..."`) that yields candidates the user confirms, **or**
+   - An existing theme collection whose members to re-synthesize.
+
+Resolve everything to UUIDs before mutating.
 
 ## Workflow
 
-### Step 1: Gather Papers
+### Step 1 — Find or create the theme collection
 
-Collect all papers tagged with the theme from `index.yaml`, or use a list provided by the user. Read their summaries.
-
-If using `database-search`:
 ```bash
-uv run database-search/scripts/search_database.py --theme <theme-name> --database references/
+# Look for an existing theme by name
+ansa collection ls --kind theme
 ```
 
-### Step 2: Read Summaries
+If a collection with the requested name exists, reuse its UUID. Otherwise create one:
 
-Read each paper's `<id>-summary.md`. Focus on:
+```bash
+ansa collection add \
+  --name "<theme-name>" \
+  --kind theme \
+  --description "<one-sentence scope of the theme>"
+```
+
+Capture the returned `id` — that's the theme UUID.
+
+### Step 2 — Attach member papers
+
+For each paper UUID that should belong to the theme:
+
+```bash
+ansa collection add-member <theme-uuid> <paper-uuid>
+```
+
+`in_collection` is idempotent at the (member, collection) level — re-adding a paper is a no-op. To remove a stale member:
+
+```bash
+ansa collection rm-member <theme-uuid> <paper-uuid>
+```
+
+Confirm the full member set:
+
+```bash
+ansa collection members <theme-uuid>
+```
+
+### Step 3 — Read each member's scratchpad
+
+For each member, pull the QLMRI summary out of its scratchpad:
+
+```bash
+ansa paper scratchpad <paper-uuid>
+```
+
+If a paper's scratchpad is just the auto-stub (`# <citekey> — <title>` and nothing else), stop and tell the user that paper needs summarization first — delegate to `paper-summarize` before continuing. A synthesis built on unread papers is fiction.
+
+Focus on:
+
 - Questions asked
-- Methods used (species, preparation, stimuli)
-- Results (effect sizes, sample sizes, specific numbers)
-- Inferences *as stated by the authors* (not your own interpretation)
-- Subject/preparation (note species for every finding)
+- Methods (species, preparation, stimuli, model architecture)
+- Results — effect sizes, sample sizes, specific numbers
+- Inferences **as stated by the authors** (not your interpretation)
 
-### Step 3: Write the Synthesis
+### Step 4 — Check for an existing synthesis note
 
-Create `themes/<theme-name>.md` following this structure:
+Find the note attached to this collection, if any:
+
+```bash
+ansa node neighbors <theme-uuid> | jq '.[] | select(.type=="note")'
+```
+
+(Equivalently: `GET /api/nodes/<theme-uuid>/notes` returns the same list.)
+
+If a note exists, read its body and present it to the user before overwriting — synthesis updates are common and a full overwrite without review loses prior careful wording.
+
+### Step 5 — Draft the synthesis
+
+Render this markdown. Keep section order and headings.
 
 ```markdown
-# Theme Title — Descriptive Subtitle
+# <Theme Title> — <descriptive subtitle>
 
 ## Scope
-State how many papers this theme draws on. Note what perspectives,
-subfields, or alternative viewpoints are NOT represented in the database.
-Be honest about the limited view.
+N papers in this synthesis. Note which perspectives, subfields, methods, or
+species are NOT represented. Be honest about the limited view.
 
 ## Overview
-2-3 sentences framing the core question. Do not claim consensus or
-state "it is now understood" — just frame the question.
+2-3 sentences framing the core question the theme addresses.
+Do not claim consensus. Do not say "it is now understood." Just frame.
 
 ## Findings by Study
-Present what each study found, attributed to the authors.
+One paragraph per paper, attributed to the authors.
 Use "AuthorName et al. (Year) found/measured/concluded..."
-Do not editorialize or add superlatives.
+Cite by citekey: `[vaswani2017attention]`.
 
 ## Points of Contact Across Studies
-Where findings from different papers relate to each other.
 Organize by sub-question or claim, not by paper.
-Always attribute: "Study A found X; Study B found Y in a different preparation."
+Always attribute: "Study A found X [citekeyA]; Study B found Y in a different
+preparation [citekeyB]."
 Note:
-- Where results are consistent across studies (with species/method noted)
+- Where results are consistent (species/method matched)
 - Where results differ or create tension
 - Methodological differences that may explain discrepancies
 
-## Key Figures
-Reference figures from papers in the database (if extracted):
-
-LastName & SeniorAuthor (Year), Fig. N — description of what it shows:
-![Caption](../paper-id/paper-id-figures/figN-description.png)
-
-## Open Questions From These Papers
-Questions that arise from the papers in the database.
-Do not speculate about answers — just identify the gaps.
+## Open Questions
+Questions that arise from the papers in this theme.
+Do not speculate about answers — identify the gaps.
 
 ## Suggested Papers to Add
-Propose specific types of papers (or specific papers if known)
-that would broaden the theme or address open questions.
-
-## Papers in This Theme
-- paper-id-1
-- paper-id-2
-- paper-id-3
+Specific paper types (or specific titles/DOIs if you can name them) that would
+broaden the theme or address the open questions above.
 ```
 
-### Step 4: Present for Review
+No `Papers in This Theme` section at the bottom — the collection's `in_collection` edges are the source of truth. The web UI shows the member list automatically.
 
-Show the draft to the user. Ask:
-- "Does this narrative accurately capture the arc of this topic?"
-- "Are there papers I should include that aren't in the database yet?"
-- "Any themes you'd like to split or merge?"
+No figure embeds — figures live in attachments on individual papers, not in the synthesis. Reference them by paper citekey + figure number in prose if needed.
 
-## Writing Principles
+### Step 6 — Write the note
 
-### Objectivity Directives (MANDATORY)
+**If no synthesis note exists yet**, create one attached to the collection:
 
-You are working from a small subset of a larger literature. You must stay within the bounds of what the papers in the database actually say.
+```bash
+# Write the body to a tempfile first
+cat > /tmp/theme-<name>.md <<'MD'
+<full rendered synthesis from Step 5>
+MD
 
-1. **Report findings, don't narrate history you haven't read.** Do not claim a paper "began the modern understanding" or was "the first to show X" unless it explicitly says so. The database is a subset of the field.
-2. **Attribute claims to specific papers.** Instead of "converging evidence shows X," write "Burr et al. (1994) found X; Reppas et al. (2002) found Y in a different preparation." Every claim needs an author attached.
-3. **Don't synthesize consensus that may not exist.** Avoid phrases like "it is now understood that," "the definitive evidence," or "has progressively narrowed." State what each study found and let the reader draw connections.
-4. **Flag your blind spots explicitly.** State how many papers the theme draws on. Note which perspectives or subfields might be missing from the database. Include a Scope section at the top of every theme.
-5. **Distinguish a paper's own claims from your inferences.** If a paper concludes "the LGN is the most likely site," write "the authors concluded that..." Don't elevate it to established fact.
-6. **Avoid superlatives and certainty language.** Do not use "definitive," "critical," "striking," "the most parsimonious," "key," "crucial," or similar editorializing. Describe what was measured and found.
-7. **Mention limitations only when they bear on interpretation.** Don't catalog every caveat for every paper. Only note limitations when they affect whether a specific claim in the synthesis actually holds.
-8. **Suggest follow-up papers after the theme.** End with a section proposing papers that could broaden the theme or address open questions, rather than speculating about answers yourself.
+ansa note add \
+  --target <theme-uuid> \
+  --title "Synthesis: <theme-name>" \
+  --body-file /tmp/theme-<name>.md
+```
 
-### General Principles
+`--target` creates the `note_of` edge from the new note → the theme collection.
 
-- **Be specific.** Include effect sizes, sample sizes, species, and methodological details where they matter.
-- **Note species/model differences.** A finding in macaque is not the same as a finding in cat or human — state which species each result comes from.
-- **Reference key figures** from papers in the database when available.
-- **Organize by finding, not by paper** when drawing connections across studies. But attribute each finding to its source.
+**If a synthesis note already exists** (from Step 4), update its body:
 
-## Common Mistakes
+```bash
+ansa note edit <note-uuid>
+```
+
+`note edit` opens `$EDITOR` on the current body. For an agent-driven overwrite, use Python:
+
+```bash
+uv run --with ansa-cli python - <<'PY'
+from ansa_cli.client import Client
+c = Client.over_http("http://kamaji:7327")
+body = open("/tmp/theme-<name>.md").read()
+c.update_note("<note-uuid>", body=body)
+print("ok")
+PY
+```
+
+### Step 7 — Present for review
+
+Show the rendered synthesis. Ask:
+
+- "Does this accurately capture the relationships across these papers?"
+- "Are members missing from this theme? Should any be removed?"
+- "Are there candidate papers (in your suggested list) you want to add now?"
+
+## Objectivity directives (mandatory)
+
+The synthesis is a small subset of a larger literature. Stay within what the member papers actually say.
+
+1. **Report findings, don't narrate history.** Don't claim a paper "began the modern understanding" or was "the first to show X" unless the paper itself says so.
+2. **Attribute every claim.** "Burr et al. (1994) found X [burr1994motion]; Reppas et al. (2002) found Y [reppas2002visual]." No floating "converging evidence shows."
+3. **Don't synthesize consensus that may not exist.** Avoid "it is now understood," "the definitive evidence," "has progressively narrowed."
+4. **Flag blind spots.** State N papers in the Scope section. Note which perspectives are absent.
+5. **Distinguish authors' claims from inferences.** Use "the authors concluded" when reporting their stance.
+6. **Avoid superlatives.** No "definitive," "critical," "striking," "key," "crucial."
+7. **Limitations only when they bear on interpretation.** Don't catalog every caveat for every paper.
+8. **End with suggested papers to add**, not your own speculation about answers.
+
+## Common mistakes
 
 | Mistake | Fix |
-|---------|-----|
-| Editorializing beyond the papers | Attribute every claim to a specific paper; use "the authors concluded" not "this shows" |
-| Claiming historical firsts | Don't say "first to show X" unless the paper itself says so — you haven't read the whole literature |
-| Synthesizing consensus from a small database | State what N papers found; don't generalize to "the field" |
-| Superlatives and certainty language | Replace "definitive," "striking," "key" with neutral descriptions |
-| Missing scope statement | Always include a Scope section noting how many papers and what perspectives are absent |
-| Cataloging every limitation | Only mention limitations when they affect interpretation of a specific claim |
-| No follow-up suggestions | End with suggested papers to broaden the theme |
-| Forgetting to update theme tags | Run update_index.py for all papers in the theme |
-| Static document | Update when new papers are added to the theme |
+|---|---|
+| Synthesizing without reading scratchpads | Step 3 is non-negotiable — stop and `paper-summarize` empty scratchpads first |
+| Creating a second note for the same theme | One note per theme; update the existing note instead |
+| Editorializing across the literature | Attribute every claim by citekey; the synthesis is a report, not an essay |
+| Claiming historical firsts | You're reading a sample, not the whole literature |
+| Forgetting to attach members | Without `in_collection` edges the theme is just a name; add members before drafting |
+| Listing papers in a "Papers in This Theme" section | The collection's edges are the source of truth — don't duplicate in prose |
+| Embedding figures in the note | Figures are attachments on the paper nodes; reference by citekey + figure number |

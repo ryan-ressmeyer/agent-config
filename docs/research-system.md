@@ -1,5 +1,7 @@
 # Research System — Design Document
 
+> **Stale (kept for history).** The filesystem-based paper database described below has been replaced by the [ansa knowledge graph](https://github.com/ryan-ressmeyer/ansa-kg). Current literature-pipeline skills (`ansa-literature-review`, `paper-summarize`, `theme-synthesize`) talk to the ansa daemon (default remote `kamaji`) via HTTP. Phase-1 retirements (Phase E in `ansa-kg/PLANNING.md`): `literature-review`, `citation-fetch`, `pdf-retrieve`, `citation-management`, `database-search`, `database-check`, `obsidian-literature-review`. The three-phase research arc still holds; only the storage substrate changed.
+
 ## Goal
 
 Support the full arc of scientific research: from reading papers, through planning analyses and manuscripts, to writing publication-ready prose.
