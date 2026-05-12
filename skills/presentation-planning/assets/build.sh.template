@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Compile slides.md + script.md into ${OUTPUT_NAME}.md, then render PDF + HTML.
+# slides.md references marp-video-controls.js via a <script src> tag, which
+# passes through to the rendered HTML thanks to `options.html: true` in
+# .marprc.yml and the --html flag below. See ../themes/, ./.marprc.yml, and
+# the marp-conventions reference (Animated figures section) for the markup
+# contract.
+# Usage: ./build.sh [-o OUTPUT_NAME]
+set -euo pipefail
+cd "$(dirname "$0")"
+
+OUTPUT_NAME="presentation"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output) OUTPUT_NAME="$2"; shift 2 ;;
+        -h|--help) sed -n '2,6p' "$0"; exit 0 ;;
+        *) echo "unknown option: $1" >&2; exit 1 ;;
+    esac
+done
+
+# --- Project-specific pre-build steps (e.g. regenerating animations) go here.
+# Example:
+#   MP4="assets/some_animation.mp4"
+#   SCRIPT="scripts/generate_some_animation.py"
+#   if [[ ! -f "$MP4" || "$SCRIPT" -nt "$MP4" ]]; then
+#       uv run "$SCRIPT"
+#   fi
+
+# --- Compile slides.md + script.md → ${OUTPUT_NAME}.md
+uv run tools/compile.py \
+    --slides slides.md \
+    --script script.md \
+    -o "${OUTPUT_NAME}.md"
+
+# --- Render with Marp.
+npx --yes @marp-team/marp-cli@latest \
+    --allow-local-files --html \
+    "${OUTPUT_NAME}.md" -o "${OUTPUT_NAME}.pdf"
+
+npx --yes @marp-team/marp-cli@latest \
+    --allow-local-files --html \
+    "${OUTPUT_NAME}.md" -o "${OUTPUT_NAME}.html"
