@@ -19,11 +19,15 @@ Use the literature database to assist writing scientific paper sections. Draws c
 
 ## Database Context
 
-Reads from a literature database (default: `references/`):
-- `index.yaml` — paper metadata and short summaries
-- `references.bib` — BibTeX entries for LaTeX citation keys
-- `themes/*.md` — thematic syntheses
-- `<id>/<id>-summary.md` — QLMRI summaries
+The literature database lives in ansa (default remote: `kamaji`). Citation keys are paper `properties.citekey`. Pull context with `ansa` over HTTP:
+
+- `ansa search "<query>"` — full-text across titles, abstracts, scratchpads, notes, collections
+- `ansa query '{"type":"paper","where":{...}}'` — structured filters (year, journal, citekey, etc.)
+- `ansa paper scratchpad <UUID>` — the user's QLMRI summary for a paper
+- `ansa collection ls --kind theme` + `ansa collection members <theme-uuid>` — thematic syntheses (the synthesis text is a `note` attached to the theme collection; pull it via `GET /api/nodes/<theme-uuid>/notes`)
+- `ansa paper similar <UUID>` — semantic neighbors when looking for adjacent work
+
+No `index.yaml`, no `references.bib`, no `references/<id>/` folders. BibTeX export from ansa is not implemented yet — when the manuscript needs a `.bib`, ask the user or assemble manually from `ansa node get <UUID>` metadata.
 
 ## Workflow
 
@@ -34,27 +38,39 @@ Ask the user:
 - What is the central claim or narrative?
 - What citation style? (LaTeX `\cite{key}`, numbered, author-year, etc.)
 
-### Step 2: Search the Database
+### Step 2: Search the database
 
-Find relevant papers using `database-search`:
+Find relevant papers:
 
 ```bash
-uv run ~/.claude/skills/database-search/scripts/search_database.py "query terms" \
-  --database references/ \
-  [--subject macaque] \
-  [--theme orientation-selectivity] \
-  [--year-min 2015]
+ansa search "query terms"
+# or structured:
+ansa query '{"type":"paper","where":{"year":{"ge":2015}},"limit":50}'
 ```
 
-Also read relevant theme documents — they already contain synthesized narratives that can inform the writing.
+For theme-level narrative, pull existing theme syntheses:
 
-### Step 3: Load Context
+```bash
+ansa collection ls --kind theme
+ansa collection members <theme-uuid>
+curl -s http://kamaji:7327/api/nodes/<theme-uuid>/notes
+```
 
-For each relevant paper, read:
-1. The `index.yaml` short summary (always)
-2. The QLMRI summary (for papers central to the argument)
-3. Theme documents (for narrative structure)
-4. Key figures (reference where they support the text)
+### Step 3: Load context
+
+For each relevant paper, read its scratchpad — that's the user's QLMRI summary:
+
+```bash
+ansa paper scratchpad <paper-uuid>
+```
+
+Also pull node metadata for the citation skeleton:
+
+```bash
+ansa node get <paper-uuid>
+```
+
+When the writing draws on a theme, read the synthesis note attached to the theme collection before drafting — it already contains the narrative connections.
 
 ### Step 4: Draft Text
 
@@ -76,7 +92,7 @@ Orientation selectivity in V1 has been studied extensively in macaque
 observed in population recordings (Smith & Jones, 2019).
 ```
 
-**Citation keys** always use the database paper IDs (e.g., `smith-jones-2019`) which match `references.bib` keys.
+**Citation keys** are each paper's `properties.citekey` in ansa (e.g., `smith-jones-2019`, `vaswani2017attention`). Get one with `ansa node get <uuid> | jq -r '.properties.citekey'`.
 
 ### Step 5: Flag Gaps
 
@@ -84,7 +100,7 @@ If a claim needs a citation but no supporting paper exists in the database:
 
 > "This claim about X needs a citation, but I don't have a supporting paper in the database. Would you like to search for one?"
 
-Offer to switch to `literature-review` to add the missing paper.
+Offer to switch to `ansa-literature-review` to add the missing paper.
 
 ### Step 6: Reference Key Figures
 
@@ -129,8 +145,8 @@ Scientific writing makes arguments, but those arguments must be grounded in what
 
 ## Rules
 
-1. **Only cite papers in the database.** Never fabricate citations or cite papers you haven't verified are in `index.yaml`.
-2. **Use database citation keys.** Keys match the paper ID format (`firstauthor-seniorauthor-year`) and are already in `references.bib`.
+1. **Only cite papers in the database.** Never fabricate citations or cite papers you haven't verified exist in ansa (`ansa search` or `ansa query` first).
+2. **Use database citation keys.** Keys come from each paper's `properties.citekey` (`firstauthor-seniorauthor-year` shape).
 3. **Flag gaps, don't guess.** If a citation is needed but missing, tell the user.
 4. **Match the user's style.** LaTeX `\cite{}`, author-year, numbered — follow whatever they're using.
 5. **Be specific in citations.** Don't just cite a paper — say what finding from that paper supports the claim.
@@ -140,7 +156,7 @@ Scientific writing makes arguments, but those arguments must be grounded in what
 
 | Mistake | Fix |
 |---------|-----|
-| Citing papers not in the database | Only cite papers in index.yaml — flag gaps instead |
+| Citing papers not in the database | Verify with `ansa search` / `ansa query` before citing; flag gaps |
 | Generic citations ("as shown previously") | Specify what was shown and by whom |
 | Ignoring species/model differences | Note when cited evidence is from a different subject |
 | Using wrong citation keys | Always use the paper ID from the database |

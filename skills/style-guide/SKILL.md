@@ -7,7 +7,7 @@ description: "**MUST INVOKE** when **writing**, **drafting**, or **editing** any
 
 ## Overview
 
-Enforce voice standards and eliminate AI writing patterns from public-facing prose. This skill fires independently via skills-prelude whenever the agent is about to produce or edit text intended for an audience. It does not apply to internal artifacts (plans, lab journals, commit messages, code comments, task descriptions).
+Enforce voice standards and eliminate AI writing patterns from public-facing prose. This skill fires whenever the agent is about to produce or edit text intended for an audience. It does not apply to internal artifacts (plans, lab journals, commit messages, code comments, task descriptions).
 
 ## Context Inference
 

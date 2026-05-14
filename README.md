@@ -53,7 +53,7 @@ agent-config/
 2. **Creates symlinks:**
    - `skills/` → `~/.claude/skills` and `~/.agents/skills`
    - `pi/{extensions,prompts,themes}/` → `~/.pi/agent/{extensions,prompts,themes}`
-3. **Generates context files** (NOT symlinks): concatenates `shared/AGENTS.md` + `machines/$HOSTNAME/context.md` into `~/.pi/agent/AGENTS.md` and `~/.claude/CLAUDE.md`.
+3. **Generates context files** (NOT symlinks): concatenates `machines/$HOSTNAME/context.md` + `shared/AGENTS.md` (machine first, shared second) into `~/.pi/agent/AGENTS.md` and `~/.claude/CLAUDE.md`.
 4. **Merges settings fragments** idempotently:
    - `pi/settings.fragment.json` + `machines/$HOSTNAME/settings.fragment.json` → `~/.pi/agent/settings.json`
    - `pi/keybindings.fragment.json` → `~/.pi/agent/keybindings.json`
@@ -91,7 +91,7 @@ See `skills/` — each subdirectory is an agent skill with a `SKILL.md`. Skills 
 
 - **Literature & research:** `literature-review`, `paper-summarize`, `pdf-retrieve`, `citation-fetch`, `database-search`, `database-check`, `theme-synthesize`, `citation-management`
 - **Writing:** `literature-writer`, `manuscript-planning`, `manuscript-review`, `manuscript-editing`, `reverse-outline`, `section-critique`, `critique-triage`, `copy-review`, `style-guide`, `presentation-planning`
-- **Process & code:** `skills-prelude`, `designing-plans`, `writing-plans`, `executing-plans`, `verification-before-completion`, `writing-skills`, `python-environment`, `uv-research-workspace`, `git-commits`, `systematic-debugging`, `test-driven-development`
+- **Process & code:** `verification-before-completion`, `writing-skills`, `python-environment`, `uv-research-workspace`, `git-commits`, `systematic-debugging`, `test-driven-development`
 - **Obsidian & web:** `obsidian-cli`, `obsidian-markdown`, `obsidian-bases`, `obsidian-literature-review`, `json-canvas`, `defuddle`
 
 ## Sources

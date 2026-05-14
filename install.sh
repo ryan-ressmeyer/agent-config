@@ -87,11 +87,14 @@ generate_context_files() {
   combined="$(mktemp)"
   trap "rm -f '$combined'" RETURN
 
-  cat "$REPO/shared/AGENTS.md" > "$combined"
-  printf '\n\n' >> "$combined"
+  # Machine context first (background / environmental facts), then shared
+  # (default posture and skill guidance — the part most relevant to current
+  # work should sit closest to the conversation).
   if [[ -f "$MACHINE_DIR/context.md" ]]; then
-    cat "$MACHINE_DIR/context.md" >> "$combined"
+    cat "$MACHINE_DIR/context.md" > "$combined"
+    printf '\n\n' >> "$combined"
   fi
+  cat "$REPO/shared/AGENTS.md" >> "$combined"
 
   mkdir -p "$PI_DIR" "$CLAUDE_DIR"
   install -m 0644 "$combined" "$PI_DIR/AGENTS.md"
