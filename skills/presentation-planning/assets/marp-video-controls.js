@@ -34,6 +34,15 @@
 //     video collapses to the HTML5 default 300x150 and surrounding content
 //     reflows visibly. currentTime = 0 is sufficient on a video that already
 //     has its first frame painted.
+//
+//   * Marp's bespoke presenter opens the speaker view in a separate window with
+//     its own DOM and its own bespoke instance, synced via BroadcastChannel.
+//     Keyboard events DO NOT cross window boundaries — a keydown in the speaker
+//     window never reaches the presentation window's document. To make
+//     data-play-then-advance work from either window, the keydown handler
+//     broadcasts a "play-then-advance" message; both windows then play their
+//     own local <video> element. We use our own channel name to stay
+//     independent of bespoke's internal sync channel.
 
 (function () {
   const ACTIVE_CLASS = "bespoke-marp-active";
@@ -41,7 +50,27 @@
   const ADVANCE_KEYS = new Set([
     "ArrowRight", "ArrowDown", "PageDown", "Enter", " ", "Spacebar"
   ]);
+  const CHANNEL_NAME = "marp-video-controls";
   const LOG = (...args) => console.debug("[marp-video]", ...args);
+
+  const channel = typeof BroadcastChannel !== "undefined"
+    ? new BroadcastChannel(CHANNEL_NAME)
+    : null;
+
+  function playPendingHere(source) {
+    const v = pendingPlayThenAdvance(activeSlide());
+    if (!v) return false;
+    v.dataset.ptaPlayed = "1";
+    startVideo(v, "play-then-advance (" + source + ")");
+    return true;
+  }
+
+  if (channel) {
+    channel.addEventListener("message", (msg) => {
+      if (!msg.data || msg.data.type !== "play-then-advance") return;
+      playPendingHere("remote");
+    });
+  }
 
   function activeSlide() {
     return document.querySelector("." + ACTIVE_CLASS);
@@ -79,7 +108,8 @@
     e.preventDefault();
     e.stopImmediatePropagation();
     v.dataset.ptaPlayed = "1";
-    startVideo(v, "play-then-advance");
+    startVideo(v, "play-then-advance (local)");
+    if (channel) channel.postMessage({ type: "play-then-advance" });
   }, true);
 
   function sync() {
