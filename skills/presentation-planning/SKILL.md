@@ -206,6 +206,12 @@ When the migration is complete, delete the inline `SPEAKER NOTES` / `TRANSITION 
 
 After Stage 5, **suggest** (do not require) that the user rehearse the talk out loud, time it, and note what felt off. This seeds `rehearsal-notes.md` and the next edit pass.
 
+## Backup slides
+
+Slides placed after the acknowledgments are a normal, expected part of a talk — held in reserve for anticipated audience questions. Zero is fine, ten is fine. Give each an explicit `<!-- _id: backup-... -->` so the slug is stable and obviously off-flow. Titles don't need a special prefix.
+
+When a slide in the main flow feels tacked-on in rehearsal, demoting it to a backup is usually better than deleting it — narrative clarity wins, and the figure is still there if asked.
+
 ## Close the loop on every change
 
 Whenever you edit a figure-producing script (e.g. a render script that emits PNG/MP4 assets), `slides.md`, or `script.md`, run the regeneration AND the deck build before handing back, so the user can review the rendered artifact rather than the diff:
