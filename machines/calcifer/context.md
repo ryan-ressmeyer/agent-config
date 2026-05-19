@@ -1,15 +1,10 @@
-# Machine Context — (unconfigured)
+# Machine Context — calcifer
 
-This is a placeholder. On first install, `install.sh` copied this file into `machines/<hostname>/` — edit it there to describe this machine.
-
-Fill in:
-
-- **Hostname:** `<hostname>`
-- **Label:** (e.g., "workstation", "lab laptop", "remote server")
-- **Primary use:** (e.g., "visual neuroscience analysis and manuscript writing")
+- **Hostname:** `calcifer`
+- **Label:** work workstation
+- **Primary use:** neuroscience data analysis and computation
 - **Key paths:**
-  - Obsidian vault: `~/path/to/vault`
-  - Literature database: `~/path/to/references`
-  - Data root: `~/path/to/data`
-- **Hardware notes:** (e.g., "NVIDIA RTX 4090, 64GB RAM, no internet access on this machine")
-- **Anything else the agent should know without asking.**
+  - Obsidian vault: `~/Documents/Ryan's Vault/`
+  - Code: `~/code/`
+- **Hardware:** Intel i9-12900K (24 threads), 128 GB RAM, NVIDIA RTX 4090, 3.6 TB NVMe disk
+- **Network:** lab network
