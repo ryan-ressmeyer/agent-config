@@ -388,6 +388,25 @@ Create an `assets/` subdirectory next to `slides.md` and place all figure and vi
 
 ---
 
+## Figure legibility — matching render to display
+
+Declared font sizes in a matplotlib figure only land at their nominal size on the slide if the SVG renders at **1.0× scale** — i.e., the figure's native size in inches equals its on-slide display size. When that ratio drifts, fonts shrink or grow per panel and the deck looks inconsistent even though every script sets the same `fontsize`.
+
+**Rule.** Pick a slide-width fraction for each panel and size both ends to match.
+
+- Marp's default canvas is 1280 × 720 px = **13.333 × 7.5 inches at 96 dpi**.
+- In the figure script: `figsize = (13.333 × width_frac, 13.333 × width_frac / aspect)`. Provide one helper (e.g. `slide_figsize(width_frac, aspect)`) and call it everywhere; do not hand-tune figsizes per panel.
+- In `slides.md`: display the image with `style="width: <width_frac × 100>%; height: auto"`. Drop `max-height` on these panels — combining a width fraction with a pixel height clamp re-scales the SVG and undoes the alignment.
+- Multi-panel layouts: set the flex/grid column width to the desired fraction and let the image be `width: 100%` of its column.
+
+**Center font sizes in one place.** A shared style helper (e.g. `_slide_style.apply_dark_style()` invoked at the top of every render script) sets `rcParams['font.size']`, `axes.labelsize`, `xtick.labelsize`, etc. Default range that survives projector and lecture hall: **16 pt body, 18 pt axis labels, 15 pt ticks/legend.** Remove per-script `fontsize=` overrides so all panels inherit; only override locally for inset annotations.
+
+**Pure-SVG scripts** (hand-written SVG, not matplotlib) follow the same idea: set the SVG `viewBox` width to `width_frac × 1280` and size text in those user units. These panels are the place where `width: %` + `max-height: Npx` *is* warranted (the SVG has a fixed aspect that may overflow the slide vertically) — leave the height clamp on them.
+
+**Axis units stay consistent across the deck.** If most time axes are in milliseconds, every time axis is in milliseconds — converting one panel to seconds for a smaller number range creates a unit mismatch the audience has to translate mid-talk.
+
+---
+
 ## Per-slide self-check (Stages 3–4)
 
 Before declaring a slide done:
@@ -405,6 +424,7 @@ Before declaring a slide done:
 - [ ] Every `FIGURE:` comment now has a `![](assets/TODO-*.png)` tag above it.
 - [ ] Progressive-reveal points are marked (duplicated slides or `BUILD:` comments).
 - [ ] Summary and acknowledgments slides present.
+- [ ] Figure script's `figsize` matches the slide-width fraction the image is displayed at (see "Figure legibility"). Image style is `width: <pct>%; height: auto` — no `max-height` clamp on a figure also sized by width.
 - [ ] `uv run tools/slide_summary.py slides.md` lists every `TODO-*` filename without surprises.
 
 ### Stage 5 only
@@ -412,6 +432,41 @@ Before declaring a slide done:
 - [ ] Every slide id is covered by a `## @<selector>` block in `script.md`.
 - [ ] Inline `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks have been removed from `slides.md`.
 - [ ] `./build.sh` runs clean (no warnings about stripped inline comments).
+- [ ] The prose reads like speech, not like writing. See "Writing spoken prose" below.
+
+---
+
+## Writing spoken prose (Stage 5)
+
+`script.md` is what the speaker says out loud while standing in front of a slide. It is **not** written prose dressed up with `(→)` markers. The rhythms that work on a page often fail at a podium, and vice versa.
+
+### Spoken prose is longer and more expanded than written prose
+
+Readers control their own pace and can re-read. Audiences cannot. The same idea that takes one tight sentence in a paper usually needs two or three sentences when spoken — a setup, the claim, and a moment to land — so the audience has time to absorb it before the next idea arrives.
+
+When the slide has a figure, walk through what is on it explicitly: name the panels, the axes, the colors, what the audience should look at first. "On the slide here is the basic setup. At the top is X. Below that is Y" reads as padding on the page; live, it is the audience's lifeline.
+
+A good heuristic: if a `script.md` block could be lifted unchanged into a methods paragraph, it is probably too compressed for speech.
+
+### Em dashes and colons read; they don't speak
+
+Em dashes and colons work in written prose because the reader's eye absorbs the structural break visually. Spoken aloud, both collapse into the same pause, and stacking them makes delivery choppy and breathless. A paragraph with three em dashes and two colons reads cleanly on the page and trips the speaker on every clause.
+
+In `script.md`, prefer commas, periods, and clause-restructured sentences. An em dash that genuinely marks a strong rhetorical break is fine occasionally; a colon introducing a single short list item is fine; the failure mode is using them as a default joinery for every dependent clause.
+
+**Before (written rhythm):**
+
+> The key measurement we can now make is the probability of transmission. Almost every spike in the LGN relay cell is preceded by a spike from its driving RGC — that's what the tight CCG peak we saw earlier tells us. But the reverse isn't true: not every RGC spike evokes a spike in the LGN. So we can ask: of the spikes coming in, what fraction get through?
+
+**After (spoken rhythm):**
+
+> The idea is simple. Almost every spike in the LGN relay cell is preceded by a spike from its driving RGC. That's what the tight CCG peak we saw earlier tells us. But the reverse isn't true, since not every RGC spike evokes a spike in the LGN. So we can ask, of the spikes coming in from the retina, what fraction get through to drive a spike in the LGN.
+
+Same content, but the dashes and colons have been replaced with periods, commas, and a restructured "since" clause. The speaker can breathe.
+
+### When the user asks for "more detail" or "go slower," expand, don't compress
+
+A common failure mode: when asked to slow down or add detail, an LLM adds qualifying adjectives and parenthetical clauses, which is *more written-prose density*, not more spoken pacing. The right move is to **add sentences** — explicit walkthroughs of what is on the slide, restatement of the claim in plain words, an extra beat between setup and payoff. Length comes from more clauses spoken slowly, not from more information per clause.
 
 ---
 
