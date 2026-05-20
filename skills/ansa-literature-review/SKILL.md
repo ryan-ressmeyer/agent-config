@@ -57,22 +57,33 @@ ansa paper import --pdf /path/to/paper.pdf
 ansa paper import --bib refs.bib
 ```
 
-`paper import` fetches metadata (Crossref / arXiv / Semantic Scholar) and, for arXiv, also downloads the PDF. **For Crossref DOIs the importer does not fetch the PDF** — only metadata. Auto-enrichment (OCR, embedding) runs synchronously after import unless disabled.
+`paper import` fetches metadata (Crossref / arXiv / Semantic Scholar) and, by default, **also makes a best-effort attempt to fetch a public PDF** via tiered resolvers (Unpaywall → Crossref `link` → OpenAlex → Europe PMC → arXiv → bioRxiv/medRxiv). Tier A = published version, Tier B = accepted manuscript, Tier C = preprint; the fetcher stops at the first source that returns a valid PDF. Auto-enrichment (OCR, embedding) runs synchronously after import.
 
-**When `--doi` succeeded but there's no PDF**, point the user at the DOI page:
+The import response includes `pdf_fetch.status`:
+- `fetched` → check `pdf_fetch.candidate.{source,tier,version,license}` to tell the user where the PDF came from (e.g. "Tier A publishedVersion via Unpaywall, CC-BY"). Provenance is also stored on `properties.pdf.fetched_from`.
+- `no_candidates` / `all_failed` → no public copy was found, or every candidate failed validation. The metadata still imported successfully.
 
-> I have metadata for `<citekey>` but no PDF. Open https://doi.org/<doi>, download, and then run:
-> `ansa paper import --pdf /path/to/<your-download>.pdf`
-> The importer will deduplicate against the existing paper by DOI.
+**Disable per-import** with `--no-fetch-pdf` (e.g. when the user already has the PDF and just wants metadata first).
 
-For paywalled cases the user can also try Unpaywall directly:
+**Retry after the fact** for any paper that ended up without a PDF:
 
 ```bash
-curl -s "https://api.unpaywall.org/v2/<doi>?email=ryan.ressmeyer@gmail.com" \
-  | jq -r '.best_oa_location.url_for_pdf // empty'
+ansa paper fetch-pdf --id <UUID>           # single paper
+ansa paper fetch-pdf --all-missing         # every paper without a PDF
+ansa paper fetch-pdf --all-missing --limit 20 --tiers A,B   # published/accepted only, no preprints
 ```
 
-If that returns a URL, `curl -L -o /tmp/<citekey>.pdf "<url>"`, validate with `head -c 4 /tmp/<citekey>.pdf` (must be `%PDF`), then `ansa paper import --pdf`. Never download from sci-hub or similar.
+`fetch-pdf` is idempotent (skips when `properties.pdf.path` is already set unless `--force`), records per-source attempt logs in `_raw.pdf_fetch.candidates_tried`, and never raises on resolver/network errors — failures are surfaced in the response, not as exceptions.
+
+**When auto-fetch returned `no_candidates` or `all_failed`, proactively ask the user for a PDF.** Don't wait for them to bring it up — the user often has institutional access or a copy on disk. Phrase it concretely so they know exactly what to do:
+
+> I imported `<citekey>` (`<UUID>`) but the auto-fetcher couldn't find a public PDF (`<status>`, tried N sources). If you can grab one from https://doi.org/<doi> (or you already have it locally), drop the path or attach the file and I'll run:
+>
+> `ansa paper set-pdf <UUID> /path/to/file.pdf`
+
+When `status == "all_failed"`, briefly summarize *what was tried* from `candidates_tried` (source, tier, http_status / error) — it tells the user whether the paper looked promising-but-blocked vs. genuinely unindexed, which helps them decide how hard to chase it.
+
+Never download from sci-hub or similar — only the tiered resolvers' OA copies and user-supplied files.
 
 After import, surface the new paper's UUID and citekey to the user and ask whether to summarize it now (→ delegate to `paper-summarize`).
 
@@ -131,6 +142,7 @@ The graph self-maintains via migrations and the verify/rekey/enrich loop. When t
 ```bash
 ansa paper verify --all --dry-run                    # surface mismatches against Crossref/S2
 ansa paper rekey  --all --dry-run                    # propose citekey changes (review before running for real)
+ansa paper fetch-pdf --all-missing --limit 50        # backfill PDFs for papers imported before auto-fetch existed
 ansa fts rebuild                                     # if search results look stale
 ```
 
