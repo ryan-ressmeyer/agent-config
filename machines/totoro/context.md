@@ -5,6 +5,5 @@
 - **Primary use:** mobile development, writing, literature review
 - **Key paths:**
   - Obsidian vault: `~/Documents/Ryan's Vault/`
-  - Code: `~/code/`
 - **Hardware notes:** integrated GPU only — do not run GPU-bound analysis here; offload to workstation.
 - **Network:** standard internet access.

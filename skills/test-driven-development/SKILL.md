@@ -203,6 +203,24 @@ Next failing test for next feature.
 | **Clear** | Name describes behavior | `test('test1')` |
 | **Shows intent** | Demonstrates desired API | Obscures what code should do |
 
+## How Many Tests? Test Behavior, Not Functions
+
+Aim for a small set of tests that exercise real behavior through the public interface — **not** one test per function. Most internal functions are implementation details; they get covered transitively when you test the behavior they support. A separate test per helper just duplicates coverage and breaks on every refactor.
+
+**A test earns its place only if it can catch a regression the existing tests can't.** If a new test would only fail when an existing test already fails, don't write it — you're spending tokens on a test that will never catch anything.
+
+Write a dedicated test when there's real behavior to pin down:
+- A feature's observable contract (inputs → outputs, side effects)
+- Edge cases and error paths the happy-path test wouldn't exercise
+- A bug you're fixing (one test reproducing it)
+
+Don't write a dedicated test for:
+- Trivial getters/setters, pass-throughs, glue code
+- Private helpers fully covered by a behavior test
+- A function whose only failure mode is already caught elsewhere
+
+This is still test-first. You write the behavior test, watch it fail, then build whatever functions it takes to pass. You're choosing the *granularity* of tests — not skipping RED.
+
 ## Why Order Matters
 
 **"I'll write tests after to verify it works"**
@@ -257,7 +275,7 @@ Tests-first force edge case discovery before implementing. Tests-after verify yo
 
 | Excuse | Reality |
 |--------|---------|
-| "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
+| "Too simple to test" | Cover it in a behavior test. "Simple" isn't a reason to skip coverage — but it's not a reason for its own dedicated test either. |
 | "I'll test after" | Tests passing immediately prove nothing. |
 | "Tests after achieve same goals" | Tests-after = "what does this do?" Tests-first = "what should this do?" |
 | "Already manually tested" | Ad-hoc ≠ systematic. No record, can't re-run. |
@@ -328,7 +346,8 @@ Extract validation for multiple fields if needed.
 
 Before marking work complete:
 
-- [ ] Every new function/method has a test
+- [ ] Every distinct behavior (and important edge case) has a test
+- [ ] No redundant tests — each test can catch a regression the others can't
 - [ ] Watched each test fail before implementing
 - [ ] Each test failed for expected reason (feature missing, not typo)
 - [ ] Wrote minimal code to pass each test
