@@ -233,6 +233,7 @@ Always echo the resolved UUID + citekey + title back to the user before doing an
 - **Respect the user's pace.** Present options; let them choose what's next.
 - **Only cite what's in the graph.** When answering questions, cite by citekey + UUID. Flag when a question requires papers not in the graph.
 - **No new HTTP endpoints from this skill.** If a workflow wants something ansa doesn't expose, note the gap and ask — that's a Phase F+ change to ansa-kg, not orchestrator work.
+- **The user maintains ansa-kg (`~/code/ansa-kg/`).** If a task hits a rough surface — awkward workaround, missing flag, repeated manual step, confusing error, a question the CLI/HTTP surface can't answer cleanly — finish the task first, then surface it at the end as a concrete feature recommendation (what was painful, what change would fix it). Don't bury it; don't fix it mid-task either. One-line recommendations are fine; the user decides whether to act.
 
 ## Common mistakes
 

@@ -74,6 +74,10 @@ ssh -t kamaji 'sudo ip netns exec vpn curl -s https://ifconfig.me'   # AirVPN eg
 curl http://kamaji:<port>/...                                         # from any tailnet host
 ```
 
+## Shell secrets distribution
+
+Tailnet machines share env-var-shaped secrets (API keys, etc.) via a plain `~/.zshrc.local` on kamaji as source of truth. No sops/age — kamaji is trusted, transport is SSH over Tailscale. Each machine has a `secrets-pull` zsh function that `scp`s the file down (chmod 600) and a `reload` alias to re-source. Edit on kamaji (`ssh kamaji vim ~/.zshrc.local`), then `secrets-pull && reload` on each consumer. Upgrade to sops only if the secret set grows sensitive enough to defend against kamaji compromise.
+
 ## Constraints that bite
 
 - **NixOS is declarative.** Never `apt`/`pip install`/`systemctl edit` to persist state — it won't survive a rebuild. Add a module to the flake.
