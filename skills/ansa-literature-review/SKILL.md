@@ -13,7 +13,7 @@ Interactive orchestrator for the ansa knowledge graph. The user drives the pace 
 
 ## Remote
 
-Default remote on totoro is `kamaji` (`http://kamaji:7327`), pre-configured in `~/.config/ansa/remotes.yaml`. All commands below run unmodified — `ansa` resolves the remote from config. To target a different remote, pass `--remote NAME` or set `ANSA_REMOTE`.
+Default remote on the user's workstations (totoro, calcifer) is `kamaji` (`http://kamaji:7327`), pre-configured in `~/.config/ansa/remotes.yaml`. All commands below run unmodified — `ansa` resolves the remote from config. To target a different remote, pass `--remote NAME` or set `ANSA_REMOTE`.
 
 If the remote is unreachable (`ansa node ls --type paper --limit 1` errors), stop and tell the user — `pdf-retrieve`-style fallbacks don't matter if the graph is offline.
 
@@ -22,11 +22,12 @@ If the remote is unreachable (`ansa node ls --type paper --limit 1` errors), sto
 When a session opens, get oriented in one cheap call:
 
 ```bash
-ansa node ls --type paper --limit 1                  # confirm remote is live
-curl -s http://kamaji:7327/api/manifest | jq '{node_types: [.node_types[].name], plugins: [.plugins[].name]}'
+curl -s http://kamaji:7327/api/manifest | jq '{node_types: [.node_types[].name], edge_types: [.edge_types[].name], plugins: [.plugins[].name]}'
 ```
 
-That's enough to know what node types exist and which plugins are loaded. Don't print large dumps.
+That's enough to confirm the remote is live and learn what node/edge types and plugins are loaded. Don't print large dumps.
+
+The `ansa` CLI is a zsh alias (`uv run --project ~/code/ansa-kg ansa`), so `subprocess.run(["ansa", ...])` from Python and non-interactive shells (sub-agents, hooks) will fail with `FileNotFoundError`. **For programmatic access, hit the HTTP API directly** (examples throughout this skill). The CLI is fine when you're driving things interactively from a zsh session.
 
 ## Sub-skills
 
@@ -87,6 +88,64 @@ Never download from sci-hub or similar — only the tiered resolvers' OA copies 
 
 After import, surface the new paper's UUID and citekey to the user and ask whether to summarize it now (→ delegate to `paper-summarize`).
 
+### External discovery (papers not yet in the graph)
+
+Trigger: "find related work outside the graph", "what's been cited by paper X?", "build a literature review on topic Y".
+
+ansa only knows about papers already imported. To surface candidates outside the graph, this skill ships three small uv-PEP-723 scripts in `scripts/` (next to this file). All three emit **JSON Lines** with a uniform schema (`doi, title, year, authors, journal, citation_count, abstract, in_graph, ansa_id, ansa_citekey`) and dedup against ansa automatically. Use `--new-only` to drop already-imported hits.
+
+```bash
+SKILL=~/.claude/skills/ansa-literature-review/scripts
+
+# Topic search via OpenAlex (free, no key)
+"$SKILL/openalex_search.py" "saccadic suppression magnocellular LGN" --per-page 50 --new-only -o cand_topic.jsonl
+
+# Walk references / cited-by for a seed paper (DOI or OpenAlex W-id)
+"$SKILL/openalex_neighbors.py" --doi 10.1016/s0896-6273\(02\)00823-1 --mode cited-by --limit 100 --new-only -o cand_citedby.jsonl
+"$SKILL/openalex_neighbors.py" --doi 10.xxx --mode references --limit 50 --new-only
+"$SKILL/openalex_neighbors.py" --doi 10.xxx --mode both --new-only
+
+# Semantic Scholar recommendations — pooled across multiple seeds
+"$SKILL/s2_recommendations.py" --doi-list seeds.txt --limit 50 --new-only -o cand_s2.jsonl
+"$SKILL/s2_recommendations.py" --doi 10.xxx --limit 30 --new-only
+```
+
+Polite-pool email defaults to `ryan.ressmeyer@gmail.com`; override with `ANSA_CONTACT_EMAIL`. Set `S2_API_KEY` if rate-limited.
+
+**Workflow for building a thematic collection from scratch**:
+
+1. Confirm with the user which papers in the graph are the **seeds**.
+2. For each seed, run `openalex_neighbors.py --mode both --new-only`. Pool the resulting JSONL files.
+3. Optionally: `openalex_search.py "<topic phrase>" --new-only` for breadth, and `s2_recommendations.py --doi-list seeds.txt --new-only` for a second-opinion ranking.
+4. Concatenate JSONL streams, dedup by DOI, rank by relevance (high citation count + topic match in title/abstract).
+5. Present the user a short triage list (≤20 candidates). For each, show `title — authors (year) — journal — citations — abstract snippet`. Let them say add/skip/maybe.
+6. Batch-import accepted DOIs with `ansa paper import --doi`. Auto-fetch handles PDFs.
+7. Add each imported paper to the target collection with `ansa collection add-member <COLL_ID> <PAPER_UUID>`.
+8. Delegate summarization in parallel — see "Parallel sub-agent delegation" below.
+
+### Parallel sub-agent delegation
+
+When N papers need summaries, spawn N **general-purpose sub-agents** in a single message (one Agent block per paper). This keeps PDF text out of the main agent's context.
+
+Per-agent prompt template:
+
+```
+You are summarizing one paper for the ansa graph. Paper UUID: <UUID>.
+Citekey: <citekey>. Title: <title>.
+
+1. Invoke the `paper-summarize` skill to write a full QLMRI summary to
+   the paper's scratchpad (this writes to ansa via HTTP).
+2. After writing, return ONLY the following stance digest (≤180 words):
+   - Question (1 sentence)
+   - Method (1 sentence, with key species / N / paradigm)
+   - Key result (1–2 sentences)
+   - <<Any additional notes that are relevant to the specific task at hand, e.g. "how does this paper relate to topic Y?" or "what's the theme across these papers?">>
+
+Do NOT include PDF text in your response.
+```
+
+The main agent receives only the digests, never the PDFs. After all sub-agents complete, the main agent calls `theme-synthesize` on the collection — that skill reads the now-populated scratchpads and writes the synthesis note.
+
 ### Search / question mode
 
 Trigger: "what do I have on X?", "find papers about Y", "is there a paper by Author on Z?"
@@ -95,8 +154,11 @@ Trigger: "what do I have on X?", "find papers about Y", "is there a paper by Aut
 # Full-text search across title, abstract, authors, notes, collections
 ansa search "binocular rivalry temporal dynamics"
 
-# Structured query
-ansa query '{"type":"paper","where":{"year":{"ge":2020}},"order_by":"year","limit":20}'
+# Structured query — CLI takes YAML via `query run`:
+ansa query run --inline 'type: paper
+where:
+  doi: 10.1038/371511a0
+limit: 2'
 
 # Semantic neighbors of a paper (embedding cosine over title+abstract)
 ansa paper similar <UUID>
@@ -105,10 +167,14 @@ ansa paper similar <UUID>
 # Use `/api/nodes/<UUID>/neighbors` and filter to edge type `cites`.
 # Edges are auto-extracted on import from cached Crossref reference lists
 # (Phase F); they cover DOI-tagged references only. References to papers
-# not yet in the graph land as `cite_candidate` nodes — visible in the
-# web detail page's "Pending citations" panel, or via:
-ansa query '{"type":"cite_candidate","limit":50}'
+# not yet in the graph land as `cite_candidate` nodes — list via:
+ansa query run --inline 'type: cite_candidate
+limit: 50'
 ```
+
+**`where` only matches indexed top-level columns** on a node (e.g. `doi`, `citekey`, `year`, `title` for `paper`). Deep keys under `properties._raw.*` are NOT filterable — pull the candidate set first, then filter client-side.
+
+**Note bodies**: `ansa note show <NOTE_ID>` returns JSON with both `properties` (which has a `file_ref` body pointer) and a top-level `body` field — that top-level `body` is the markdown string. The HTTP equivalent is `GET /api/notes/{id}`; note that `/api/notes/{id}/body` and `/api/nodes/{id}/body` do NOT exist (they return the SvelteKit shell rather than 404).
 
 Read summaries (scratchpads) before answering — they're the user's own notes and outrank abstracts. Fetch a paper's scratchpad with `ansa paper scratchpad <UUID>`.
 
