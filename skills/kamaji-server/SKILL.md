@@ -7,7 +7,7 @@ description: Use when interfacing with the kamaji home server — SSHing in, dep
 
 ## What kamaji is
 
-Single-host NixOS box on Ryan's home tailnet. Fully declarative — every service is a NixOS module in the private `kamaji` flake. Runs media (Jellyfin + arr stack behind AirVPN netns), file shares (Samba/NFS on a ZFS mirror at `/tank`), Paperless-ngx, the ansa daemon, `ryanressmeyer.com` (Caddy + Cloudflare Tunnel — the only public surface), and Grafana/Prometheus monitoring. Weekly restic to Backblaze B2 covers `/tank/documents` only; everything else is re-derivable from the flake.
+Single-host NixOS box on Ryan's home tailnet. Fully declarative — every service is a NixOS module in the private `kamaji` flake. Runs media (Jellyfin + arr stack behind AirVPN netns), file shares (Samba/NFS on a ZFS mirror at `/tank`), Paperless-ngx, the ansa daemon, Forgejo (self-hosted private git server), `ryanressmeyer.com` (Caddy + Cloudflare Tunnel — the only public surface), and Grafana/Prometheus monitoring. Weekly restic to Backblaze B2 covers the canonical stores (`/tank/documents`, `/tank/ansa`, `/tank/forgejo`); everything else is re-derivable from the flake.
 
 ## Access
 
@@ -21,7 +21,7 @@ ssh kamaji '<cmd>'          # one-shot
 
 Commands requiring sudo access will fail (e.g. `ssh kamaji 'sudo rebuild'). If access to a sudo command is required, bring it to the attention of the user and provide them with the commands that need to be run and an explanation of what they do and why they are required.
 
-Tailnet-only services (no public ports): SSH 22, Jellyfin 8096, Sonarr 8989, Radarr 7878, Prowlarr 9696, Bazarr 6767, qBittorrent 8080, ansa 7327, Paperless 28981, Grafana 3000. Auth only on Paperless; tailnet is the auth boundary for the rest. Mechanism: ports open only on `interfaces.tailscale0.allowedTCPPorts` (not in the global firewall); `tailscale0` is in `firewall.trustedInterfaces`. The single public surface is `ryanressmeyer.com` via outbound Cloudflare Tunnel — zero inbound ports.
+Tailnet-only services (no public ports): SSH 22, Jellyfin 8096, Sonarr 8989, Radarr 7878, Prowlarr 9696, Bazarr 6767, qBittorrent 8080, ansa 7327, Paperless 28981, Grafana 3000, Forgejo 3300 (web) + 2222 (git ssh). Auth on Paperless and Forgejo; tailnet is the auth boundary for the rest. Mechanism: ports open only on `interfaces.tailscale0.allowedTCPPorts` (not in the global firewall); `tailscale0` is in `firewall.trustedInterfaces`. The single public surface is `ryanressmeyer.com` via outbound Cloudflare Tunnel — zero inbound ports.
 
 ## Service registry
 
@@ -37,13 +37,35 @@ Tailnet-only services (no public ports): SSH 22, Jellyfin 8096, Sonarr 8989, Rad
 | AirVPN tunnel | — | `wg-airvpn` (`BindsTo` for all six above) | `airvpn.conf` | — |
 | ansa | 7327 | `ansa` | — | `/tank/ansa` |
 | Paperless | 28981 | `paperless-web`, `paperless-consumer`, `paperless-scheduler`, `paperless-task-queue` | `paperless-admin-password` | `/tank/paperless` |
+| Forgejo | 3300 (web), 2222 (git ssh) | `forgejo` | — | `/tank/forgejo` |
 | Grafana | 3000 | `grafana` | — | — |
 | Prometheus | 9090 (localhost) | `prometheus` | — | — |
 | Caddy + tunnel | 80 (localhost) | `caddy`, `cloudflared` | `cloudflare-tunnel-token` | — |
-| Restic backup | — | `restic-backups-documents.{service,timer}`, `restic-check-documents.{service,timer}` | `restic-b2-env`, `restic-password` | `/tank/documents` (source) |
+| Restic backup | — | `restic-backups-documents.{service,timer}`, `restic-check-documents.{service,timer}` | `restic-b2-env`, `restic-password` | `/tank/documents`, `/tank/ansa`, `/tank/forgejo` (sources) |
 | Email | — | `msmtpq`, `kamaji-mail-flush.timer`, `kamaji-notify` CLI | `resend-api-key` | — |
 
 Bouncing a service: `ssh -t kamaji 'sudo systemctl restart <unit>'`. Six arr-stack units live in the `vpn` netns and `BindsTo=wg-airvpn` — restarting `wg-airvpn` cascades to all of them.
+
+## Forgejo (self-hosted git)
+
+Private git server — the canonical home for personal repos (no GitHub mirroring; the point is to keep them off GitHub). Web UI + login at `http://kamaji:3300` (admin user `ryanress`). State under `/tank/forgejo` (SQLite + bare repos + LFS), backed up offsite by the restic `documents` job.
+
+- **Clone/push:** `ssh://forgejo@kamaji:2222/ryanress/<repo>.git`. Note the SSH user is **`forgejo`**, not `git` — Forgejo's built-in SSH server runs as the `forgejo` user (port 2222, tailnet-only). Add your public key in the web UI (Settings → SSH Keys). HTTP(S) clone works too via `http://kamaji:3300/...` with a token.
+- **Server admin CLI** (on kamaji, as the `forgejo` user — for users/tokens, not day-to-day):
+  ```bash
+  sudo -u forgejo forgejo admin user create --admin --username <u> --email <e> \
+    --random-password --config /tank/forgejo/custom/conf/app.ini
+  sudo -u forgejo forgejo admin user generate-access-token --username ryanress \
+    --scopes write:repository,write:user --token-name <name> --raw \
+    --config /tank/forgejo/custom/conf/app.ini
+  ```
+- **Client CLI for agents/repo ops** — `tea` (the Gitea/Forgejo API client). Installed as `tea` on kamaji (nixpkgs) and as `tea-cli` on Ubuntu hosts (apt package `tea-cli`; plain `tea` there is an unrelated editor — jiji symlinks `~/.local/bin/tea → tea-cli`). Talks to the API over the tailnet with a stored token (`~/.config/tea/`); login name is `kamaji`:
+  ```bash
+  tea repos ls --login kamaji
+  tea repo create --login kamaji --name <repo> --private
+  tea repos delete --login kamaji --owner ryanress --name <repo> --force
+  ```
+  Set up once per host: `tea login add --name kamaji --url http://kamaji:3300 --token <token>`. The token also lives in `~/.zshrc.local` as `FORGEJO_TOKEN` (+ `FORGEJO_URL`), distributed via the shell-secrets `secrets-pull` flow, for raw `curl` against `http://kamaji:3300/api/v1/...`.
 
 ## Deploy chain (human-in-the-loop)
 
@@ -83,6 +105,6 @@ Tailnet machines share env-var-shaped secrets (API keys, etc.) via a plain `~/.z
 - **NixOS is declarative.** Never `apt`/`pip install`/`systemctl edit` to persist state — it won't survive a rebuild. Add a module to the flake.
 - **Secrets are sops-nix.** Edit via `nix-shell -p sops --run 'sops ~/kamaji/secrets/secrets.yaml'` on kamaji, or anywhere with an age key at `~/.config/sops/age/keys.txt`.
 - **Private flake inputs need access tokens.** Use `github:owner/repo` form; `git+https://` bypasses tokens and prompts interactively (breaks rebuilds).
-- **ZFS pool `/tank`.** Per-service datasets (`/tank/media`, `/tank/documents`, `/tank/paperless`, `/tank/ansa`, …). Only `/tank/documents` is backed up offsite.
+- **ZFS pool `/tank`.** Per-service datasets (`/tank/media`, `/tank/documents`, `/tank/paperless`, `/tank/ansa`, `/tank/forgejo`, …), each created imperatively (`sudo zfs create tank/<name>`) before the service's first rebuild. Only the canonical stores (`/tank/documents`, `/tank/ansa`, `/tank/forgejo`) are backed up offsite.
 - **Custom `dataDir` outside `/var/lib/<svc>`** requires overriding the unit's `User`/`Group` to a static system user — `DynamicUser=true` can't `chown` non-default state dirs.
 - **i226-V NIC wedge.** If kamaji drops off the tailnet, suspect `enp3s0` link state first. A watchdog auto-recovers, but it's the most common cause of "kamaji is unreachable."
