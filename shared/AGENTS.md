@@ -110,6 +110,7 @@ When you invoke a skill, say so briefly: "Using `<skill-name>` to <purpose>." Th
 
 - Building or extending the literature knowledge graph → `ansa-literature-review` (orchestrator), `paper-summarize`, `theme-synthesize`
 - Writing a manuscript → `manuscript-planning`, `literature-writer`, `manuscript-review`, `style-guide`
+- Exploratory or explanatory analysis — a walkthrough, building intuition, an "analysis I can learn from" → `exploratory-notebook` (drives a live marimo notebook; delegates kernel mechanics to `marimo-pair`)
 - Implementing a feature or bugfix → `test-driven-development` (failing test first, always)
 - Bug or unexpected behavior → `systematic-debugging` before proposing fixes
 - Before claiming work complete → `verification-before-completion`
@@ -128,7 +129,7 @@ When you invoke a skill, say so briefly: "Using `<skill-name>` to <purpose>." Th
 
 ## Toolset preferences
 
-- **Python:** always via `uv run`. Never bare `python`, `python3`, or `pip`. Project code uses `pyproject.toml` + `.venv`; standalone scripts use PEP 723 inline metadata. See the `python-environment` skill.
+- **Python:** always via `uv run`. Never bare `python`, `python3`, or `pip`. Project code uses `pyproject.toml` + `.venv`; standalone scripts use PEP 723 inline metadata. See the `python-environment` skill. Exploratory/explanatory analysis is a third kind — a live marimo notebook, not a run-once script; see `exploratory-notebook`.
 - **Git:** commit messages are a single line. No body, no bullets, no Co-Authored-By trailers. See the `git-commits` skill.
 - **Editor:** Neovim. Terminal-first workflow.
 - **Obsidian** is the primary knowledge store — vault-aware skills (`obsidian-*`) exist for vault operations.

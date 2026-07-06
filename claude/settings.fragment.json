@@ -33,7 +33,9 @@
       "Bash(python3 --version)",
       "Bash(gh --version)",
       "Bash(printenv *)",
-      "Bash(env)"
+      "Bash(env)",
+      "Bash(bash **/skills/marimo-pair/scripts/discover-servers.sh *)",
+      "Bash(bash **/skills/marimo-pair/scripts/execute-code.sh *)"
     ]
   }
 }
