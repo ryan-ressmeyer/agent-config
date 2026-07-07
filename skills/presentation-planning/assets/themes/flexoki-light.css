@@ -264,6 +264,10 @@ section::after {
 /* --- Images --- */
 img { background: transparent; border-radius: 2px; }
 
+/* Standalone figures are centered by default. Uses text-align (not
+   display:block) so multiple images on one line stay in a centered row. */
+section p:has(img) { text-align: center; }
+
 /* --- Utility classes --- */
 section.section     { background: var(--bg-elev); }
 section.section h1  { color: var(--accent); border: none; font-size: 2.4em; }

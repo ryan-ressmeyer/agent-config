@@ -125,7 +125,7 @@ Polite-pool email defaults to `ryan.ressmeyer@gmail.com`; override with `ANSA_CO
 
 ### Parallel sub-agent delegation
 
-When N papers need summaries, spawn N **general-purpose sub-agents** in a single message (one Agent block per paper). This keeps PDF text out of the main agent's context.
+When N papers need summaries, spawn N **general-purpose sub-agents** in a single message (one Agent block per paper). These agents do not need to be frontier-level, Sonnet is appropriate. This keeps PDF text out of the main agent's context.
 
 Per-agent prompt template:
 

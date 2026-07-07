@@ -104,6 +104,7 @@ Audience should notice in ~2 s that most points lie above the unity line.
 - **Build up complex figures** via progressive reveals (see below).
 - **No red-green pairs. No 3D chart effects. No gridlines unless they carry meaning.**
 - **Never invent figure content.** Every figure in `slides.md` is a placeholder the user fills in.
+- **Figures are centered by default.** The locked-in themes ship `section p:has(img) { text-align: center; }`, so a standalone image (or a row of side-by-side images on one line) centers without per-slide CSS. Do not add manual centering; do not left-align figures unless a slide deliberately needs it.
 - **Never stretch images.** Aspect ratio must be preserved. On `<img>` tags, do not combine `width: X%` with `max-height: Ypx` — when the natural height at that width exceeds the max, the browser clamps height while leaving width fixed and the image is squished. Use `max-width` + `max-height` (with `width: auto; height: auto`) so both bounds preserve intrinsic aspect ratio. Canonical sizing for an inline image:
 
   ```html
