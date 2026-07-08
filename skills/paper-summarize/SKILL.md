@@ -102,6 +102,12 @@ Multiple subjects: list all.
 Reference figures by number with one-line captions. (No filesystem embeds — the scratchpad is a single markdown blob; figure assets live elsewhere if they exist at all.)
 ```
 
+**Rendering notes.** The scratchpad renders through the same markdown pipeline as
+notes: inline `$…$` and display `$$…$$` LaTeX render as math — use it freely for
+a quantitative paper. If you reference *another* node (a related paper, a theme),
+link it as `[<citekey-or-label>](/nodes/<uuid>)`, never a bare `` `citekey` `` —
+same node-link convention as `theme-synthesize`.
+
 ### Step 5 — Write the scratchpad
 
 PUT the rendered body. There is no CLI flag for this today (`ansa paper scratchpad --edit` opens `$EDITOR`, which doesn't fit an agent workflow). Use a short inline Python call:

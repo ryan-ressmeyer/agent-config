@@ -1,5 +1,8 @@
 {
   "defaultProvider": "openrouter",
   "defaultModel": "anthropic/claude-opus-4.7",
-  "defaultThinkingLevel": "medium"
+  "defaultThinkingLevel": "medium",
+  "packages": [
+    "npm:pi-openai-usage"
+  ]
 }

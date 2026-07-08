@@ -123,12 +123,12 @@ Do not claim consensus. Do not say "it is now understood." Just frame.
 ## Findings by Study
 One paragraph per paper, attributed to the authors.
 Use "AuthorName et al. (Year) found/measured/concluded..."
-Cite by citekey: `[vaswani2017attention]`.
+Cite as a node link: `[vaswani2017attention](/nodes/<paper-uuid>)`.
 
 ## Points of Contact Across Studies
 Organize by sub-question or claim, not by paper.
-Always attribute: "Study A found X [citekeyA]; Study B found Y in a different
-preparation [citekeyB]."
+Always attribute: "Study A found X [citekeyA](/nodes/<uuidA>); Study B found Y
+in a different preparation [citekeyB](/nodes/<uuidB>)."
 Note:
 - Where results are consistent (species/method matched)
 - Where results differ or create tension
@@ -144,6 +144,21 @@ broaden the theme or address the open questions above.
 ```
 
 No `Papers in This Theme` section at the bottom — the collection's `in_collection` edges are the source of truth. The web UI shows the member list automatically.
+
+### Citation syntax — node links
+
+Cite papers as standard markdown links to their node page:
+`[<citekey>](/nodes/<paper-uuid>)`. The web note renderer turns these into
+clickable links straight to the paper. The citekey stays the visible label, so
+raw markdown remains readable and greppable.
+
+- Get the UUIDs from the member set you already pulled in Step 2
+  (`ansa collection members <theme-uuid>` lists each member's id + citekey).
+  Build a citekey→uuid map once and reuse it for every reference.
+- This works for **any** node type, not just papers — link a collection, note,
+  or author the same way (`[label](/nodes/<uuid>)`).
+- Do **not** use the old bare-citekey forms (`` `citekey` `` or `[citekey]`
+  without a target) — they render as plain text, not links.
 
 No figure embeds — figures live in attachments on individual papers, not in the synthesis. Reference them by paper citekey + figure number in prose if needed.
 
