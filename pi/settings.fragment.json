@@ -3,6 +3,7 @@
   "defaultModel": "anthropic/claude-opus-4.7",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "npm:pi-openai-usage"
+    "npm:pi-openai-usage",
+    "npm:pi-terminal-math"
   ]
 }
