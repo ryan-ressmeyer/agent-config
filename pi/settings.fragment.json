@@ -4,6 +4,7 @@
   "defaultThinkingLevel": "medium",
   "packages": [
     "npm:pi-openai-usage",
-    "npm:pi-terminal-math"
+    "npm:pi-terminal-math",
+    "npm:pi-web-search"
   ]
 }
