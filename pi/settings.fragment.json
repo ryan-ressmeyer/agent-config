@@ -5,6 +5,7 @@
   "packages": [
     "npm:pi-openai-usage",
     "npm:pi-terminal-math",
-    "npm:pi-web-search"
+    "npm:pi-web-search",
+    "npm:pi-profile"
   ]
 }
