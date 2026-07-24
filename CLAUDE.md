@@ -30,7 +30,7 @@ cd ~/code/agent-config
 
 Add `skills/<category>/<name>/SKILL.md`, then run `./install.sh` to create its individual links.
 
-Skills require YAML frontmatter with only `name` (letters, numbers, hyphens) and `description` (≤1024 chars total, starts with "Use when…", third-person, triggering conditions only — never workflow summary). See `skills/agent-workflows/writing-skills/SKILL.md` for the full authoring process (TDD-based: write a failing pressure test first, then write the skill, then close loopholes).
+Skills require YAML frontmatter with `name` (lowercase letters, numbers, and hyphens) and `description` (≤1024 characters, starts with "Use when…", third-person, retrieval or invocation triggers only — never a workflow summary). User-invoked workflows may also set `disable-model-invocation: true`; reference skills must remain model-invoked so agents can retrieve them when relevant. See `skills/agent-workflows/writing-skills/SKILL.md` for the evaluation-driven authoring process.
 
 Optional subdirectories per skill: `references/`, `assets/`, `source/`.
 
