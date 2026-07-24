@@ -65,11 +65,54 @@ ensure_machine_dir() {
 
 # --- step 2: symlinks ---
 
+install_skill_links() {
+  local -a skill_dirs
+  mapfile -t skill_dirs < <(
+    find "$REPO/skills" -mindepth 3 -maxdepth 3 -type f -name SKILL.md -printf '%h\n' | sort
+  )
+  [[ ${#skill_dirs[@]} -gt 0 ]] || error "no skills found under $REPO/skills/<category>/<name>"
+
+  local -A names=()
+  local skill_dir skill_name
+  for skill_dir in "${skill_dirs[@]}"; do
+    skill_name="$(basename "$skill_dir")"
+    [[ -z "${names[$skill_name]:-}" ]] || \
+      error "duplicate skill name '$skill_name': ${names[$skill_name]} and $skill_dir"
+    names[$skill_name]="$skill_dir"
+  done
+
+  local target_root current target link_name
+  for target_root in "$CLAUDE_DIR/skills" "$AGENTS_DIR/skills"; do
+    if [[ -L "$target_root" ]]; then
+      current="$(readlink "$target_root")"
+      warn "replacing legacy skill-directory symlink: $target_root (was → $current)"
+      rm "$target_root"
+    elif [[ -e "$target_root" && ! -d "$target_root" ]]; then
+      error "skill target exists and is not a directory: $target_root"
+    fi
+    mkdir -p "$target_root"
+
+    for target in "$target_root"/*; do
+      [[ -L "$target" ]] || continue
+      current="$(readlink "$target")"
+      link_name="$(basename "$target")"
+      if [[ "$current" == "$REPO/skills/"* && -z "${names[$link_name]:-}" ]]; then
+        warn "removing stale managed skill symlink: $target (was → $current)"
+        rm "$target"
+      fi
+    done
+
+    for skill_dir in "${skill_dirs[@]}"; do
+      skill_name="$(basename "$skill_dir")"
+      symlink "$skill_dir" "$target_root/$skill_name"
+    done
+  done
+}
+
 install_symlinks() {
   info "installing symlinks"
-  # Skills — both tools
-  symlink "$REPO/skills" "$CLAUDE_DIR/skills"
-  symlink "$REPO/skills" "$AGENTS_DIR/skills"
+  # Categorized in the repository, flattened for discovery by both tools.
+  install_skill_links
 
   # pi-only resources
   symlink "$REPO/pi/extensions" "$PI_DIR/extensions"

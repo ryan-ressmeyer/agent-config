@@ -15,7 +15,7 @@ auto-update.
 
 ## Updating
 
-Re-copy `skills/marimo-pair/` and `LICENSE` from a fresh clone of the upstream
+Re-copy `skills/research-computing/marimo-pair/` and `LICENSE` from a fresh clone of the upstream
 repo and bump the commit above. `marimo-pair`'s commit API `cm`
 (`marimo._code_mode`) is private and unstable across marimo versions, so pin
 the marimo version in research workspaces and re-check this skill after marimo

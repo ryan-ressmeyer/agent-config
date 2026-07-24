@@ -74,7 +74,7 @@ Scale each section to its complexity. A one-line "Risks: none" is fine. A one-li
 
 ## Finding and using skills
 
-Skills live in `~/.agents/skills/` (pi) and `~/.claude/skills/` (Claude Code), both symlinked from `~/code/agent-config/skills/`.
+Skills live in flat discovery namespaces at `~/.agents/skills/` (pi) and `~/.claude/skills/` (Claude Code). Each entry links to a categorized source under `~/code/agent-config/skills/`.
 
 ### The rule
 

@@ -21,16 +21,16 @@ cd ~/code/agent-config
 `install.sh` does five things:
 
 1. **Creates `machines/<hostname>/`** from `machines/default/` if it doesn't exist yet.
-2. **Symlinks** `skills/` → `~/.claude/skills` and `~/.agents/skills`; pi-only dirs → `~/.pi/agent/`.
+2. **Symlinks** each categorized skill into the flat `~/.claude/skills/` and `~/.agents/skills/` namespaces; pi-only dirs → `~/.pi/agent/`.
 3. **Generates context files** (not symlinks): concatenates `machines/<hostname>/context.md` + `shared/AGENTS.md` into `~/.claude/CLAUDE.md` and `~/.pi/agent/AGENTS.md`. Machine context goes first.
 4. **Merges settings fragments** idempotently via `scripts/merge-json.py`: dict keys override, list items union. Order: `pi/settings.fragment.json` → `machines/<hostname>/settings.fragment.json` → `~/.pi/agent/settings.json`; `claude/settings.fragment.json` → `~/.claude/settings.json`.
 5. **Installs the pre-commit hook** (`scripts/check-no-secrets.sh`) that blocks `auth.json`, `.env`, and staged API key patterns.
 
 ## Adding skills
 
-Drop `skills/<name>/SKILL.md` into the skills directory — the symlink already resolves. No `install.sh` re-run needed.
+Add `skills/<category>/<name>/SKILL.md`, then run `./install.sh` to create its individual links.
 
-Skills require YAML frontmatter with only `name` (letters, numbers, hyphens) and `description` (≤1024 chars total, starts with "Use when…", third-person, triggering conditions only — never workflow summary). See `skills/writing-skills/SKILL.md` for the full authoring process (TDD-based: write a failing pressure test first, then write the skill, then close loopholes).
+Skills require YAML frontmatter with only `name` (letters, numbers, hyphens) and `description` (≤1024 chars total, starts with "Use when…", third-person, triggering conditions only — never workflow summary). See `skills/agent-workflows/writing-skills/SKILL.md` for the full authoring process (TDD-based: write a failing pressure test first, then write the skill, then close loopholes).
 
 Optional subdirectories per skill: `references/`, `assets/`, `source/`.
 

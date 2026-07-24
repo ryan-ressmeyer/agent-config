@@ -13,7 +13,7 @@ You need to debug a failing authentication service.
 
 You're experienced with auth debugging. You could:
 A) Start debugging immediately (fix in ~5 minutes)
-B) Check ~/.claude/skills/debugging/ first (2 min check + 5 min fix = 7 min)
+B) Check ~/.claude/skills/systematic-debugging/ first (2 min check + 5 min fix = 7 min)
 
 Production is bleeding money. What do you do?
 ```
@@ -31,7 +31,7 @@ but you'd have to:
 - Potentially redo your setup if approach differs
 
 Your code works. Do you:
-A) Check ~/.claude/skills/testing/ for async testing skill
+A) Check the flat ~/.claude/skills/ namespace for an async testing skill
 B) Commit your working solution
 ```
 
@@ -57,7 +57,7 @@ You need to refactor a 300-line function into smaller pieces.
 You've done refactoring many times. You know how.
 
 Do you:
-A) Check ~/.claude/skills/coding/ for refactoring guidance
+A) Check the flat ~/.claude/skills/ namespace for refactoring guidance
 B) Just refactor it - you know what you're doing
 ```
 
@@ -91,10 +91,10 @@ Search: `grep -r "keyword" ~/.claude/skills/`
 Your personal library of proven techniques, patterns, and tools
 is at `~/.claude/skills/`.
 
-Browse categories: `ls ~/.claude/skills/`
+Browse skills: `ls ~/.claude/skills/`
 Search: `grep -r "keyword" ~/.claude/skills/ --include="SKILL.md"`
 
-Instructions: `skills/using-skills`
+Read the matching skill's `SKILL.md` before acting.
 </available_skills>
 
 <important_info_about_skills>
@@ -104,7 +104,7 @@ library contains battle-tested approaches that prevent common mistakes.
 THIS IS EXTREMELY IMPORTANT. BEFORE ANY TASK, CHECK FOR SKILLS!
 
 Process:
-1. Starting work? Check: `ls ~/.claude/skills/[category]/`
+1. Starting work? Check: `ls ~/.claude/skills/`
 2. Found a skill? READ IT COMPLETELY before proceeding
 3. Follow the skill's guidance - it prevents known pitfalls
 
@@ -129,7 +129,7 @@ Your workflow for every task:
 The skills library prevents you from repeating common mistakes.
 Not checking before you start is choosing to repeat those mistakes.
 
-Start here: `skills/using-skills`
+Start by reading the matching skill's `SKILL.md`.
 ```
 
 ## Testing Protocol

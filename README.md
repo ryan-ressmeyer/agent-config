@@ -26,7 +26,8 @@ The script is idempotent — re-run it any time after pulling changes.
 ```
 agent-config/
 ├── install.sh                  # entry point
-├── skills/                     # universal; symlinked to ~/.agents/skills and ~/.claude/skills
+├── skills/                     # categorized sources; individually linked into each agent
+│   └── <category>/<name>/      # each skill contains SKILL.md and optional supporting files
 ├── pi/
 │   ├── extensions/             # pi-only TS extensions
 │   ├── prompts/                # pi-only /slash templates
@@ -51,7 +52,7 @@ agent-config/
 
 1. **Ensures a machine directory exists** for `$HOSTNAME` (copies from `machines/default/` if absent).
 2. **Creates symlinks:**
-   - `skills/` → `~/.claude/skills` and `~/.agents/skills`
+   - Each `skills/<category>/<name>/` → `~/.claude/skills/<name>` and `~/.agents/skills/<name>`
    - `pi/{extensions,prompts,themes}/` → `~/.pi/agent/{extensions,prompts,themes}`
 3. **Generates context files** (NOT symlinks): concatenates `machines/$HOSTNAME/context.md` + `shared/AGENTS.md` (machine first, shared second) into `~/.pi/agent/AGENTS.md` and `~/.claude/CLAUDE.md`.
 4. **Merges settings fragments** idempotently:
@@ -63,14 +64,14 @@ agent-config/
 
 ## Adding new skills, extensions, prompts, themes
 
-Just drop them into the matching directory. The symlinks already resolve.
+Add resources to the matching directory.
 
-- New skill: `skills/<name>/SKILL.md` (+ optional `references/`, `assets/`, `scripts/`)
+- New skill: `skills/<category>/<name>/SKILL.md` (+ optional `references/`, `assets/`, `scripts/`)
 - New pi extension: `pi/extensions/<name>.ts` (or directory)
 - New pi prompt: `pi/prompts/<name>.md`
 - New pi theme: `pi/themes/<name>.ts`
 
-No `install.sh` re-run needed unless you're adding a new symlinked directory.
+Re-run `./install.sh` after adding a skill so its individual links are created. Other resources appear through their existing directory links.
 
 ## Per-machine customization
 
@@ -85,14 +86,14 @@ Re-run `install.sh` after editing machine files to regenerate context and re-mer
 - **Never** commit `auth.json`, `.env`, or API keys. `.gitignore` and the pre-commit hook both block them.
 - OpenRouter keys live in `~/.pi/agent/auth.json` (mode 600) — populated by `install.sh` on first run.
 
-## Skill index
+## Skill categories
 
-See `skills/` — each subdirectory is an agent skill with a `SKILL.md`. Skills cover:
-
-- **Literature & research:** `literature-review`, `paper-summarize`, `pdf-retrieve`, `citation-fetch`, `database-search`, `database-check`, `theme-synthesize`, `citation-management`
-- **Writing:** `literature-writer`, `manuscript-planning`, `manuscript-review`, `manuscript-editing`, `reverse-outline`, `section-critique`, `critique-triage`, `copy-review`, `style-guide`, `presentation-planning`
-- **Process & code:** `verification-before-completion`, `writing-skills`, `python-environment`, `uv-research-workspace`, `git-commits`, `systematic-debugging`, `test-driven-development`
-- **Obsidian & web:** `obsidian-cli`, `obsidian-markdown`, `obsidian-bases`, `obsidian-literature-review`, `json-canvas`, `defuddle`
+- `agent-workflows/` — reusable agent process skills
+- `communication/` — manuscripts, reviews, presentations, and style
+- `infrastructure/` — machine and server operations
+- `knowledge/` — literature discovery, paper summaries, and thematic synthesis
+- `research-computing/` — uv workspaces and marimo notebooks
+- `software/` — Python environments, Git, testing, debugging, and verification
 
 ## Sources
 
