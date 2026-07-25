@@ -17,17 +17,11 @@ Use the literature database to assist writing scientific paper sections. Draws c
 - Building a narrative arc for a paper's background
 - Checking if claims in a draft have citation support in the database
 
-## Database Context
+## Required references
 
-The literature database lives in ansa (default remote: `kamaji`). Citation keys are paper `properties.citekey`. Pull context with `ansa` over HTTP:
+Load `ansa-reference` before retrieving literature context. It defines the current paper, scratchpad, theme, citation-key, query, and remote conventions. Discover exact ANSA commands from the active daemon rather than copying a static command surface here.
 
-- `ansa search "<query>"` — full-text across titles, abstracts, scratchpads, notes, collections
-- `ansa query '{"type":"paper","where":{...}}'` — structured filters (year, journal, citekey, etc.)
-- `ansa paper scratchpad <UUID>` — the user's QLMRI summary for a paper
-- `ansa collection ls --kind theme` + `ansa collection members <theme-uuid>` — thematic syntheses (the synthesis text is a `note` attached to the theme collection; pull it via `GET /api/nodes/<theme-uuid>/notes`)
-- `ansa paper similar <UUID>` — semantic neighbors when looking for adjacent work
-
-No `index.yaml`, no `references.bib`, no `references/<id>/` folders. BibTeX export from ansa is not implemented yet — when the manuscript needs a `.bib`, ask the user or assemble manually from `ansa node get <UUID>` metadata.
+Load `scientific-claims-reference` before drafting. It supplies the evidence-attribution, scope, uncertainty, consensus, and historical-claim conventions used throughout this workflow.
 
 ## Workflow
 
@@ -44,8 +38,7 @@ Find relevant papers:
 
 ```bash
 ansa search "query terms"
-# or structured:
-ansa query '{"type":"paper","where":{"year":{"ge":2015}},"limit":50}'
+# or use `ansa query run --inline` with a bounded YAML query
 ```
 
 For theme-level narrative, pull existing theme syntheses:
@@ -53,7 +46,7 @@ For theme-level narrative, pull existing theme syntheses:
 ```bash
 ansa collection ls --kind theme
 ansa collection members <theme-uuid>
-curl -s http://kamaji:7327/api/nodes/<theme-uuid>/notes
+curl -s <ANSA_URL>/api/nodes/<theme-uuid>/notes
 ```
 
 ### Step 3: Load context
@@ -131,17 +124,9 @@ When a figure from the database illustrates a point being discussed:
 - When methods build on prior work, cite the originals
 - Use QLMRI Methods sections for accurate descriptions of what prior papers did
 
-## Objectivity Directives (MANDATORY)
+## Scientific claim discipline
 
-Scientific writing makes arguments, but those arguments must be grounded in what the cited papers actually reported. You are working from a limited database, not the full literature.
-
-1. **Attribute findings to specific papers.** Write "Burr et al. (1994) found X" not "it has been shown that X" or "X is well established." Every factual claim needs an author attached.
-2. **Don't overstate what a citation supports.** If a paper found something in cat, don't cite it as though the finding applies to all mammals. State what was found and in what preparation.
-3. **Don't claim consensus from your database.** You have a subset of the literature. Don't write "it is widely accepted" or "extensive evidence demonstrates" based on a handful of papers. State what the specific cited papers found.
-4. **Avoid superlatives and certainty language.** Do not write "clearly demonstrates," "conclusively shows," "the most important," "a landmark study," etc. Describe findings neutrally.
-5. **Distinguish authors' conclusions from facts.** "Burr et al. (1994) concluded that suppression occurs before V1" is different from "suppression occurs before V1." Use the former when the claim is an interpretation.
-6. **Don't narrate history you haven't read.** Don't write "the first study to show X" or "pioneering work by" unless the paper itself makes that claim. You haven't read the whole literature.
-7. **Flag what you don't know.** If the database doesn't have papers representing an alternative viewpoint, say so rather than writing as though the available papers tell the whole story.
+Apply `scientific-claims-reference` to every substantive claim. In particular, preserve the distinction between findings and interpretation, retain preparation-specific scope, and state that ANSA represents a selected literature set rather than field-wide consensus.
 
 ## Rules
 
@@ -161,7 +146,4 @@ Scientific writing makes arguments, but those arguments must be grounded in what
 | Ignoring species/model differences | Note when cited evidence is from a different subject |
 | Using wrong citation keys | Always use the paper ID from the database |
 | Not checking theme documents | Themes show how papers in the database relate to each other |
-| "It is well established that X" | State what specific papers found — don't claim consensus from a small database |
-| Superlatives ("landmark study," "clearly demonstrates") | Describe findings neutrally without editorializing |
-| Elevating authors' interpretations to fact | "Authors concluded X" not "X is the case" when the claim is an inference |
-| Claiming historical firsts ("the first to show") | Don't assert priority unless the paper itself does — you haven't read the full literature |
+| Violating evidence scope, attribution, or uncertainty conventions | Apply `scientific-claims-reference` and narrow the claim to what the cited studies support |

@@ -55,20 +55,11 @@ All files live in a user-specified presentation directory (default: `./presentat
 | `script.md` | 5 | Verbatim spoken script, routed to slides by `## @<selector>` blocks (`@slug` or `@a..b` ranges). Authored once the deck is visually settled; inline scaffolding notes migrate here in one pass. One block can cover several slides — that's the point. `(→)` markers are presenter cues. |
 | `rehearsal-notes.md` | post-5 | User-written record of what felt off during rehearsal; seeds the next edit pass |
 
-`slides.md` and `script.md` are the **canonical sources**; `build.sh` compiles them into the Marp deck (see Build system below). Until Stage 5, the canonical speaker notes are the inline `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks on the slides themselves — `script.md` does not yet exist (or exists empty). At Stage 5 the inline scaffolding migrates into `script.md` as `## @<selector>` blocks, and from that point on `script.md` is the source of truth — same speaker note often attaches to several build-slides at once, and editing them in one place is the whole point.
+`slides.md` and `script.md` are the **canonical sources**; `build.sh` compiles them into the Marp deck. `marp-presentation-reference` defines how authority moves from inline scaffolding to `script.md` at Stage 5 and how script selectors cover build sequences.
 
-## Build system
+## Marp dependency
 
-Two canonical files → one compiled output:
-
-- **`slides.md`** — slide content. Each slide auto-gets a stable id from the slugified first heading; declare `<!-- _id: my-slug -->` near the heading to override (required when titles repeat without builds). Marp directives (`<!-- _class: ... -->`, `<!-- _backgroundColor: ... -->`, ...) are preserved. Once `script.md` exists, `<!-- @ author note -->` comments are stripped silently and any other inline HTML comment (including stray `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks left over from Stage 3-4) is stripped *with a warning* (script.md is then the source of truth).
-- **`script.md`** — verbatim spoken script as `## @<selector>` blocks. Selectors: `@slug` or `@slug-a..slug-b` (inclusive range in slides.md order), comma-separated. The block body becomes the note for every slide in the selection, so one block covers an arc of builds. `(→)` and `(play)` are presenter cues; preserved verbatim, ignored by the compiler. Authored at Stage 5 — until then, render the deck directly from `slides.md` (compiler emits a no-op if `script.md` is absent or empty).
-- **`build.sh`** — compiles `slides.md` + `script.md` → `${OUTPUT_NAME}.md`, then renders HTML + PDF via Marp CLI. Override with `./build.sh -o other-name`.
-- **`tools/compile.py`** — splicer (slides + script → Marp deck).
-- **`tools/slide_summary.py`** — emits a one-line-per-slide index (id, title, image alts, video sources). Use this as the low-token agent overview of the deck.
-- **`tools/script_format.py`** — validates selectors; reorders blocks to slides.md order; inserts `## @id` TODO blocks for any uncovered slide. `--dry-run` previews; `--init` scaffolds from scratch (use at Stage 5 start).
-
-During Stages 3-4, run `./build.sh` after every edit to verify rendering; speaker notes are read off the inline scaffolding. At Stage 5, run `uv run tools/script_format.py --init` to scaffold `script.md` from current slide ids, then migrate inline notes into the blocks. After any later structural change to `slides.md`, run `uv run tools/script_format.py --dry-run` to surface broken selectors and apply the reorder without `--dry-run`.
+Load `marp-presentation-reference` before Stage 3 and keep it active through slide authoring, visual iteration, script writing, rendering, and later deck edits. It is the authoritative location for `slides.md`/`script.md`, selector, figure, video, theme, build, and spoken-prose conventions. This workflow owns the templates and executable resources copied into a new presentation.
 
 ## Core Loop
 
@@ -145,7 +136,7 @@ Read `references/storyline-guide.md`. Produce:
 ### Stage 3: Slide structure (skeleton)
 **Output:** `slides.md` — titles, `FIGURE:` comments, inline scaffolding notes, no image tags
 
-Read `references/marp-conventions.md`. Convert the storyline into a no-image Marp skeleton focused on the **spoken performance**.
+Load `marp-presentation-reference`. Convert the storyline into a no-image Marp skeleton focused on the **spoken performance**.
 
 **Copy the locked-in visual style, tools, and build wiring at the start of Stage 3** so the deck is renderable from the first slide:
 
@@ -159,13 +150,13 @@ cp    <skill-dir>/assets/marp-video-controls.js  <presentation-dir>/marp-video-c
 chmod +x <presentation-dir>/build.sh
 ```
 
-`script.md` is **not** copied yet — it's authored in Stage 5. Edit `build.sh` to set `OUTPUT_NAME` to the presentation name. See **Locked-in visual style** below. Do not re-author the theme/tools wiring.
+`script.md` is **not** copied yet — it's authored in Stage 5. Edit `build.sh` to set `OUTPUT_NAME` to the presentation name. Apply the visual-style conventions in `marp-presentation-reference`. Do not re-author the theme/tools wiring.
 
 In `slides.md`, each slide gets:
 
 | Field | Content |
 |-------|---------|
-| Title | A single short directive clause naming what the slide shows. See `references/marp-conventions.md` ("The title"). |
+| Title | A single short directive clause naming what the slide shows. Apply the title conventions in `marp-presentation-reference`. |
 | Figure slot | An HTML-comment `FIGURE:` description: what the figure should show, what axes, what the audience should look at first. No image tag yet. |
 | Inline scaffolding | An HTML comment block containing `SPEAKER NOTES` (2–4 bullets) and `TRANSITION IN:` / `TRANSITION OUT:` sentences. This is the primary note vehicle during construction — it lives on the slide so the spoken frame is visible alongside the slide's content. It migrates to `script.md` at Stage 5. |
 | Id (optional) | `<!-- _id: my-slug -->` if the auto-id from the title is awkward, or if multiple slides share a title (build sequences need explicit ids on at least one). |
@@ -178,7 +169,7 @@ One message per slide. If a slide is carrying two takeaways, split it.
 Now build out visuals. Unlike the prior structure-only pass, slide order, titles, and inline scaffolding notes are **explicitly in scope to revise here** — visuals reveal mismatches that the storyline-on-paper couldn't surface (a figure carries two takeaways and the slide needs to split; a transition sentence stops working once the audience can see the image; a dive needs an extra setup slide). Co-iterate.
 
 - Replace each `FIGURE:` comment with a placeholder image tag: `![width:700px](assets/TODO-descriptive-name.png)`. Keep the description directly below the tag so the user knows what to produce. Visuals live in the deck's `assets/` directory.
-- Add progressive-reveal markers where the storyline calls for build-up: duplicate slides (Pattern A) or annotate with `<!-- BUILD: ... -->` comments (Pattern B). See `references/marp-conventions.md`.
+- Add progressive-reveal markers where the storyline calls for build-up. Apply the reveal conventions in `marp-presentation-reference`.
 - Check sizing hints, per-slide class directives (dark backgrounds for microscopy, etc.), and the summary/acknowledgments slides.
 - Adjust the inline scaffolding notes as flow changes. The spoken frame stays in sync with the visible deck through this stage.
 - Do not invent figure content. Every figure is a placeholder the user supplies (or a render script you've been pointed at).
@@ -259,9 +250,9 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 | Inventing figure content in `slides.md` | Placeholders only. The user supplies actual figures. |
 | Adding a "Background" slide | Prerequisites are earned as stepping stones within the forward narrative, not dumped as setup. Rework the storyline. |
 | Forgetting the spoken frame | Inline scaffolding `SPEAKER NOTES` / `TRANSITION IN/OUT` is a first-class output at Stage 3, not an afterthought. Without it the skeleton is just titles. |
-| Slide titles that fail the title rules (long sentences, two clauses, "E.g." prefixes, vague catch-alls) | See `references/marp-conventions.md` ("The title") for the canonical rules and good/bad examples. |
+| Slide titles that fail the title rules (long sentences, two clauses, "E.g." prefixes, vague catch-alls) | Apply the title rules and examples in `marp-presentation-reference`. |
 | Writing `script.md` during Stage 3 or 4 | The script is Stage 5. During construction the canonical notes live inline on the slides. Writing the verbatim script before visuals settle produces script you'll throw away when the flow shifts under you. |
-| Writing `script.md` in written-prose rhythm (em-dash chains, colons, dense clauses) | `script.md` is spoken aloud. Em dashes and colons collapse into the same audible pause and stack into choppy delivery. Spoken prose is also longer and more expanded than written prose — when the user asks to "go slower," add sentences (explicit walkthroughs of the slide, plain restatements, a beat between setup and payoff), don't pack more qualifiers into the existing ones. See `references/marp-conventions.md` ("Writing spoken prose"). |
+| Writing `script.md` in written-prose rhythm | Apply the spoken-prose guidance in `marp-presentation-reference`; add sentences and explanatory beats rather than packing more qualifiers into existing clauses. |
 | Leaving inline scaffolding in `slides.md` after Stage 5 | Once `script.md` exists, the inline `SPEAKER NOTES` / `TRANSITION IN/OUT` blocks should be deleted from `slides.md`. `compile.py` strips any that remain with a warning — `script.md` is the source of truth from Stage 5 onward. |
 | Repeating the same speaker note inline across every build slide of a sequence | Acceptable during Stages 3-4 (scaffolding); at Stage 5 collapse into a single `## @first-build..last-build` block. One block, many slides. |
 | Prescribing home slides universally | Home slides help long talks with clearly separable sections. For shorter or single-thread talks, verbal signposting suffices. Use the principle, not the device. |
@@ -269,14 +260,14 @@ From baseline testing, these are the specific arguments a capable LLM uses to sk
 
 ## Skill Dependencies
 
-- `manuscript-planning` / `literature-review` — if the talk is built from a manuscript or literature that lives in the codebase, read those artifacts for context before Frame
+- `manuscript-planning` / `ansa-literature-review` — if the talk is built from a manuscript or literature graph, read those artifacts for context before Frame
 
 ## References
 
 - `references/principles.md` — the seven principles across Naegle, McConnell, Alley, Alon, Tufte, Doumont, Crivellaro, Kenny
 - `references/frame-guide.md` — Stage 1 elicitation script
 - `references/storyline-guide.md` — Stage 2 narrative craft
-- `references/marp-conventions.md` — Stages 3–5: Marp syntax, slide titles, the spoken frame (inline scaffolding and `script.md` blocks), figure placeholders, fragments, videos
+- `marp-presentation-reference` — Stages 3–5 and later deck edits: Marp syntax, slide titles, spoken frame, script routing, figures, videos, themes, and rendering
 
 ## Asset templates
 
@@ -290,11 +281,11 @@ Each stage has a template in `assets/` that shows the expected shape of the outp
 - `assets/themes/` — locked-in visual style (Flexoki + Inter); copy verbatim to `<presentation>/themes/`
 - `assets/marprc.yml.template` — marp-cli config; copy to `<presentation>/.marprc.yml`
 - `assets/build.sh.template` — compile + render driver; copy to `<presentation>/build.sh` (and `chmod +x`). Edit `OUTPUT_NAME` to the presentation name.
-- `assets/marp-video-controls.js` — JS controller for `data-play-from-start` / `data-play-then-advance` video attributes; copy to `<presentation>/marp-video-controls.js`. See `references/marp-conventions.md` (Animated figures).
+- `assets/marp-video-controls.js` — JS controller for the video attributes documented by `marp-presentation-reference`; copy it to `<presentation>/marp-video-controls.js`.
 
 ## Locked-in visual style
 
-The skill ships a fixed visual identity (Flexoki palette + Inter typeface) so every presentation looks the same on every rendering machine, without per-talk CSS authoring. The Stage 3 copy block above wires it in; do not author per-talk themes or swap fonts. See `references/marp-conventions.md` ("Locked-in visual style") for the canonical reference, and `assets/themes/README.md` for what ships alongside each deck.
+The skill ships the fixed visual identity and copies it during Stage 3. Apply the theme and font conventions in `marp-presentation-reference`; `assets/themes/README.md` inventories the resources copied into each deck.
 
 ## Session Start
 

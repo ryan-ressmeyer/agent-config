@@ -11,15 +11,17 @@ Read a paper that lives in the ansa knowledge graph and write a structured QLMRI
 
 This skill no longer touches `references/<id>/`, `index.yaml`, `references.bib`, or any per-paper folder. The scratchpad markdown blob *is* the summary.
 
+Load `ansa-reference` for remote, paper, storage, scratchpad, identifier, and related-work conventions. Load `scientific-claims-reference` when evaluating the relationship between reported results and author inferences. The QLMRI framework and artifact requirements remain part of this workflow.
+
 ## When to Use
 
 - User points at a paper UUID, citekey, or title and wants a QLMRI summary.
 - User wants to re-summarize a paper already in ansa (e.g. after a verify/rekey).
 - A paper exists in ansa but its scratchpad is empty or only contains the auto-stub.
 
-## Remote
+## ANSA access
 
-Default remote: `kamaji` (`http://kamaji:7327`), via the user's `remotes.yaml`. Override by passing `--remote NAME` to `ansa`, setting `ANSA_REMOTE=NAME`, or — for inline Python — passing the URL to `Client.over_http(...)`.
+Use the configured remote and current CLI/API surface described by `ansa-reference`. Resolve the active remote rather than hard-coding a URL when the CLI can use its configuration.
 
 ## Workflow
 
@@ -29,13 +31,16 @@ You should arrive with one of: a UUID, a citekey, or a title fragment. Resolve t
 
 ```bash
 # UUID already known — confirm it exists:
-uv run ansa --remote kamaji node get <UUID>
+ansa node get <UUID>
 
 # Citekey known — query for it:
-uv run ansa --remote kamaji query '{"type":"paper","where":{"citekey":"vaswani2017attention"}}'
+ansa query run --inline 'type: paper
+where:
+  citekey: vaswani2017attention
+limit: 2'
 
 # Free-text — search FTS:
-uv run ansa --remote kamaji search "attention all you need"
+ansa search "attention all you need"
 ```
 
 Confirm the match with the user when the input was a citekey or title — duplicates and near-misses happen.
@@ -54,7 +59,7 @@ Always read `properties.abstract`, `properties.title`, `properties.authors` (via
 ### Step 3 — Check the existing scratchpad
 
 ```bash
-uv run ansa --remote kamaji paper scratchpad <UUID>
+ansa paper scratchpad <UUID>
 ```
 
 The route auto-stubs `# <citekey> — <title>\n\n` on first GET. If the body is just the stub (or empty after the stub), overwrite freely in Step 5. If it contains real content (prior summary, human notes), surface it to the user and ask before overwriting — the PUT is a full overwrite, not a merge.
@@ -110,12 +115,12 @@ same node-link convention as `theme-synthesize`.
 
 ### Step 5 — Write the scratchpad
 
-PUT the rendered body. There is no CLI flag for this today (`ansa paper scratchpad --edit` opens `$EDITOR`, which doesn't fit an agent workflow). Use a short inline Python call:
+PUT the rendered body. There is no CLI flag for this today (`ansa paper scratchpad --edit` opens `$EDITOR`, which doesn't fit an agent workflow). Invoke `python-environment`, resolve the configured remote URL as described by `ansa-reference`, and use a short inline Python call:
 
 ```bash
 uv run --with ansa-cli python - <<'PY'
 from ansa_cli.client import Client
-c = Client.over_http("http://kamaji:7327")
+c = Client.over_http("<ANSA_URL>")
 body = open("/tmp/qlmri-<UUID>.md").read()  # or pass a heredoc
 c.put_scratchpad("<UUID>", body)
 print("ok")
@@ -125,7 +130,7 @@ PY
 Round-trip to confirm:
 
 ```bash
-uv run ansa --remote kamaji paper scratchpad <UUID>
+ansa paper scratchpad <UUID>
 ```
 
 ### Step 6 — Present and discuss
@@ -140,10 +145,10 @@ Show the rendered summary to the user. Ask:
 The old `references.yaml` / `cited-by.yaml` / `related.yaml` files don't exist in ansa. Use `ansa similar` for semantic neighbors:
 
 ```bash
-uv run ansa --remote kamaji paper similar <UUID>
+ansa paper similar <UUID>
 ```
 
-For citation neighbors, walk `cites` edges via `node get <UUID>` + `ansa edge list --source <UUID> --type cites` — though as of Phase B importers don't yet build `cites` edges (Phase F).
+For citation neighbors, follow `cites` edges through the current neighbors or edge-list interface described by `ansa-reference`. Unresolved DOI-bearing references may appear as `cite_candidate` nodes.
 
 ## Rigor Requirements
 

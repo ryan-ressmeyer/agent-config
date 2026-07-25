@@ -137,10 +137,11 @@ digraph manuscript_planning {
 
 ## Interfacing with the Literature Database
 
-- Read summaries, themes, `index.yaml` to understand field context
-- Use `database-search` to find papers relevant to a hypothesis
-- When literature gaps are found, hand off to `literature-review`
-- Draw on themes to position the manuscript's contribution
+- Load `ansa-reference` for the current literature graph, query, paper, scratchpad, and theme conventions.
+- Read relevant paper scratchpads and theme synthesis notes to understand field context.
+- Use ANSA search and structured query to find papers relevant to a hypothesis.
+- When literature gaps are found, hand off to `ansa-literature-review`.
+- Apply `scientific-claims-reference` when comparing the manuscript's results with prior work.
 
 ## Impact is Negotiated
 
@@ -160,8 +161,9 @@ When invoked, the agent should:
 
 ## Skill Dependencies
 
-- `database-search` — find relevant papers in the literature database
-- `literature-review` — hand off when literature gaps are found
+- `ansa-reference` — retrieve literature graph and ANSA usage context
+- `ansa-literature-review` — hand off when literature gaps are found
+- `scientific-claims-reference` — scope evidence and cross-study claims
 - `literature-writer` — hand off when plan is ready for prose
 - `python-environment` — all script execution (REQUIRED before running any Python)
 - `systematic-debugging` — when analyses fail

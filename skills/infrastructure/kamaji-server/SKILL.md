@@ -1,9 +1,11 @@
 ---
 name: kamaji-server
-description: Use when interfacing with the kamaji home server — SSHing in, deploying NixOS config changes, checking service status, probing tailnet-only services, or any task that runs on or against kamaji.
+description: Use when a task needs facts or usage guidance about the kamaji home server, including access, services, ports, storage, Forgejo, NixOS deployment, probes, secrets, backups, or tailnet constraints.
 ---
 
-# kamaji-server
+# Kamaji Server Reference
+
+This reference records kamaji's host-specific architecture and operational conventions. Treat the private NixOS flake as authoritative when its current configuration differs from this note.
 
 ## What kamaji is
 
@@ -67,7 +69,7 @@ Private git server — the canonical home for personal repos (no GitHub mirrorin
   ```
   Set up once per host: `tea login add --name kamaji --url http://kamaji:3300 --token <token>`. The token also lives in `~/.zshrc.local` as `FORGEJO_TOKEN` (+ `FORGEJO_URL`), distributed via the shell-secrets `secrets-pull` flow, for raw `curl` against `http://kamaji:3300/api/v1/...`.
 
-## Deploy chain (human-in-the-loop)
+## NixOS deployment guidance
 
 The kamaji NixOS config lives in a private repo with **two checkouts that sync only via `origin/main` on GitHub**:
 

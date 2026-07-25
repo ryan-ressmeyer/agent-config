@@ -17,6 +17,8 @@ There is one synthesis note per theme. Updating a theme means PUTting a new body
 
 The synthesis is an **objective report** of what each study found and how findings relate — not an editorial narrative, not a list of summaries, not a claim about field consensus.
 
+Load `ansa-reference` for the graph, paper, scratchpad, collection, note, and node-link conventions. Load `scientific-claims-reference` before drafting or revising synthesis prose.
+
 ## When to use
 
 - User asks to synthesize across a specific list of papers.
@@ -98,7 +100,7 @@ Focus on:
 Find the note attached to this collection, if any:
 
 ```bash
-ansa node neighbors <theme-uuid> | jq '.[] | select(.type=="note")'
+ansa neighbors <theme-uuid> | jq '.[] | select(.type=="note")'
 ```
 
 (Equivalently: `GET /api/nodes/<theme-uuid>/notes` returns the same list.)
@@ -186,12 +188,12 @@ ansa note add \
 ansa note edit <note-uuid>
 ```
 
-`note edit` opens `$EDITOR` on the current body. For an agent-driven overwrite, use Python:
+`note edit` opens `$EDITOR` on the current body. For an agent-driven overwrite, invoke `python-environment`, resolve the configured remote URL through `ansa-reference`, and use Python:
 
 ```bash
 uv run --with ansa-cli python - <<'PY'
 from ansa_cli.client import Client
-c = Client.over_http("http://kamaji:7327")
+c = Client.over_http("<ANSA_URL>")
 body = open("/tmp/theme-<name>.md").read()
 c.update_note("<note-uuid>", body=body)
 print("ok")
@@ -206,18 +208,9 @@ Show the rendered synthesis. Ask:
 - "Are members missing from this theme? Should any be removed?"
 - "Are there candidate papers (in your suggested list) you want to add now?"
 
-## Objectivity directives (mandatory)
+## Scientific claim discipline
 
-The synthesis is a small subset of a larger literature. Stay within what the member papers actually say.
-
-1. **Report findings, don't narrate history.** Don't claim a paper "began the modern understanding" or was "the first to show X" unless the paper itself says so.
-2. **Attribute every claim.** "Burr et al. (1994) found X [burr1994motion]; Reppas et al. (2002) found Y [reppas2002visual]." No floating "converging evidence shows."
-3. **Don't synthesize consensus that may not exist.** Avoid "it is now understood," "the definitive evidence," "has progressively narrowed."
-4. **Flag blind spots.** State N papers in the Scope section. Note which perspectives are absent.
-5. **Distinguish authors' claims from inferences.** Use "the authors concluded" when reporting their stance.
-6. **Avoid superlatives.** No "definitive," "critical," "striking," "key," "crucial."
-7. **Limitations only when they bear on interpretation.** Don't catalog every caveat for every paper.
-8. **End with suggested papers to add**, not your own speculation about answers.
+Apply `scientific-claims-reference` throughout the synthesis. The Scope must state the number of member papers and important missing perspectives. Attribute every cross-study comparison, distinguish results from authors' interpretations, preserve preparation differences, and do not infer consensus or historical priority from the collection. End with evidence gaps and suggested papers rather than speculative answers.
 
 ## Common mistakes
 
@@ -225,8 +218,7 @@ The synthesis is a small subset of a larger literature. Stay within what the mem
 |---|---|
 | Synthesizing without reading scratchpads | Step 3 is non-negotiable — stop and `paper-summarize` empty scratchpads first |
 | Creating a second note for the same theme | One note per theme; update the existing note instead |
-| Editorializing across the literature | Attribute every claim by citekey; the synthesis is a report, not an essay |
-| Claiming historical firsts | You're reading a sample, not the whole literature |
+| Violating evidence scope, attribution, or uncertainty conventions | Apply `scientific-claims-reference` and narrow the synthesis to what the member papers support |
 | Forgetting to attach members | Without `in_collection` edges the theme is just a name; add members before drafting |
 | Listing papers in a "Papers in This Theme" section | The collection's edges are the source of truth — don't duplicate in prose |
 | Embedding figures in the note | Figures are attachments on the paper nodes; reference by citekey + figure number |

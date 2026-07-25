@@ -26,7 +26,7 @@ Each principle is stated, then translated into a concrete test you can apply to 
 
 **Principle.** Every slide makes one point and shows one visual that proves it. This is Alley's assertion-evidence structure, restated: the slide's *argument* is a conclusion, and the visual is the evidence. The PowerPoint default (topic phrase + bulleted list) is the failure mode.
 
-**Title form.** A short directive clause that names what the slide shows. The full declarative claim belongs in the speaker's mouth, not on the slide. See `marp-conventions.md` ("The title") for the canonical rules and examples.
+**Title form.** A short directive clause that names what the slide shows. The full declarative claim belongs in the speaker's mouth, not on the slide. Apply the title guidance in `marp-presentation-reference` for canonical rules and examples.
 
 **Test.** Can a reader of the slide-alone tell which claim is being made? "Results" and "Benchmarks" fail (too vague). "Protein X represses Gene Y in postmitotic neurons, as shown by qPCR" also fails (too long, visibly a sentence). "Gene Y repression by Protein X" passes — short, directive, unambiguous.
 
