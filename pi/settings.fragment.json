@@ -7,6 +7,9 @@
     "npm:pi-terminal-math",
     "npm:pi-web-search",
     "npm:pi-smart-fetch",
-    "npm:pi-profile"
+    "npm:pi-profile",
+    "npm:pi-docparser",
+    "npm:pi-updater",
+    "npm:@nguyenquangthai/pi-ask"
   ]
 }
