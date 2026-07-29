@@ -9,6 +9,11 @@ Merges a fragment file into a target JSON file:
 - Lists union (fragment items appended if not already present)
 - Scalars override
 
+In a list, a string item prefixed with "!" removes its match from the merged
+result instead of being appended -- this is how a per-machine fragment opts out
+of something the base fragment adds. Items are processed in order, so within a
+single fragment ["a", "!a"] nets to absent. Write "\\!" to mean a literal "!".
+
 Usage:
     merge-json.py <fragment> <target>
 
@@ -23,6 +28,11 @@ from pathlib import Path
 from typing import Any
 
 
+def _unescape(value: str) -> str:
+    r"""Turn a leading ``\!`` back into a literal ``!``."""
+    return value[1:] if value.startswith("\\!") else value
+
+
 def merge(target: Any, fragment: Any) -> Any:
     if isinstance(target, dict) and isinstance(fragment, dict):
         result = dict(target)
@@ -35,6 +45,12 @@ def merge(target: Any, fragment: Any) -> Any:
     if isinstance(target, list) and isinstance(fragment, list):
         result = list(target)
         for item in fragment:
+            if isinstance(item, str):
+                if item.startswith("!"):
+                    excluded = _unescape(item[1:])
+                    result = [existing for existing in result if existing != excluded]
+                    continue
+                item = _unescape(item)
             if item not in result:
                 result.append(item)
         return result

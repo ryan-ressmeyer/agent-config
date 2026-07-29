@@ -79,6 +79,18 @@ Edit `machines/<hostname>/context.md` with machine-specific info the agent shoul
 
 For per-machine settings overrides (different model, thinking level, permissions), edit `machines/<hostname>/settings.fragment.json`. These merge on top of the base `pi/settings.fragment.json` with fragment values winning.
 
+Lists union rather than override, so a machine fragment can add to a list but not replace it. To drop something the base fragment adds, prefix it with `!`:
+
+```json
+{
+  "packages": [
+    "!npm:pi-smart-fetch"
+  ]
+}
+```
+
+This is how `solo` opts out of `pi-smart-fetch`, whose native `wreq-js` module needs glibc 2.34 while Ubuntu 20.04 ships 2.31. Every other machine still gets it.
+
 Re-run `install.sh` after editing machine files to regenerate context and re-merge settings.
 
 ## Secrets

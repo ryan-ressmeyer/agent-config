@@ -44,6 +44,10 @@ Optional subdirectories per skill: `references/`, `assets/`, `source/`.
 
 Merges a JSON fragment into a target file. Dicts merge recursively (fragment wins on conflicts), lists union (fragment items appended if absent), scalars override. Run with `uv run scripts/merge-json.py <fragment> <target>`.
 
+In a list, a string prefixed with `!` removes its match from the merged result instead of being appended — this is how a per-machine fragment opts out of something the base fragment adds (see `machines/solo/settings.fragment.json`). Because the merge target is the live settings file, an exclusion also strips an entry a previous install already wrote. Items apply in order, so `["a", "!a"]` within one fragment nets to absent. Write `\!` for a literal `!`.
+
+Tests: `tests/merge-json-exclusions.sh` and `tests/install-nested-skills.sh`. Both are self-contained — run them directly.
+
 ## Secrets
 
 Never commit `auth.json`, `.env`, or API keys. The pre-commit hook blocks them automatically. OpenRouter keys live in `~/.pi/agent/auth.json` (mode 600), written by `install.sh` on first run.
