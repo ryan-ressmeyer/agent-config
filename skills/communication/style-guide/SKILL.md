@@ -20,6 +20,18 @@ Infer the writing register from the conversation. Do not ask the user.
 
 If ambiguous, default to manuscript.
 
+## Order of Priorities
+
+Apply style rules in this order.
+
+1. Preserve factual meaning, evidentiary support, and necessary qualifications.
+2. Supply the context and logical relationships readers need.
+3. Make sentence and paragraph structure direct.
+4. Remove unnecessary words and repetition.
+5. Apply voice preferences and anti-pattern checks.
+
+Do not sacrifice accuracy or comprehension to brevity. Blacklisted forms are prohibited when they perform the listed function. A term with a precise technical meaning is not filler merely because the same word is often misused.
+
 ## Voice Principles
 
 These are shared across all contexts.
@@ -28,7 +40,7 @@ These are shared across all contexts.
 2. **Adjectives earn their place or get cut.** Every modifier must carry information the reader needs.
 3. **Transitions mark real logical moves, not theatrical ones.** "However" is fine when there's a genuine contrast. "But here's the thing:" is theater.
 4. **Let content carry its own weight.** Never announce importance — demonstrate it.
-5. **Trust the reader.** No softening, hand-holding, or justification for why you're telling them something. State facts directly.
+5. **Respect the reader's time and intelligence.** Supply the definitions, premises, transitions, and methodological details needed to follow the argument. Do not repeat established points, announce obvious conclusions, or add empty reassurance.
 6. **Name the actor.** Prefer human subjects doing things over inanimate objects performing human actions. (Relaxed for manuscripts — "The model predicts..." is fine in scientific register.)
 7. **Vary rhythm.** Mix sentence lengths. Don't stack short punchy fragments. Don't let every paragraph end the same way.
 8. **Be specific.** No vague declaratives ("The implications are significant"). Name the specific thing.
@@ -38,10 +50,10 @@ These are shared across all contexts.
 These document where each register relaxes or tightens the shared rules.
 
 ### Manuscript
+- Before drafting or editing manuscript prose, read and apply [references/manuscript.md](references/manuscript.md)
 - Passive voice is acceptable when the actor is irrelevant ("Stimuli were presented at 60 Hz") or convention demands it (Methods sections)
 - Inanimate subjects performing domain verbs are fine ("The model predicts...", "These results suggest...", "The data indicate...")
 - Precision hedging is expected — "approximately", "predominantly", "in most cases" are not filler, they're accuracy
-- Em-dashes are acceptable
 - No "you" address
 
 ### Blog
@@ -111,9 +123,9 @@ Formulaic patterns that telegraph AI authorship.
 | Rhetorical setup | "What if [reframe]?" / "Think about it:" |
 | Epiphanic closing | "In the end, maybe the real X was the Y we made..." |
 
-### Vocabulary `CRITICAL`
+### Vocabulary `CRITICAL` When Used as Filler
 
-Words and phrases that signal AI-generated text.
+These words and phrases often signal AI-generated text. Remove them when they add emphasis without information or replace a more specific description. Preserve established technical uses whose meaning is defined by the field or the immediate context.
 
 | Category | Examples |
 |----------|---------|
@@ -127,7 +139,7 @@ Words and phrases that signal AI-generated text.
 
 ### Self-Reference & Meta-Commentary `CRITICAL`
 
-Text that announces its own structure or importance.
+Text that announces its own structure or importance without helping readers navigate. A concise roadmap is acceptable in a long or technically dense document when it identifies a real sequence or distinction.
 
 - "In this section, we'll..."
 - "As we'll see..."
@@ -141,11 +153,15 @@ Text that announces its own structure or importance.
 - "But that's another post"
 - "I want to explore..."
 
-### Colons & Em-Dashes `HIGH`
+### Colons `HIGH`; `CRITICAL` in Manuscripts
 
-LLMs overuse both as structural crutches. Neither is banned, but each must be justified. If the same meaning and style can be achieved with a period, comma, or restructured sentence, prefer that. Before delivering prose, check: could this colon or em-dash be replaced without losing clarity or rhythm? If yes, replace it.
+LLMs overuse colons as bridges between a claim and an appended explanation. Prefer a period or rewrite the sentence so that the logical relationship is explicit. In manuscripts, do not use a colon to connect a complete claim to its explanation, consequence, qualification, interpretation, or elaboration. Apply the narrow exceptions in [references/manuscript.md](references/manuscript.md).
 
-Em-dashes are more acceptable in manuscript register where they're conventional. Still prefer alternatives when equivalent.
+Outside manuscripts, retain a colon only when a compact list, label, or definition reads more clearly than an integrated sentence.
+
+### Em Dashes `MODERATE`
+
+Em dashes are acceptable when a genuine parenthetical interruption or apposition reads more clearly than commas or parentheses. Do not use them for dramatic pivots, false contrasts, or repeated emphasis. Prefer an alternative when it preserves both clarity and rhythm.
 
 ### Stacked Synonyms & Triplets `HIGH`
 
@@ -208,10 +224,11 @@ Run this checklist before delivering any prose.
 - Any self-referential meta-commentary? Delete.
 - Any stacked synonyms or triplets? Reduce to one or two items.
 - Any vague declaratives? Name the specific thing.
-- Any unnecessary colons or em-dashes? Restructure the sentence.
+- Any colon bridging a claim to an explanation or elaboration? Rewrite it. In manuscripts, this construction is prohibited.
+- Any em dash used as a dramatic pivot or repeated emphasis? Replace it.
 - Any passive voice? (Manuscript: acceptable when conventional. Blog/email: find the actor.)
 - Inanimate thing doing a human verb? (Manuscript: acceptable for domain conventions. Blog: name the person.)
 - Three consecutive sentences match length? Break one.
 - Any paragraph end with a punchy one-liner? Vary it.
 - Does any sentence sound like a pull-quote? Rewrite it.
-- Any adverbs? (Manuscript: keep precision hedges like "approximately". Cut filler like "interestingly".)
+- Any adverbs that editorialize or add emphasis without information? Cut them. Preserve precision modifiers such as "approximately".
