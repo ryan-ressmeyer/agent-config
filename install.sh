@@ -188,6 +188,11 @@ except Exception:
     return 0
   fi
 
+  if [[ ! -t 0 ]]; then
+    warn "no interactive input; skipping OpenRouter key setup"
+    return 0
+  fi
+
   echo ""
   read -r -p "Enter OpenRouter API key (or leave blank to skip): " key
   if [[ -z "$key" ]]; then

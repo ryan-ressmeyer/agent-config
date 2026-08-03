@@ -24,7 +24,7 @@ cd ~/code/agent-config
 2. **Symlinks** each categorized skill into the flat `~/.claude/skills/` and `~/.agents/skills/` namespaces; pi-only dirs → `~/.pi/agent/`.
 3. **Generates context files** (not symlinks): concatenates `machines/<hostname>/context.md` + `shared/AGENTS.md` into `~/.claude/CLAUDE.md` and `~/.pi/agent/AGENTS.md`. Machine context goes first.
 4. **Merges settings fragments** idempotently via `scripts/merge-json.py`: dict keys override, list items union. Order: `pi/settings.fragment.json` → `machines/<hostname>/settings.fragment.json` → `~/.pi/agent/settings.json`; `claude/settings.fragment.json` → `~/.claude/settings.json`.
-5. **Installs the pre-commit hook** (`scripts/check-no-secrets.sh`) that blocks `auth.json`, `.env`, and staged API key patterns.
+5. **Skips OpenRouter key setup in headless runs**, then installs the pre-commit hook (`scripts/check-no-secrets.sh`) that blocks `auth.json`, `.env`, and staged API key patterns.
 
 ## Adding skills
 

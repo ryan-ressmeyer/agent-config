@@ -19,7 +19,13 @@ cd ~/code/agent-config
 ./install.sh
 ```
 
-The script is idempotent — re-run it any time after pulling changes.
+The script is idempotent. Re-run it after pulling changes. When stdin is not interactive, installation skips OpenRouter key setup instead of prompting.
+
+## Automatic updates in pi
+
+The `agent-config-updater` extension checks `origin/main` in the background when pi starts. If the local checkout is clean and can be fast-forwarded, it offers to pull the changes, run `install.sh`, and reload pi's resources. If upstream changes exist but the checkout is dirty, diverged, detached, or on another branch, it warns without modifying the repository.
+
+Run `/config-update` to check manually. The extension finds this repository through its installed extension path, so it does not depend on a fixed clone location.
 
 ## Layout
 
@@ -59,7 +65,7 @@ agent-config/
    - `pi/settings.fragment.json` + `machines/$HOSTNAME/settings.fragment.json` → `~/.pi/agent/settings.json`
    - `pi/keybindings.fragment.json` → `~/.pi/agent/keybindings.json`
    - `claude/settings.fragment.json` → `~/.claude/settings.json`
-5. **Prompts for the OpenRouter API key** if not already in `~/.pi/agent/auth.json`; writes it with mode 600.
+5. **Prompts for the OpenRouter API key** during interactive installation if it is absent from `~/.pi/agent/auth.json`; headless runs skip this step.
 6. **Installs the pre-commit hook** (`scripts/check-no-secrets.sh`) into this repo's `.git/hooks/`.
 
 ## Adding new skills, extensions, prompts, themes
