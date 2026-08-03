@@ -149,3 +149,59 @@ test("fast-forwards, runs install.sh, and returns the installed commit", async (
   assert.equal(result.commit, git(checkout, "rev-parse", "origin/main"));
   assert.equal(readFileSync(join(checkout, "install-marker"), "utf8"), "installed\n");
 });
+
+test("startup acceptance applies the update without injecting a slash command", async () => {
+  const { default: registerUpdater } = await import(extensionUrl);
+  const handlers = new Map();
+  const commands = [];
+  const notifications = [];
+  const sentUserMessages = [];
+
+  const pi = {
+    on(event, handler) {
+      handlers.set(event, handler);
+    },
+    registerCommand() {},
+    sendUserMessage(message) {
+      sentUserMessages.push(message);
+    },
+    async exec(command, args) {
+      commands.push([command, ...args]);
+      const invocation = [command, ...args].join(" ");
+      if (invocation === "env GIT_TERMINAL_PROMPT=0 AGENT_CONFIG_NONINTERACTIVE=1 git rev-parse --show-toplevel") {
+        return { stdout: "/config\n", stderr: "", code: 0, killed: false };
+      }
+      if (invocation.endsWith("git symbolic-ref --quiet --short HEAD")) {
+        return { stdout: "main\n", stderr: "", code: 0, killed: false };
+      }
+      if (invocation.endsWith("git rev-list --left-right --count HEAD...origin/main")) {
+        return { stdout: "0 1\n", stderr: "", code: 0, killed: false };
+      }
+      if (invocation.endsWith("git rev-parse HEAD")) {
+        return { stdout: "1234567890abcdef\n", stderr: "", code: 0, killed: false };
+      }
+      return { stdout: "", stderr: "", code: 0, killed: false };
+    },
+  };
+  const ctx = {
+    hasUI: true,
+    ui: {
+      async select() {
+        return "Update now";
+      },
+      setStatus() {},
+      notify(message) {
+        notifications.push(message);
+      },
+    },
+  };
+
+  registerUpdater(pi);
+  handlers.get("session_start")({ reason: "startup" }, ctx);
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(sentUserMessages.length, 0);
+  assert.equal(commands.some((parts) => parts.includes("pull")), true);
+  assert.equal(commands.some((parts) => parts.includes("/config/install.sh")), true);
+  assert.equal(notifications.some((message) => message.includes("Run /reload")), true);
+});

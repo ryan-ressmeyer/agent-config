@@ -47,7 +47,11 @@ export default function (pi: ExtensionAPI) {
     return findRepositoryRoot(extensionDirectory, runner);
   }
 
-  async function applyUpdate(ctx: ExtensionCommandContext, repoRoot: string): Promise<void> {
+  async function applyUpdate(
+    ctx: ExtensionContext,
+    repoRoot: string,
+    reload?: () => Promise<void>,
+  ): Promise<void> {
     ctx.ui.setStatus("agent-config-updater", "Updating agent-config...");
     let commit: string;
     try {
@@ -59,8 +63,13 @@ export default function (pi: ExtensionAPI) {
     }
 
     ctx.ui.setStatus("agent-config-updater", undefined);
+    if (!reload) {
+      ctx.ui.notify(`agent-config updated to ${commit.slice(0, 8)}. Run /reload to load the new resources.`, "info");
+      return;
+    }
+
     ctx.ui.notify(`agent-config updated to ${commit.slice(0, 8)}. Reloading resources...`, "info");
-    await ctx.reload();
+    await reload();
     return;
   }
 
@@ -110,12 +119,13 @@ export default function (pi: ExtensionAPI) {
     const accepted = await offerUpdate(ctx, state);
     if (!accepted) return;
 
-    if (options.commandContext) {
-      await applyUpdate(options.commandContext, repoRoot);
+    const commandContext = options.commandContext;
+    if (commandContext) {
+      await applyUpdate(commandContext, repoRoot, () => commandContext.reload());
       return;
     }
 
-    pi.sendUserMessage("/config-update --apply");
+    await applyUpdate(ctx, repoRoot);
   }
 
   pi.on("session_start", (event, ctx) => {
@@ -129,7 +139,7 @@ export default function (pi: ExtensionAPI) {
     handler: async (args, ctx) => {
       if (args.trim() === "--apply") {
         try {
-          await applyUpdate(ctx, await getRepositoryRoot());
+          await applyUpdate(ctx, await getRepositoryRoot(), () => ctx.reload());
         } catch (error) {
           ctx.ui.notify(`Could not locate agent-config: ${error instanceof Error ? error.message : String(error)}`, "error");
         }
