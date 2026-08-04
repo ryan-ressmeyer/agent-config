@@ -182,23 +182,14 @@ ansa note add \
 
 `--target` creates the `note_of` edge from the new note → the theme collection.
 
-**If a synthesis note already exists** (from Step 4), update its body:
+**If a synthesis note already exists** (from Step 4), overwrite its body:
 
 ```bash
-ansa note edit <note-uuid>
+ansa note set-body <note-uuid> --body-file /tmp/theme-<name>.md
 ```
 
-`note edit` opens `$EDITOR` on the current body. For an agent-driven overwrite, invoke `python-environment`, resolve the configured remote URL through `ansa-reference`, and use Python:
-
-```bash
-uv run --with ansa-cli python - <<'PY'
-from ansa_cli.client import Client
-c = Client.over_http("<ANSA_URL>")
-body = open("/tmp/theme-<name>.md").read()
-c.update_note("<note-uuid>", body=body)
-print("ok")
-PY
-```
+`--body-file` takes a path, or `-` to read stdin. It works the same over a
+remote as it does locally.
 
 ### Step 7 — Present for review
 

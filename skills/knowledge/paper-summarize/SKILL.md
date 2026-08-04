@@ -115,17 +115,15 @@ same node-link convention as `theme-synthesize`.
 
 ### Step 5 — Write the scratchpad
 
-PUT the rendered body. There is no CLI flag for this today (`ansa paper scratchpad --edit` opens `$EDITOR`, which doesn't fit an agent workflow). Invoke `python-environment`, resolve the configured remote URL as described by `ansa-reference`, and use a short inline Python call:
+Write the body to a file, then hand it to the CLI. `--set-file` takes a path, or
+`-` to read stdin; `--edit` opens `$EDITOR`, which doesn't fit an agent workflow.
 
 ```bash
-uv run --with ansa-cli python - <<'PY'
-from ansa_cli.client import Client
-c = Client.over_http("<ANSA_URL>")
-body = open("/tmp/qlmri-<UUID>.md").read()  # or pass a heredoc
-c.put_scratchpad("<UUID>", body)
-print("ok")
-PY
+ansa paper scratchpad <UUID> --set-file /tmp/qlmri-<UUID>.md
 ```
+
+Over a remote-only install (no papers plugin installed locally), the same write
+is `ansa paper set-scratchpad <UUID> --body-file /tmp/qlmri-<UUID>.md`.
 
 Round-trip to confirm:
 
