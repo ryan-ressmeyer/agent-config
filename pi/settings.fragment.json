@@ -10,6 +10,7 @@
     "npm:pi-profile",
     "npm:pi-docparser",
     "npm:pi-updater",
-    "npm:@nguyenquangthai/pi-ask"
+    "npm:@nguyenquangthai/pi-ask",
+    "npm:pi-blackhole"
   ]
 }
