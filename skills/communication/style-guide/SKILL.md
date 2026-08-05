@@ -33,6 +33,60 @@ These are shared across all contexts.
 7. **Vary rhythm.** Mix sentence lengths. Don't stack short punchy fragments. Don't let every paragraph end the same way.
 8. **Be specific.** No vague declaratives ("The implications are significant"). Name the specific thing.
 
+## Serial Reading
+
+The reader moves forward once and cannot see what you can see. You hold the finished
+passage; they hold the last few sentences. These four rules all follow from that asymmetry,
+and they take precedence over the sentence-level rules below — a paragraph with the wrong
+opening sentence or an undefined term is not improved by fixing its adverbs.
+
+### Open on the claim, not the approach to it
+
+The first sentence of a paragraph must assert something. If it licenses the analysis,
+orients the reader, or explains why the question matters, it is preparation. Delete it and
+start at the next sentence.
+
+Preparation reads as competent, which is why it survives self-review. It is nonetheless the
+single most frequently rejected thing an agent writes.
+
+**Check:** cover the first sentence. If the paragraph still stands and loses nothing but
+throat-clearing, that sentence was preparation.
+
+### Introduce before you use
+
+A term is introduced when the reader first meets it, not when you first did. Drafting the
+whole passage gives you knowledge the reader lacks at every point before the definition.
+
+Before using a technical term, condition name, or symbol, confirm it was introduced earlier
+in **reading order** — earlier in the document, not earlier in your reasoning. If it was
+not, introduce it in place or use the long form.
+
+This failure is silent: the sentence is correct, and it is correct *to you*. Preserving the
+author's exact terminology is not a reason to use that terminology before it is defined;
+that trades the reader's comprehension for consistency.
+
+### Spend words to relieve working memory
+
+Concision is subordinate to what the reader can hold. When a shorthand requires recalling a
+referent from more than a sentence or two back, replace it with the full description even
+though the sentence gets longer.
+
+"The drop between the two" forces a backward search. "The gap between the uncorrected
+residual and that floor" does not. The second is longer and better.
+
+Length is not the cost function. A sentence is too long when it carries more than the
+reader can hold, not when it exceeds a word count. An instruction to "tighten" is not
+licence to compress past that limit.
+
+### A seam that needs a bridge needs restructuring
+
+When you find yourself writing a connective sentence to smooth a transition — stating a
+relation you have just worked out so that the next paragraph follows — stop. That impulse
+is evidence the material is in the wrong order.
+
+Reorder the surrounding text and propose the reordering. A bridging sentence asserts
+something the reader has no setup for, in the register of something already established.
+
 ## Context-Specific Adjustments
 
 These document where each register relaxes or tightens the shared rules.
@@ -200,7 +254,18 @@ Interestingly, Notably, Remarkably, Crucially — only with strong justification
 
 ## Quick Checks
 
-Run this checklist before delivering any prose.
+Run the passage checks first. Fixing word choice inside a paragraph that opens on
+preparation or uses an undefined term is wasted work.
+
+### Passage
+
+- Does each paragraph open on a claim rather than preparation for one?
+- Is every technical term, condition name, and symbol introduced before its first use in
+  reading order?
+- Does any shorthand require recalling a referent from more than a sentence or two back?
+- Is any sentence bridging a seam that reordering would fix?
+
+### Sentence and word
 
 - Any filler phrases or throat-clearing? Cut to the point.
 - Any binary contrasts or false reframes? State the positive claim directly.

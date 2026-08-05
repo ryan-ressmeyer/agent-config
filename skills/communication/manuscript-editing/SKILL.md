@@ -98,9 +98,21 @@ For each step in the plan:
    - `[NEW]` — new connective text, framing, or transitions
 
    All `[MODIFIED]` and `[NEW]` text must be written under the `style-guide` voice principles and blacklist loaded during Setup. This means the draft is clean on first presentation — not written sloppily and fixed later.
-2. **Review.** Present the draft to the user. Explain what's new vs. moved. Flag any decisions that need user input.
+2. **Review.** Present the draft to the user. Explain what's new vs. moved.
+
+   **Offer drafts, not decisions.** Where a real choice exists, write each option out in
+   full as it would appear in the manuscript and label them. Do not close the turn with a
+   stack of open questions — they go unanswered, and the user rewrites instead of replying.
+   If a question genuinely blocks progress, ask exactly one and wait. If it does not block,
+   draft the version you judge correct and let the diff carry the question.
 3. **Revise.** Iterate on the draft based on user feedback until approved. Continue writing under `style-guide` for any new or rewritten text in revisions.
-4. **Integrate.** Apply the approved draft to the manuscript.
+
+   **Treat the user's stated reason as a pointer, not a specification.** Their words locate
+   where their attention snagged; the defect is often adjacent to it. Inspect the
+   surrounding text before implementing. If you diagnose a different problem than the one
+   named, present both the requested fix and the diagnosed one, and say how they differ.
+4. **Integrate.** Apply the approved draft to the manuscript — **one prose edit, then stop
+   and report.** See Rule 6 for the invariant.
 5. **Verify.** Read back the affected region to confirm the edit landed correctly. Check for broken cross-references (`\ref` to removed `\label`s), orphaned content, and formatting issues.
 
 **If the step is a straightforward move, cut, or rearrangement:**
@@ -139,7 +151,17 @@ These are baked into the skill's behavior, not suggestions:
 3. **Always verify after integrating.** Read back affected regions and check cross-references after every edit.
 4. **Invoke `style-guide` before writing any prose.** It must be loaded via the Skill tool during Setup so its voice principles and blacklist govern all `[MODIFIED]` and `[NEW]` text from the moment of drafting. Writing first and checking later is not acceptable.
 5. **Save drafts to `reviews/YYYY-MM-DD/`.** Working drafts are artifacts the user may want to reference later.
-6. **One step at a time.** Complete and confirm each step before moving to the next.
+6. **One prose edit per user turn.** After applying a prose edit, stop and report. Do not
+   apply a second prose edit until the user has responded.
+
+   The invariant: **approval of a plan is not approval of its prose.** An approved revision
+   plan authorizes the *sequence*; each piece of writing in it still needs its own look.
+   Neither a long session, an approaching stopping point, nor an earlier "go ahead" converts
+   plan approval into blanket approval, and batching "just the small ones" does not satisfy
+   this rule. If applying edits one at a time feels too slow, say so and ask the user to
+   relax the rule explicitly — do not relax it yourself.
+
+   Verbatim moves and cuts of existing prose are exempt; this governs new and rewritten text.
 
 ## Skill Dependencies
 
