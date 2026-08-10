@@ -25,6 +25,17 @@ HOME="$HOME_DIR" "$REPO/install.sh" </dev/null >/dev/null
   exit 1
 }
 
+BLACKHOLE_SOURCE="$REPO/pi/pi-blackhole/pi-blackhole-config.json"
+BLACKHOLE_TARGET="$HOME_DIR/.pi/agent/pi-blackhole/pi-blackhole-config.json"
+[[ -f "$BLACKHOLE_TARGET" ]] || {
+  printf 'headless install did not deploy Blackhole config\n' >&2
+  exit 1
+}
+cmp -s "$BLACKHOLE_SOURCE" "$BLACKHOLE_TARGET" || {
+  printf 'deployed Blackhole config differs from tracked source\n' >&2
+  exit 1
+}
+
 [[ -L "$REPO/.git/hooks/pre-commit" ]] || {
   printf 'installer exited before completing the post-key steps\n' >&2
   exit 1

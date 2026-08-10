@@ -120,7 +120,19 @@ install_symlinks() {
   symlink "$REPO/pi/themes"     "$PI_DIR/themes"
 }
 
-# --- step 3: generated context files ---
+# --- step 3: managed pi config files ---
+
+install_pi_configs() {
+  info "installing pi config files"
+  local blackhole_source="$REPO/pi/pi-blackhole/pi-blackhole-config.json"
+  local blackhole_target="$PI_DIR/pi-blackhole/pi-blackhole-config.json"
+
+  mkdir -p "$(dirname "$blackhole_target")"
+  install -m 0644 "$blackhole_source" "$blackhole_target"
+  ok "wrote $blackhole_target"
+}
+
+# --- step 4: generated context files ---
 # AGENTS.md / CLAUDE.md are generated, not symlinked, so per-machine content
 # stays per-machine.
 
@@ -146,7 +158,7 @@ generate_context_files() {
   ok "wrote $CLAUDE_DIR/CLAUDE.md"
 }
 
-# --- step 4: settings merges ---
+# --- step 5: settings merges ---
 
 merge_settings() {
   info "merging settings fragments"
@@ -163,7 +175,7 @@ merge_settings() {
   "$MERGE" "$REPO/claude/settings.fragment.json"             "$CLAUDE_DIR/settings.json"
 }
 
-# --- step 5: OpenRouter key ---
+# --- step 6: OpenRouter key ---
 
 ensure_openrouter_key() {
   info "checking OpenRouter API key"
@@ -221,7 +233,7 @@ PY
   ok "wrote OpenRouter key to $auth (mode 600)"
 }
 
-# --- step 6: pre-commit hook ---
+# --- step 7: pre-commit hook ---
 
 install_precommit_hook() {
   info "installing pre-commit hook"
@@ -259,6 +271,7 @@ main() {
 
   ensure_machine_dir
   install_symlinks
+  install_pi_configs
   generate_context_files
   merge_settings
   ensure_openrouter_key

@@ -5,6 +5,7 @@ Personal coding-agent configuration for [pi](https://github.com/badlogic/pi-mono
 Single source of truth for:
 - **Skills** (cross-tool, symlinked into both agents)
 - **Pi extensions, prompts, themes** (pi-only, symlinked into `~/.pi/agent/`)
+- **Pi extension configuration** (installed into `~/.pi/agent/`)
 - **Global context files** (generated `AGENTS.md` / `CLAUDE.md`)
 - **Settings fragments** (idempotently merged into each tool's settings.json)
 - **Per-machine overrides** (hostname-keyed)
@@ -38,6 +39,7 @@ agent-config/
 │   ├── extensions/             # pi-only TS extensions
 │   ├── prompts/                # pi-only /slash templates
 │   ├── themes/                 # pi-only themes
+│   ├── pi-blackhole/           # managed pi-blackhole configuration
 │   ├── settings.fragment.json  # merged into ~/.pi/agent/settings.json
 │   └── keybindings.fragment.json
 ├── claude/
@@ -60,13 +62,14 @@ agent-config/
 2. **Creates symlinks:**
    - Each `skills/<category>/<name>/` → `~/.claude/skills/<name>` and `~/.agents/skills/<name>`
    - `pi/{extensions,prompts,themes}/` → `~/.pi/agent/{extensions,prompts,themes}`
-3. **Generates context files** (NOT symlinks): concatenates `machines/$HOSTNAME/context.md` + `shared/AGENTS.md` (machine first, shared second) into `~/.pi/agent/AGENTS.md` and `~/.claude/CLAUDE.md`.
-4. **Merges settings fragments** idempotently:
+3. **Installs extension configuration:** copies `pi/pi-blackhole/pi-blackhole-config.json` to `~/.pi/agent/pi-blackhole/pi-blackhole-config.json`.
+4. **Generates context files** (NOT symlinks): concatenates `machines/$HOSTNAME/context.md` + `shared/AGENTS.md` (machine first, shared second) into `~/.pi/agent/AGENTS.md` and `~/.claude/CLAUDE.md`.
+5. **Merges settings fragments** idempotently:
    - `pi/settings.fragment.json` + `machines/$HOSTNAME/settings.fragment.json` → `~/.pi/agent/settings.json`
    - `pi/keybindings.fragment.json` → `~/.pi/agent/keybindings.json`
    - `claude/settings.fragment.json` → `~/.claude/settings.json`
-5. **Prompts for the OpenRouter API key** during interactive installation if it is absent from `~/.pi/agent/auth.json`; headless runs skip this step.
-6. **Installs the pre-commit hook** (`scripts/check-no-secrets.sh`) into this repo's `.git/hooks/`.
+6. **Prompts for the OpenRouter API key** during interactive installation if it is absent from `~/.pi/agent/auth.json`; headless runs skip this step.
+7. **Installs the pre-commit hook** (`scripts/check-no-secrets.sh`) into this repo's `.git/hooks/`.
 
 ## Adding new skills, extensions, prompts, themes
 
