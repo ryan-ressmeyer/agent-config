@@ -109,7 +109,7 @@ When you invoke a skill, say so briefly: "Using `<skill-name>` to <purpose>." Th
 ## Common starting points
 
 - Building or extending the literature knowledge graph → `ansa-literature-review` (orchestrator), `paper-summarize`, `theme-synthesize`
-- Writing a manuscript → `manuscript-planning`, `literature-writer`, `manuscript-review`, `style-guide`
+- Planning or drafting a manuscript → `manuscript-planning`, `literature-writer`, `style-guide`
 - Exploratory or explanatory analysis — a walkthrough, building intuition, an "analysis I can learn from" → `exploratory-notebook` (drives a live marimo notebook; delegates kernel mechanics to `marimo-pair`)
 - Implementing a feature or bugfix → `test-driven-development` (failing test first, always)
 - Bug or unexpected behavior → `systematic-debugging` before proposing fixes
