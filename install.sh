@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # agent-config installer — idempotent.
-# Wires skills, extensions, prompts, themes, context files, and settings
+# Wires skills, agents, extensions, prompts, themes, context files, and settings
 # into both pi (~/.pi/agent/) and Claude Code (~/.claude/).
 set -euo pipefail
 
@@ -115,6 +115,7 @@ install_symlinks() {
   install_skill_links
 
   # pi-only resources
+  symlink "$REPO/pi/agents"     "$PI_DIR/agents"
   symlink "$REPO/pi/extensions" "$PI_DIR/extensions"
   symlink "$REPO/pi/prompts"    "$PI_DIR/prompts"
   symlink "$REPO/pi/themes"     "$PI_DIR/themes"
