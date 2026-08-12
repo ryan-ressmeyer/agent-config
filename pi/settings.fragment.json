@@ -11,6 +11,7 @@
     "npm:pi-docparser",
     "npm:pi-updater",
     "npm:@nguyenquangthai/pi-ask",
-    "npm:pi-blackhole"
+    "npm:pi-blackhole",
+    "git:github.com/edxeth/pi-subagents"
   ]
 }
