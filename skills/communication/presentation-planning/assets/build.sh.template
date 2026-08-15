@@ -33,10 +33,20 @@ uv run tools/compile.py \
     -o "${OUTPUT_NAME}.md"
 
 # --- Render with Marp.
+#
+# `--no-stdin` IS NOT OPTIONAL. marp-cli treats a non-TTY stdin as a markdown
+# source and blocks until EOF ("Currently waiting data from stdin stream").
+# From an interactive terminal stdin is a TTY, so it is skipped and the bug is
+# invisible; from anything handing the script an open pipe or socket on fd 0 —
+# CI, an editor task, an agent harness — marp waits on that fd forever. It never
+# launches Chromium, never writes output, and sits at 0% CPU looking like a slow
+# render. With `set -e` the PDF call is first, so every hang looks like "the PDF
+# step is stuck". The tell is /proc/<pid>/fd/0 pointing at a socket, not
+# /dev/null. It CANNOT be set in .marprc.yml — `stdin: false` there is ignored.
 npx --yes @marp-team/marp-cli@latest \
-    --allow-local-files --html \
+    --allow-local-files --html --no-stdin \
     "${OUTPUT_NAME}.md" -o "${OUTPUT_NAME}.pdf"
 
 npx --yes @marp-team/marp-cli@latest \
-    --allow-local-files --html \
+    --allow-local-files --html --no-stdin \
     "${OUTPUT_NAME}.md" -o "${OUTPUT_NAME}.html"

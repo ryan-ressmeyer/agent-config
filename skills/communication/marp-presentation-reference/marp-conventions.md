@@ -490,6 +490,19 @@ The deck should be renderable at any point during Stages 3–5 — rendering is 
 
 `build.sh` invokes `tools/compile.py` to splice `script.md` into `slides.md` (a no-op if `script.md` does not yet exist or is empty — which is the normal state during Stages 3–4), then runs marp-cli for HTML and PDF. **Do not** call `npx @marp-team/marp-cli slides.md --pdf` directly: at Stage 5 onward that renders the raw, unspliced `slides.md` and the deck ships with no speaker notes. marp-cli auto-discovers `.marprc.yml`, so theme registration and `allowLocalFiles` are picked up automatically.
 
+### A build that hangs is stdin, not a slow render
+
+Every marp-cli invocation needs `--no-stdin`. marp-cli treats a non-TTY stdin as a markdown input source and waits for EOF before converting:
+
+```
+[ INFO ] Currently waiting data from stdin stream. Conversion will start after
+         finished reading. (Pass --no-stdin option if it was not intended)
+```
+
+From an interactive terminal stdin is a TTY, so marp skips it and the bug never reproduces by hand. It bites when something hands the script an open pipe or socket on fd 0 that never closes — CI, an editor task, an agent harness. marp then waits forever: no Chromium child, no output written, 0% CPU, indistinguishable from a slow render. Because `build.sh` renders the PDF first and uses `set -e`, the hang always presents as "the PDF step is stuck."
+
+Recognise it by `ls -l /proc/<pid>/fd/0` pointing at a `socket:` or `pipe:` instead of `/dev/null`. It **cannot** be fixed in `.marprc.yml`; `stdin: false` there is ignored. `build.sh` passes the flag already — add it to any ad-hoc marp-cli call too, e.g. when rendering a few slides to PNG for a layout check.
+
 **When to render:**
 - After writing an initial batch of Stage 3 slides, to confirm titles don't wrap and inline scaffolding comments aren't leaking onto the slide face.
 - After Stage 4 figure placeholders are added, to confirm sizing directives work.
