@@ -29,7 +29,21 @@ SLIDE_SEP_RE = re.compile(r"^---\s*$")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 COMMENT_RE = re.compile(r"<!--(.*?)-->", re.DOTALL)
 ID_DIRECTIVE_RE = re.compile(r"^\s*_id\s*:\s*([A-Za-z0-9][A-Za-z0-9_-]*)\s*$")
-MARP_DIRECTIVE_RE = re.compile(r"^\s*_?[A-Za-z][A-Za-z0-9]*\s*:")
+# Only a comment naming an ACTUAL Marp directive counts as one; a directive is kept
+# verbatim in the compiled deck, and Marp renders every comment it finds as a presenter
+# note. The old pattern was `_?[A-Za-z][A-Za-z0-9]*\s*:`, which matches any `Word:`
+# shape — so authoring comments like `<!-- FIGURE: recycled as-is. Build 1 of 3. -->`
+# were treated as directives and surfaced in the speaker notes. Names are Marp's own
+# (case-sensitive), optionally `_`-prefixed for the spot/local form, plus this
+# workflow's own `_id`.
+_MARP_DIRECTIVE_NAMES = (
+    "marp theme style headingDivider paginate header footer class color size "
+    "backgroundColor backgroundImage backgroundPosition backgroundRepeat "
+    "backgroundSize transition math lang"
+).split()
+MARP_DIRECTIVE_RE = re.compile(
+    r"^\s*(?:_id|_?(?:" + "|".join(_MARP_DIRECTIVE_NAMES) + r"))\s*:"
+)
 AUTHOR_COMMENT_RE = re.compile(r"^\s*@(?:\s|$)")
 BLOCK_HEADER_RE = re.compile(r"^##\s+(@.+?)\s*$")
 SELECTOR_RE = re.compile(r"^@([A-Za-z0-9][A-Za-z0-9_-]*)(?:\.\.([A-Za-z0-9][A-Za-z0-9_-]*))?$")
