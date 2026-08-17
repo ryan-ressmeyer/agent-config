@@ -35,16 +35,33 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from parser import COMMENT_RE, SlidesDoc, parse_script, parse_slides, route  # noqa: E402
 
+# Placeholder for a stripped comment; see strip_slide_comments. Never survives output.
+SENTINEL = "\x00"
+
 
 def strip_slide_comments(body: str, slide_id: str) -> tuple[str, list[str]]:
-    """Strip non-directive comments from a slide body. Returns (new_body, warnings)."""
+    """Strip non-directive comments from a slide body. Returns (new_body, warnings).
+
+    Stripped comments are replaced with SENTINEL rather than "", and any line left
+    holding nothing but sentinels is then deleted outright. Replacing a whole-line
+    comment with "" would leave a BLANK LINE behind, and a blank line inside a run
+    of HTML ends the HTML block (CommonMark). The next line then re-enters as
+    markdown, and a nested <div> indented four spaces reads as an indented code
+    block — so the slide renders its own markup as visible text.
+
+    This bites any deck whose layout comments sit INSIDE the HTML scaffolding,
+    between e.g. `    </div>` and `    <div ...>` with no blank line on either
+    side. It only appears at Stage 5, when script.md turns stripping on, so it
+    presents as figures breaking rather than as a compiler bug. Deleting the
+    whole line is the only edit that preserves the HTML block.
+    """
     warnings: list[str] = []
 
     def repl(m: re.Match[str]) -> str:
         inner = m.group(1)
         stripped = inner.strip()
         if not stripped:
-            return ""  # empty comment
+            return SENTINEL  # empty comment
         first_line = stripped.splitlines()[0]
         # Marp directive: keep
         from parser import (
@@ -54,11 +71,11 @@ def strip_slide_comments(body: str, slide_id: str) -> tuple[str, list[str]]:
         )
         if "\n" not in stripped:
             if ID_DIRECTIVE_RE.match(stripped):
-                return ""  # consumed
+                return SENTINEL  # consumed
             if MARP_DIRECTIVE_RE.match(stripped):
                 return m.group(0)
         if AUTHOR_COMMENT_RE.match(first_line):
-            return ""  # silently stripped
+            return SENTINEL  # silently stripped
         # Anything else: stripped with warning if non-trivial.
         word_count = len(stripped.split())
         if word_count >= 3:
@@ -67,9 +84,17 @@ def strip_slide_comments(body: str, slide_id: str) -> tuple[str, list[str]]:
                 f"slide {slide_id!r}: stripped non-directive comment "
                 f"({word_count} words; \"{preview}...\") — script.md is the source of truth"
             )
-        return ""
+        return SENTINEL
 
-    return COMMENT_RE.sub(repl, body), warnings
+    marked = COMMENT_RE.sub(repl, body)
+    kept: list[str] = []
+    for line in marked.split("\n"):
+        if SENTINEL in line:
+            if not line.replace(SENTINEL, "").strip():
+                continue  # the comment was the whole line; drop the line
+            line = line.replace(SENTINEL, "")  # inline comment; keep the rest
+        kept.append(line)
+    return "\n".join(kept), warnings
 
 
 def render(slides: SlidesDoc, notes: dict[str, str]) -> tuple[str, list[str]]:
