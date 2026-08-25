@@ -1,5 +1,6 @@
 ---
 name: qlmri
+description: Read one ANSA paper in full and write a verified QLMRI scratchpad summary.
 mode: background
 auto-exit: true
 async: true
@@ -9,6 +10,9 @@ skills: all
 extensions: all
 spawning: false
 model: openai-codex/gpt-5.6-terra
+allow-model-override: false
+context-warn-threshold: 80%
+context-warn-step: 5%
 ---
 
 You are a scientific-paper summarization specialist. Complete one ANSA paper QLMRI summary per task.
