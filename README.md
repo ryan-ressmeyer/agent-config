@@ -1,9 +1,9 @@
 # agent-config
 
-Personal coding-agent configuration for [pi](https://github.com/badlogic/pi-mono) and [Claude Code](https://claude.ai/code).
+Personal coding-agent configuration for [pi](https://github.com/badlogic/pi-mono), [Claude Code](https://claude.ai/code), and [Codex](https://developers.openai.com/codex/cli/).
 
 Single source of truth for:
-- **Skills** (cross-tool, symlinked into both agents)
+- **Skills** (cross-tool, symlinked into each agent's discovery path)
 - **Pi extensions, prompts, themes** (pi-only, symlinked into `~/.pi/agent/`)
 - **Extension configuration** (installed into tool-specific and XDG config directories)
 - **Global context files** (generated `AGENTS.md` / `CLAUDE.md`)
@@ -45,7 +45,7 @@ agent-config/
 ├── claude/
 │   └── settings.fragment.json  # merged into ~/.claude/settings.json
 ├── shared/
-│   └── AGENTS.md               # common context; prepended into both tools' context files
+│   └── AGENTS.md               # common context; prepended into all tools' context files
 ├── machines/
 │   ├── default/                # template; copied to machines/<hostname>/ on first install
 │   └── <hostname>/             # per-machine context + settings overrides
@@ -62,8 +62,8 @@ agent-config/
 2. **Creates symlinks:**
    - Each `skills/<category>/<name>/` → `~/.claude/skills/<name>` and `~/.agents/skills/<name>`
    - `pi/{extensions,prompts,themes}/` → `~/.pi/agent/{extensions,prompts,themes}`
-3. **Installs extension configuration:** copies the Blackhole config into `~/.pi/agent/` and the Ponytail config into `${XDG_CONFIG_HOME:-$HOME/.config}/ponytail/`. Ponytail is available in Pi and Claude Code but starts in `off` mode; run `/ponytail full`, `/ponytail lite`, or `/ponytail ultra` to opt in for a session.
-4. **Generates context files** (NOT symlinks): concatenates `machines/$HOSTNAME/context.md` + `shared/AGENTS.md` (machine first, shared second) into `~/.pi/agent/AGENTS.md` and `~/.claude/CLAUDE.md`.
+3. **Installs extension configuration:** copies the Blackhole config into `~/.pi/agent/` and the Ponytail config into `${XDG_CONFIG_HOME:-$HOME/.config}/ponytail/`. Ponytail is available in Pi, Claude Code, and Codex but starts in `off` mode; run `/ponytail full`, `/ponytail lite`, or `/ponytail ultra` to opt in for a session.
+4. **Generates context files** (NOT symlinks): concatenates `machines/$HOSTNAME/context.md` + `shared/AGENTS.md` (machine first, shared second) into `~/.pi/agent/AGENTS.md`, `~/.claude/CLAUDE.md`, and `~/.codex/AGENTS.md`.
 5. **Merges settings fragments** idempotently:
    - `pi/settings.fragment.json` + `machines/$HOSTNAME/settings.fragment.json` → `~/.pi/agent/settings.json`
    - `pi/keybindings.fragment.json` → `~/.pi/agent/keybindings.json`

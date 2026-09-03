@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # agent-config installer — idempotent.
 # Wires skills, agents, extensions, prompts, themes, context files, and settings
-# into both pi (~/.pi/agent/) and Claude Code (~/.claude/).
+# into pi (~/.pi/agent/), Claude Code (~/.claude/), and Codex (~/.codex/).
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
@@ -11,6 +11,7 @@ DEFAULT_MACHINE_DIR="$REPO/machines/default"
 
 PI_DIR="$HOME/.pi/agent"
 CLAUDE_DIR="$HOME/.claude"
+CODEX_DIR="$HOME/.codex"
 AGENTS_DIR="$HOME/.agents"
 
 MERGE="$REPO/scripts/merge-json.py"
@@ -163,11 +164,13 @@ generate_context_files() {
   fi
   cat "$REPO/shared/AGENTS.md" >> "$combined"
 
-  mkdir -p "$PI_DIR" "$CLAUDE_DIR"
+  mkdir -p "$PI_DIR" "$CLAUDE_DIR" "$CODEX_DIR"
   install -m 0644 "$combined" "$PI_DIR/AGENTS.md"
   install -m 0644 "$combined" "$CLAUDE_DIR/CLAUDE.md"
+  install -m 0644 "$combined" "$CODEX_DIR/AGENTS.md"
   ok "wrote $PI_DIR/AGENTS.md"
   ok "wrote $CLAUDE_DIR/CLAUDE.md"
+  ok "wrote $CODEX_DIR/AGENTS.md"
 }
 
 # --- step 5: settings merges ---
