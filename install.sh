@@ -133,6 +133,17 @@ install_pi_configs() {
   ok "wrote $blackhole_target"
 }
 
+install_ponytail_config() {
+  info "installing Ponytail config"
+  local config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
+  local source="$REPO/ponytail/config.json"
+  local target="$config_root/ponytail/config.json"
+
+  mkdir -p "$(dirname "$target")"
+  install -m 0644 "$source" "$target"
+  ok "wrote $target"
+}
+
 # --- step 4: generated context files ---
 # AGENTS.md / CLAUDE.md are generated, not symlinked, so per-machine content
 # stays per-machine.
@@ -273,6 +284,7 @@ main() {
   ensure_machine_dir
   install_symlinks
   install_pi_configs
+  install_ponytail_config
   generate_context_files
   merge_settings
   ensure_openrouter_key

@@ -22,7 +22,7 @@ cd ~/code/agent-config
 
 1. **Creates `machines/<hostname>/`** from `machines/default/` if it doesn't exist yet.
 2. **Symlinks** each categorized skill into the flat `~/.claude/skills/` and `~/.agents/skills/` namespaces; pi-only dirs → `~/.pi/agent/`.
-3. **Installs pi extension configuration**, including the managed Blackhole preset at `~/.pi/agent/pi-blackhole/pi-blackhole-config.json`.
+3. **Installs extension configuration**, including the managed Blackhole preset and the shared Ponytail default-mode config under the XDG config directory.
 4. **Generates context files** (not symlinks): concatenates `machines/<hostname>/context.md` + `shared/AGENTS.md` into `~/.claude/CLAUDE.md` and `~/.pi/agent/AGENTS.md`. Machine context goes first.
 5. **Merges settings fragments** idempotently via `scripts/merge-json.py`: dict keys override, list items union. Order: `pi/settings.fragment.json` → `machines/<hostname>/settings.fragment.json` → `~/.pi/agent/settings.json`; `claude/settings.fragment.json` → `~/.claude/settings.json`.
 6. **Skips OpenRouter key setup in headless runs**, then installs the pre-commit hook (`scripts/check-no-secrets.sh`) that blocks `auth.json`, `.env`, and staged API key patterns.

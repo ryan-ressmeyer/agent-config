@@ -12,6 +12,7 @@
     "npm:pi-updater",
     "npm:@nguyenquangthai/pi-ask",
     "npm:pi-blackhole",
-    "git:github.com/edxeth/pi-subagents"
+    "git:github.com/edxeth/pi-subagents",
+    "git:github.com/DietrichGebert/ponytail@v4.9.0"
   ]
 }

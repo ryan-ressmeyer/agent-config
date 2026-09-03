@@ -5,7 +5,7 @@ Personal coding-agent configuration for [pi](https://github.com/badlogic/pi-mono
 Single source of truth for:
 - **Skills** (cross-tool, symlinked into both agents)
 - **Pi extensions, prompts, themes** (pi-only, symlinked into `~/.pi/agent/`)
-- **Pi extension configuration** (installed into `~/.pi/agent/`)
+- **Extension configuration** (installed into tool-specific and XDG config directories)
 - **Global context files** (generated `AGENTS.md` / `CLAUDE.md`)
 - **Settings fragments** (idempotently merged into each tool's settings.json)
 - **Per-machine overrides** (hostname-keyed)
@@ -62,7 +62,7 @@ agent-config/
 2. **Creates symlinks:**
    - Each `skills/<category>/<name>/` → `~/.claude/skills/<name>` and `~/.agents/skills/<name>`
    - `pi/{extensions,prompts,themes}/` → `~/.pi/agent/{extensions,prompts,themes}`
-3. **Installs extension configuration:** copies `pi/pi-blackhole/pi-blackhole-config.json` to `~/.pi/agent/pi-blackhole/pi-blackhole-config.json`.
+3. **Installs extension configuration:** copies the Blackhole config into `~/.pi/agent/` and the Ponytail config into `${XDG_CONFIG_HOME:-$HOME/.config}/ponytail/`. Ponytail is available in Pi and Claude Code but starts in `off` mode; run `/ponytail full`, `/ponytail lite`, or `/ponytail ultra` to opt in for a session.
 4. **Generates context files** (NOT symlinks): concatenates `machines/$HOSTNAME/context.md` + `shared/AGENTS.md` (machine first, shared second) into `~/.pi/agent/AGENTS.md` and `~/.claude/CLAUDE.md`.
 5. **Merges settings fragments** idempotently:
    - `pi/settings.fragment.json` + `machines/$HOSTNAME/settings.fragment.json` → `~/.pi/agent/settings.json`

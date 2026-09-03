@@ -13,6 +13,7 @@ cp -a \
   "$ROOT/scripts" \
   "$ROOT/pi" \
   "$ROOT/claude" \
+  "$ROOT/ponytail" \
   "$ROOT/shared" \
   "$ROOT/machines" \
   "$ROOT/skills" \
