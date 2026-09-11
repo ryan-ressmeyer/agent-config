@@ -1,6 +1,7 @@
 ---
 name: literature-writer
-description: Use when writing scientific paper sections (introduction, discussion, or any section needing citations) that should draw on papers from the literature database
+description: Use when the user explicitly invokes /literature-writer to draft cited paper sections from the literature database.
+disable-model-invocation: true
 ---
 
 # Literature Writer
@@ -93,7 +94,7 @@ If a claim needs a citation but no supporting paper exists in the database:
 
 > "This claim about X needs a citation, but I don't have a supporting paper in the database. Would you like to search for one?"
 
-Offer to switch to `ansa-literature-review` to add the missing paper.
+Suggest the user run `/ansa-literature-review` to add the missing paper.
 
 ### Step 6: Reference Key Figures
 

@@ -1,6 +1,7 @@
 ---
 name: manuscript-planning
-description: "Use when planning a scientific manuscript from existing data and analyses, when exploring which questions a dataset can answer, when iterating on paper structure and framing, or when deciding what analyses to run next to strengthen a paper"
+description: Use when the user explicitly invokes /manuscript-planning to plan a scientific manuscript from existing data and analyses.
+disable-model-invocation: true
 ---
 
 # Manuscript Planning
@@ -140,7 +141,7 @@ digraph manuscript_planning {
 - Load `ansa-reference` for the current literature graph, query, paper, scratchpad, and theme conventions.
 - Read relevant paper scratchpads and theme synthesis notes to understand field context.
 - Use ANSA search and structured query to find papers relevant to a hypothesis.
-- When literature gaps are found, hand off to `ansa-literature-review`.
+- When literature gaps are found, suggest the user run `/ansa-literature-review`.
 - Apply `scientific-claims-reference` when comparing the manuscript's results with prior work.
 
 ## Impact is Negotiated
@@ -162,9 +163,9 @@ When invoked, the agent should:
 ## Skill Dependencies
 
 - `ansa-reference` — retrieve literature graph and ANSA usage context
-- `ansa-literature-review` — hand off when literature gaps are found
+- `/ansa-literature-review` — suggest to the user when literature gaps are found
 - `scientific-claims-reference` — scope evidence and cross-study claims
-- `literature-writer` — hand off when plan is ready for prose
+- `/literature-writer` — suggest to the user when the plan is ready for prose
 - `python-environment` — all script execution (REQUIRED before running any Python)
 - `systematic-debugging` — when analyses fail
 - `test-driven-development` — when building analysis pipelines

@@ -31,7 +31,7 @@ cd ~/code/agent-config
 
 Add `skills/<category>/<name>/SKILL.md`, then run `./install.sh` to create its individual links.
 
-Skills require YAML frontmatter with `name` (lowercase letters, numbers, and hyphens) and `description` (≤1024 characters, starts with "Use when…", third-person, retrieval or invocation triggers only — never a workflow summary). User-invoked workflows may also set `disable-model-invocation: true`; reference skills must remain model-invoked so agents can retrieve them when relevant. See `skills/agent-workflows/writing-skills/SKILL.md` for the evaluation-driven authoring process.
+Skills require YAML frontmatter with `name` (lowercase letters, numbers, and hyphens) and `description` (≤1024 characters, starts with "Use when…", third-person, retrieval or invocation triggers only — never a workflow summary). User-invoked workflows may also set `disable-model-invocation: true` and add `agents/openai.yaml` with `policy: {allow_implicit_invocation: false}` (Codex ignores the frontmatter flag); reference skills must remain model-invoked so agents can retrieve them when relevant. See `skills/agent-workflows/writing-skills/SKILL.md` for the evaluation-driven authoring process.
 
 Optional subdirectories per skill: `references/`, `assets/`, `source/`.
 

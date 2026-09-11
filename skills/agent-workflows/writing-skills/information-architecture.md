@@ -15,7 +15,7 @@ Scripts and pi extensions are executable resources, not additional skill types. 
 
 A model-invoked skill contributes its description to context on every turn. A user-invoked skill saves that context but requires the user to remember and explicitly run it.
 
-Use user invocation for workflows that represent deliberate commands and do not need autonomous discovery. In pi, set `disable-model-invocation: true`; confirm support in every target harness. Keep a workflow model-invoked when safety, diagnosis, or another process depends on it starting autonomously.
+Use user invocation for workflows that represent deliberate commands and do not need autonomous discovery. In pi and Claude Code, set `disable-model-invocation: true`; Codex ignores that flag and instead needs `agents/openai.yaml` with `policy: {allow_implicit_invocation: false}`. Confirm support in every target harness. Keep a workflow model-invoked when safety, diagnosis, or another process depends on it starting autonomously.
 
 Keep every reference model-invoked. Its value depends on the agent recognizing when the context is relevant without the user naming the skill.
 

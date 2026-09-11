@@ -1,11 +1,7 @@
 ---
 name: exploratory-notebook
-description: >-
-  Use when a task calls for exploratory or explanatory data analysis — building
-  intuition step by step, a walkthrough or demonstration, an "analysis I can
-  learn from", or explaining what an analysis actually does — rather than
-  reusable infrastructure or a run-once compute script. Also use when about to
-  reach for a batch script to walk someone through an analysis.
+description: Use when the user explicitly invokes /exploratory-notebook to explore or explain an analysis in a live marimo notebook.
+disable-model-invocation: true
 ---
 
 # Exploratory Notebook

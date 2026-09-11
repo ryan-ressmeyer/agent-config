@@ -1,6 +1,7 @@
 ---
 name: ansa-literature-review
-description: Use when building or expanding the literature knowledge graph, adding papers, asking what papers are available on a topic, finding related work, summarizing a paper, or synthesizing themes across papers. Routes literature-review work through ANSA and its paper-summarize and theme-synthesize workflows.
+description: Use when the user explicitly invokes /ansa-literature-review to build or expand the literature knowledge graph.
+disable-model-invocation: true
 ---
 
 # ANSA Literature Review

@@ -1,6 +1,7 @@
 ---
 name: uv-research-workspace
-description: Use when creating a new Python research project workspace, adding sub-repositories to an existing workspace, or managing cross-repo dependencies with uv workspaces
+description: Use when the user explicitly invokes /uv-research-workspace to create or extend a uv research workspace.
+disable-model-invocation: true
 ---
 
 # UV Research Workspace

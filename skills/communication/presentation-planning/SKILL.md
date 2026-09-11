@@ -1,6 +1,7 @@
 ---
 name: presentation-planning
-description: "Use when planning a scientific talk before drafting slides, when prior LLM-generated slide drafts have felt word-heavy or non-collaborative, when adapting research for a specific audience (lab meeting, seminar, conference, faculty talk, defense), or when a dataset of results needs to be shaped into a narrative the speaker can rehearse"
+description: Use when the user explicitly invokes /presentation-planning to plan a scientific talk before drafting slides.
+disable-model-invocation: true
 ---
 
 # Presentation Planning

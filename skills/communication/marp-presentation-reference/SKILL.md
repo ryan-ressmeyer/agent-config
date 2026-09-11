@@ -5,7 +5,7 @@ description: Use when a task needs facts or usage guidance about Ryan's Marp pre
 
 # Marp Presentation Reference
 
-Ryan's presentation format separates slide content from the spoken script and compiles both into a rendered Marp deck. Use this reference for authoring, editing, repairing, or rendering an existing presentation. Use `presentation-planning` when the task is to develop a talk collaboratively from framing through storyline and slides.
+Ryan's presentation format separates slide content from the spoken script and compiles both into a rendered Marp deck. Use this reference for authoring, editing, repairing, or rendering an existing presentation. Suggest the user run `/presentation-planning` when the task is to develop a talk collaboratively from framing through storyline and slides.
 
 Read [marp-conventions.md](marp-conventions.md) for detailed slide, figure, video, visual-style, and spoken-prose conventions.
 

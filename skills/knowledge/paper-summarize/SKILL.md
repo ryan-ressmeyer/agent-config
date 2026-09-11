@@ -136,7 +136,7 @@ ansa paper scratchpad <UUID>
 Show the rendered summary to the user. Ask:
 
 - "Does this accurately capture the paper? Anything to correct or add?"
-- If the user wants to tag/group this paper (status, topic, reading-list), that's a `collection` workflow — see the `ansa-literature-review` orchestrator. The scratchpad itself is just the QLMRI body.
+- If the user wants to tag/group this paper (status, topic, reading-list), that's a `collection` workflow — suggest the user run `/ansa-literature-review`. The scratchpad itself is just the QLMRI body.
 
 ### Step 7 — Surface related papers
 
