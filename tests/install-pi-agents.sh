@@ -19,9 +19,6 @@ cp -a \
   "$ROOT/skills" \
   "$REPO/"
 
-mkdir -p "$REPO/pi/agents"
-printf '%s\n' '---' 'name: delegate' '---' > "$REPO/pi/agents/delegate.md"
-
 printf '\n' | HOME="$HOME_DIR" "$REPO/install.sh" >/dev/null
 
 target="$HOME_DIR/.pi/agent/agents"
@@ -33,8 +30,14 @@ target="$HOME_DIR/.pi/agent/agents"
   printf 'wrong pi agents target: %s -> %s\n' "$target" "$(readlink "$target")" >&2
   exit 1
 }
-[[ -f "$target/delegate.md" ]] || {
-  printf 'installed delegate agent is missing: %s\n' "$target/delegate.md" >&2
+actual_roster="$({
+  for agent_file in "$target"/*.md; do
+    basename "$agent_file" .md
+  done
+} | sort)"
+expected_roster=$'coder\ninvestigator\nqlmri'
+[[ "$actual_roster" == "$expected_roster" ]] || {
+  printf 'wrong installed pi agent roster:\n%s\n' "$actual_roster" >&2
   exit 1
 }
 

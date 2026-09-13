@@ -59,6 +59,16 @@ Scale each section to its complexity. A one-line "Risks: none" is fine. A one-li
 - Run the verification named in the plan. Show the output.
 - No "should work" or "done" without fresh evidence. `verification-before-completion` skill covers the discipline.
 
+### Delegation when named agents are available
+
+The parent owns planning, integration, and final judgment. Delegation does not grant new authorization: all approval-before-mutation requirements still apply.
+
+- Use `investigator` (Astra) when substantial unresolved ambiguity needs repository or source investigation, competing explanations, or evidence synthesis. Its value is judgment and context isolation, not lower inference cost; do not use it for every read.
+- Once the goal, constraints, and acceptance criteria are clear, send substantial well-defined execution to `coder` (Sol), even when the work is sequential. Give it room for local implementation decisions rather than line-by-line instructions.
+- Use `qlmri` (Terra) for its defined one-paper QLMRI workflow.
+- Handle quick lookups and tiny edits directly. Investigate enough to scope a handoff, but do not solve the delegated task first or repeat the worker's investigation afterward.
+- Allow one writer per shared workspace unless workers are explicitly isolated. Verify consequential outputs against acceptance criteria and cited evidence.
+
 ### Floor: when does this apply?
 
 - **Always** for state-changing actions.
