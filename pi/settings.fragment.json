@@ -14,6 +14,7 @@
     "npm:pi-blackhole",
     "npm:@aliou/pi-processes",
     "git:github.com/edxeth/pi-subagents",
-    "git:github.com/DietrichGebert/ponytail@v4.9.0"
+    "git:github.com/DietrichGebert/ponytail@v4.9.0",
+    "git:github.com/ryan-ressmeyer/glim@ecdea0b8cbc58c1da33dd5ad8765a58c33dc3f11"
   ]
 }
