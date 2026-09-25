@@ -9,7 +9,7 @@ tools: all
 skills: all
 extensions: all
 spawning: false
-model: openai-codex/gpt-5.6-terra
+model: openai-codex/gpt-6-luna
 allow-model-override: false
 context-warn-threshold: 80%
 context-warn-step: 5%

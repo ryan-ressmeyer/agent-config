@@ -9,7 +9,7 @@ tools: all
 skills: all
 extensions: all
 spawning: false
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: high
 allow-model-override: false
 context-warn-threshold: 80%
