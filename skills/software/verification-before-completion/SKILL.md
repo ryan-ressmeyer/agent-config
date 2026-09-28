@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: Use when about to claim work is complete, fixed, or passing, or when verified code changes need Git disposition before committing, pushing, merging, creating a PR, or deleting a branch
+description: Use when about to claim work is complete, fixed, or passing, or when deciding Git disposition, committing, pushing, merging, creating a PR, or deleting a branch
 ---
 
 # Verification Before Completion
@@ -40,35 +40,38 @@ Skip any step = lying, not verifying
 
 ## Git Wrap-Up Decision
 
-Fresh verification establishes whether changes are ready; it does not authorize a Git workflow. After successful verification, inspect the current branch, working tree, and remotes, then determine whether the user already specified how to handle the finished changes.
+Fresh verification establishes whether changes are ready; it does not authorize a Git workflow. Use this decision both at task completion and before a topic-branch push, including a requested work-in-progress push.
 
-### 1. Honor an existing choice
+### 1. Establish the target and readiness
 
-If the user already gave explicit instructions for the current changes—such as leaving them uncommitted, committing only, pushing, opening a PR, or integrating and cleaning up a topic branch—follow that choice without asking the general wrap-up question again. Ask only for details required to execute it safely, such as a missing target branch or whether to push after integration.
+Inspect the current branch, working tree, remotes, and worktrees. Use the user's named or project-documented integration branch; otherwise use the remote's default branch. Ask if the target or remote is ambiguous. Do not infer the target from branch ancestry or assume it is named `main`.
 
-**Complete when:** the user's existing choice and every still-missing execution detail are identified, or the workflow has established that no choice was provided.
+Recommend integration only for completed, verified work. If work is unfinished, checks fail, or branch protection or required PR review blocks direct integration, explain the blocker and ask whether to retain the branch for a push or PR instead. Do not bypass checks or review requirements, or describe an approved work-in-progress push as verified completion.
 
-### 2. Ask when no choice was provided
+**Complete when:** the integration target and remote are established or flagged for clarification, and readiness or the specific integration blocker is known.
 
-Use a structured user-question tool when available; otherwise ask directly. Present only options valid for the current repository state. Include the applicable choices among:
+### 2. Obtain a cleanup-first decision
 
-- Leave changes uncommitted
-- Commit only
-- Commit and push
-- Commit, merge into a target branch, delete the topic branch, and choose whether to push
-- User-specified handling
+For a finished topic branch, recommend **commit if needed → merge into the named integration branch → push that target → delete this task's local and remote topic branch**. Ask using a structured user-question tool when available. Alternatives may include leaving changes uncommitted, committing only, or explicitly retaining the topic branch for a push or PR. On the integration branch itself, offer only applicable choices; never propose merging it into itself or deleting it.
 
-Do not silently choose a conservative default and stop. Reporting “left uncommitted because committing was not requested” does not complete this decision—the user must be offered the choice. Do not commit, push, merge, create a PR, or delete a branch before the user selects that action.
+A request to “push” or “commit and push this branch” alone still requires the merge-and-prune question before a topic-branch push. Skip that question only when the user has explicitly approved retaining the branch, such as “keep this branch,” “do not merge,” or a confirmed PR workflow. Ask for retention approval before treating a new PR request as permission to skip the cleanup decision.
 
-**Complete when:** the user has explicitly selected how the finished changes should be handled.
+Honor explicit choices to leave uncommitted, commit only, retain the branch, or integrate and prune. One approval covers the specified workflow; ask only for missing details or new blockers, not the same decision again. Do not silently leave changes uncommitted as a substitute for asking when no disposition was specified.
 
-### 3. Execute only the selected path
+**Complete when:** the user has selected a valid disposition, including explicit branch retention for a topic-branch push or approval of the named integration/cleanup workflow, and any missing target or push details are resolved.
 
-Obtain any missing details for the selected path one decision at a time, then perform exactly that Git workflow. Load `git-commits` before composing any commit message. For topic-branch integration, confirm the target branch and whether the resulting target branch should be pushed before merging or deleting the topic branch.
+### 3. Execute and verify the selected path
 
-**Complete when:** the selected operations have been executed and verified, or the changes remain uncommitted because that was the user's explicit selection; no unselected Git operation has occurred.
+Load `git-commits` before composing a commit message. Perform only the approved operations. For integration and cleanup:
 
-If verification fails, stop before this decision. Report the actual failure and return to diagnosis or ask the user how to proceed; unverified changes are not ready for Git wrap-up.
+1. Verify that the topic branch contains only the intended work and is not shared or in use by another worktree. Stop and ask if either condition prevents safe integration or deletion; preserve unrelated branches.
+2. Merge into the approved target and verify the integrated result. Stop on conflicts or failed verification rather than forcing integration.
+3. Push the target and verify the remote contains the integrated commits. If the push fails, preserve the topic branch for recovery; do not force-push to bypass rejection.
+4. Only after successful integration and target push, delete this task's local and remote topic branch if they exist. Verify their removal and report any incomplete cleanup. Never use this approval to prune unrelated branches.
+
+An explicitly approved local-only merge does not authorize a push or remote deletion; retain the topic branch until the target is published unless the user separately approves local-only cleanup.
+
+**Complete when:** all approved operations and their verification are accounted for, any failed or blocked operation is reported with recoverable work preserved, and no unselected operation or unrelated branch cleanup has occurred.
 
 ## Common Failures
 

@@ -138,6 +138,6 @@ When you invoke a skill, say so briefly: "Using `<skill-name>` to <purpose>." Th
 ## Toolset preferences
 
 - **Python:** always via `uv run`. Never bare `python`, `python3`, or `pip`. Project code uses `pyproject.toml` + `.venv`; standalone scripts use PEP 723 inline metadata. See the `python-environment` skill.
-- **Git:** commit messages are a single line. No body, no bullets, no Co-Authored-By trailers. See the `git-commits` skill.
+- **Git:** use `verification-before-completion` for Git disposition, including explicit push requests. Commit messages are a single line with no body or Co-Authored-By trailers; see `git-commits`.
 - **Editor:** Neovim. Terminal-first workflow.
 - **Obsidian** is the primary knowledge store — vault-aware skills (`obsidian-*`) exist for vault operations.

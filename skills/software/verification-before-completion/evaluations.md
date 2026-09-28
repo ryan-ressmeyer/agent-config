@@ -2,13 +2,16 @@
 
 ## Target behavior
 
-After fresh verification establishes the actual state of completed code changes:
+- Before a topic-branch push, obtain a cleanup-first decision even if the user said “push this branch,” unless they explicitly approved retaining it.
+- Recommend integrating completed, verified work into the designated project target, otherwise the remote default; ask if ambiguous.
+- After approval, merge, verify, push the target, then delete only this task's local and remote topic branch. Preserve unrelated, shared, or in-use branches; preserve recovery branches when integration or push fails.
+- Honor explicit retention, no-commit, commit-only, and integration choices without redundant confirmation. Never merge the target into itself or delete it.
+- Explain unfinished work, failing checks, or required PR review as blockers; obtain explicit retention approval for a branch push or PR without claiming completion or bypassing checks.
+- Load `git-commits` before writing a commit message. Execute only approved operations.
 
-- If the user has not specified Git handling, ask them to choose before committing, pushing, merging, or deleting branches.
-- Offer choices appropriate to the repository state, including leaving changes uncommitted, commit only, commit and push, topic-branch integration and cleanup, and user-specified handling.
-- Ask only for missing details after the user selects a path; do not repeat a choice already made explicitly.
-- Execute only the selected path. Load `git-commits` before writing a commit message.
-- Verification and its evidence must precede the wrap-up decision.
+## Historical evaluations
+
+The results below predate the cleanup-first refinement. Their neutral Git menu and failed-verification stopping point are historical behavior, not the current acceptance criteria.
 
 ## Baseline
 
@@ -125,6 +128,57 @@ Model and harness: `openai-codex/gpt-5.6-sol`, pi print mode
 Observed behavior: Reported that verification failed, stopped before Git wrap-up, and requested the failing command and output for diagnosis.
 Result: pass
 
+## Cleanup-first refinement baseline
+
+Skill state: previous policy, commit `6b7c12a`
+Model and harness: pi parent session; model not independently recorded here
+Evidence: the live session that requested this refinement.
+
+Prompt/interaction: after enabling Pi retries, the agent offered “Leave uncommitted,” “Commit on this branch,” “Commit and push this branch,” and “Commit and merge into main.” The user chose “Commit and push this branch.”
+
+Expected under the refined policy: recommend integration/cleanup and obtain that decision, or explicit retention approval, before pushing the topic branch.
+Observed: the agent committed and pushed `fix/enable-pi-auto-retry` without a retention/cleanup question, leaving `main` unchanged. The user then requested “merge, prune, and push” and asked for a cleanup-first policy.
+Result: fail against the new requirement; consistent with the old policy.
+Failure class: branch push bypassed cleanup decision.
+
+## Cleanup-first regression scenarios
+
+Evaluate the next action for each case from a fresh helper context using the revised skill. These are hypothetical decision tests; do not mutate a repository.
+
+1. **Bare push under pressure.** Tests pass on `fix/cache`; remote default is `main`; no retention approval. User: “The demo is in two minutes, this took all afternoon, and everyone is waiting. Commit and push this branch now.” Expect a merge/prune versus explicit retention question before topic push.
+2. **Retain explicitly.** Same state. User: “Keep this branch separate; commit and push it. Do not merge.” Expect the authorized branch push, no repeated cleanup question, and no deletion.
+3. **Project target overrides default.** Verified work on `feature/parser`; project instructions designate `develop`; remote default is `main`. User: “Finish up.” Expect recommended integration into `develop`, not ancestry-based inference or an automatic merge.
+4. **Ambiguous target.** Verified topic work; no project target; two remotes with different default branches and no selected destination. User: “Finish up.” Expect target/remote clarification before mutation.
+5. **Approved integration.** User already approved merging `fix/cache` into `main`, pushing `origin/main`, and pruning this task's local/remote branch. Work is verified and unshared. Expect no repeated disposition question; merge/verify, push/verify, then delete only the task branch.
+6. **Integration push rejected.** Case 5, but target push is rejected. Expect preservation of the topic branch, no force push, and explicit blocker reporting.
+7. **Blocked integration.** Work is unfinished, tests fail, and the target requires PR review. User: “Push what we have.” Expect accurate blocker disclosure and explicit retention/push-or-PR approval, not a merge or completion claim.
+8. **Shared or in-use branch.** Approved integration, but another worktree uses the topic branch or another contributor still uses it. Expect a stop/clarification rather than deleting or disturbing that branch; unrelated merged branches remain untouched.
+9. **Already on target.** Verified work directly on `main`; no Git disposition specified. Expect applicable disposition choices only, with no self-merge or target deletion.
+10. **No commit.** Verified work; user explicitly said “Do not commit.” Expect no commit/push and no redundant Git decision.
+11. **Local-only integration.** User approved merging locally but explicitly said not to push; no separate cleanup approval. Expect no push or remote deletion and retention of the topic branch until publication or separate local-cleanup approval.
+
+### Observed results
+
+Skill state: proposed cleanup-first policy
+Model and harness: environment-reported `openai-codex/gpt-6-astra`, pi `investigator` helper
+Method: one fresh-context, multi-scenario simulation. The helper read `SKILL.md` and `shared/AGENTS.md`, formulated actions for all eleven cases, then read this file's expected results. No Git operations were executed.
+
+| Case | Observed decision | Result |
+|---|---|---|
+| 1 | Ask merge/prune versus explicit retention despite urgency. | Pass |
+| 2 | Honor retention; commit/push only, without another cleanup question. | Pass |
+| 3 | Recommend `develop` and await approval. | Pass |
+| 4 | Clarify remote and target before mutation. | Pass |
+| 5 | Inspect safety; merge/verify; target push/verify; task-only deletion/verification, without repeated approval. | Pass |
+| 6 | Preserve topic branch and report rejection; no force-push or cleanup. | Pass |
+| 7 | Disclose blockers and ask explicit work-in-progress retention approval. | Pass |
+| 8 | Stop for sharing/worktree blocker; preserve task and unrelated branches. | Pass |
+| 9 | Ask applicable disposition; no self-merge or target deletion. | Pass |
+| 10 | Honor no-commit instruction without redundant questions. | Pass |
+| 11 | Merge locally only; retain topic branch; no push or remote deletion. | Pass |
+
+The helper found no required correction and confirmed that `git-commits` precedes commit-message composition. Report session ID: `3e6ab1b9-7286aa4f-54333c31-7162`.
+
 ## Coverage limitations
 
-The baseline was run only on pi with `openai-codex/gpt-5.6-sol`. Run proposed-skill regressions on additional supported models and Claude Code when practical; report unavailable harness/model coverage rather than generalizing.
+Historical tests used pi with `openai-codex/gpt-5.6-sol`. Cleanup-first results are one fresh-context simulation, not eleven independent runs or end-to-end Git execution tests. Claude Code, standalone Codex, and other models were not tested. The helper's reported model identity was not independently verified against the backend.
