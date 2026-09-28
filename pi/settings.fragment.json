@@ -2,6 +2,9 @@
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6-astra",
   "defaultThinkingLevel": "high",
+  "retry": {
+    "enabled": true
+  },
   "packages": [
     "npm:pi-openai-usage",
     "npm:pi-terminal-math",
