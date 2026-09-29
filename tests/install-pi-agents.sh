@@ -35,7 +35,7 @@ actual_roster="$({
     basename "$agent_file" .md
   done
 } | sort)"
-expected_roster=$'coder\ninvestigator\nqlmri'
+expected_roster=$'coder\ninvestigator\nqlmri\nscout'
 [[ "$actual_roster" == "$expected_roster" ]] || {
   printf 'wrong installed pi agent roster:\n%s\n' "$actual_roster" >&2
   exit 1

@@ -15,8 +15,16 @@ DELEGATE="$ROOT/pi/agents/delegate.md"
   exit 1
 }
 
-grep -Eq '^description: .+' "$AGENT" || {
-  printf 'investigator agent needs a routing description for ambient discovery\n' >&2
+grep -Eq '^description: .*ambigu.*(competing|evidence)' "$AGENT" || {
+  printf 'investigator description must route substantial ambiguity, not ordinary discovery\n' >&2
+  exit 1
+}
+grep -Eq 'not (ordinary|routine) (discovery|search|grep)' "$AGENT" || {
+  printf 'investigator must leave routine discovery to scout\n' >&2
+  exit 1
+}
+grep -Eq 'Use `scout` .*search-heavy' "$ROOT/shared/AGENTS.md" || {
+  printf 'shared context must route search-heavy discovery to scout\n' >&2
   exit 1
 }
 
