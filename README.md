@@ -80,7 +80,7 @@ Add resources to the matching directory.
 - New pi prompt: `pi/prompts/<name>.md`
 - New pi theme: `pi/themes/<name>.ts`
 
-Re-run `./install.sh` after adding a skill so its individual links are created. Other resources appear through their existing directory links.
+Re-run `./install.sh` after adding a skill so its individual links are created. Other resources appear through their existing directory links. The Pi `agent-bell.ts` extension is a regular file in `pi/extensions/`; it no longer depends on the Ubuntu configuration checkout.
 
 ## Per-machine customization
 
