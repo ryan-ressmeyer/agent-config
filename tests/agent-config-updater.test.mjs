@@ -21,8 +21,10 @@ function createFixture() {
   const checkout = join(root, "checkout");
 
   mkdirSync(upstream);
-  git(root, "init", "--bare", "--initial-branch=main", remote);
-  git(upstream, "init", "--initial-branch=main");
+  git(root, "init", "--bare", remote);
+  git(remote, "symbolic-ref", "HEAD", "refs/heads/main");
+  git(upstream, "init");
+  git(upstream, "symbolic-ref", "HEAD", "refs/heads/main");
   git(upstream, "config", "user.name", "Updater Test");
   git(upstream, "config", "user.email", "updater@example.invalid");
   writeFileSync(join(upstream, "config.txt"), "initial\n");

@@ -14,13 +14,13 @@ grep -Eq '^description: .+' "$AGENT" || {
   exit 1
 }
 
-grep -Fxq 'model: openai-codex/gpt-5.6-terra' "$AGENT" || {
-  printf 'QLMRI agent must default to GPT-5.6 Terra\n' >&2
+grep -Fxq 'model: openai-codex/gpt-6-luna' "$AGENT" || {
+  printf 'QLMRI agent must default to GPT-6 Luna\n' >&2
   exit 1
 }
 
 grep -Fxq 'allow-model-override: false' "$AGENT" || {
-  printf 'QLMRI agent must remain pinned to GPT-5.6 Terra\n' >&2
+  printf 'QLMRI agent must remain pinned to GPT-6 Luna\n' >&2
   exit 1
 }
 
