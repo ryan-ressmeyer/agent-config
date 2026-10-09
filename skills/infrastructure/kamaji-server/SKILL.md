@@ -46,6 +46,8 @@ Tailnet-only services (no public ports): SSH 22, Jellyfin 8096, Sonarr 8989, Rad
 | Restic backup | — | `restic-backups-documents.{service,timer}`, `restic-check-documents.{service,timer}` | `restic-b2-env`, `restic-password` | `/tank/documents`, `/tank/ansa`, `/tank/forgejo` (sources) |
 | Email | — | `msmtpq`, `kamaji-mail-flush.timer`, `kamaji-notify` CLI | `resend-api-key` | — |
 
+The Email row is kamaji's own outbound mail (reminders, unit-failure alerts). An agent that needs to email Ryan uses the `email-ryan` skill instead.
+
 Bouncing a service: `ssh -t kamaji 'sudo systemctl restart <unit>'`. Six arr-stack units live in the `vpn` netns and `BindsTo=wg-airvpn` — restarting `wg-airvpn` cascades to all of them.
 
 ## Forgejo (self-hosted git)
