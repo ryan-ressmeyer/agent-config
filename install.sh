@@ -120,6 +120,7 @@ install_symlinks() {
   symlink "$REPO/pi/extensions" "$PI_DIR/extensions"
   symlink "$REPO/pi/prompts"    "$PI_DIR/prompts"
   symlink "$REPO/pi/themes"     "$PI_DIR/themes"
+  symlink "$REPO/claude/hooks/glim-context.sh" "$CLAUDE_DIR/hooks/glim-context.sh"
 }
 
 # --- step 3: managed pi config files ---

@@ -11,6 +11,19 @@
   "enabledPlugins": {
     "ponytail@ponytail": true
   },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/glim-context.sh\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Read",
