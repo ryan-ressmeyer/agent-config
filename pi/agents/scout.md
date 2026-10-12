@@ -7,7 +7,7 @@ async: true
 session-mode: lineage-only
 tools: read,grep,find,ls,caller_ping
 skills: none
-extensions: none
+extensions: git:github.com/DietrichGebert/ponytail@v4.9.0
 spawning: false
 model: openai-codex/gpt-6-luna
 thinking: low

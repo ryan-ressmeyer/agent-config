@@ -38,8 +38,8 @@ jq -e '
   printf 'Claude settings do not declare and enable the pinned Ponytail plugin\n' >&2
   exit 1
 }
-jq -e '.defaultMode == "off"' "$XDG_DIR/ponytail/config.json" >/dev/null || {
-  printf 'Ponytail default mode is not off\n' >&2
+jq -e '.defaultMode == "full"' "$XDG_DIR/ponytail/config.json" >/dev/null || {
+  printf 'Ponytail default mode is not full\n' >&2
   exit 1
 }
 cmp -s "$REPO/ponytail/config.json" "$XDG_DIR/ponytail/config.json" || {

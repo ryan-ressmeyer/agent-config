@@ -12,7 +12,7 @@ for field in \
   'async: true' \
   'session-mode: lineage-only' \
   'tools: read,grep,find,ls,caller_ping' \
-  'extensions: none' \
+  'extensions: git:github.com/DietrichGebert/ponytail@v4.9.0' \
   'skills: none' \
   'spawning: false' \
   'model: openai-codex/gpt-6-luna' \
