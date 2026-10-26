@@ -7,7 +7,7 @@
   },
   "packages": [
     "npm:pi-openai-usage",
-    "npm:pi-terminal-math",
+    "!npm:pi-terminal-math",
     "npm:pi-web-search",
     "npm:pi-smart-fetch",
     "npm:pi-profile",
