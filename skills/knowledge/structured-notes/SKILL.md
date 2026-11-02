@@ -20,15 +20,15 @@ At most 6 lines. Enough to decide whether to read further.
 
 ## <Body sections, any number, any names>
 
-## Sources
+## References
 - [1] ...
 ```
 
-- The three header lines follow the H1 directly, in this order. `date` is the creation date; git records later edits, so add no other header lines.
-- `## Summary` is the first H2 and `## Sources` is the last. A short note may have no body sections.
+- The header lines follow the H1 directly, in this order. `source` is optional. `date` is the creation date; git records later edits, so add no other header lines.
+- `## Summary` is the first H2 and `## References` is the last. A short note may have no body sections.
 - Use H2 (`## `) only for sections. Use H3 and below inside sections.
 - Verbatim material such as a transcript, email, or quoted answers goes unedited in its own body section. The Summary says that it is verbatim.
-- Sources are a numbered list. Mark a URL you did not open as cited but not checked.
+- `## References` is a numbered list of the sources and other material the note cites. Each entry may add one short sentence of context.
 
 ## Leaving a note
 
@@ -36,7 +36,7 @@ When the user asks for a note, write a new file at `notes/<kebab-case-topic>.md`
 
 ## Editing a note
 
-Keep `date` unchanged. When a body change alters a conclusion, rewrite the Summary to match, and add a Sources entry for the new information.
+Keep `date` unchanged. When a body change alters a conclusion, rewrite the Summary to match, and add a References entry for the new information.
 
 ## Reading notes in parts
 
