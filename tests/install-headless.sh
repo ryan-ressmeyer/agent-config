@@ -42,4 +42,28 @@ cmp -s "$BLACKHOLE_SOURCE" "$BLACKHOLE_TARGET" || {
   exit 1
 }
 
-printf 'headless installation passed\n'
+MODELS="$HOME_DIR/.pi/agent/models.json"
+jq -e '.providers["openai-codex"].modelOverrides["gpt-6-astra"].contextWindow == 1050000' \
+  "$MODELS" >/dev/null || {
+  printf 'headless install did not set Astra context to 1050000\n' >&2
+  exit 1
+}
+
+# Reinstallation updates the managed limit without replacing local configuration.
+jq '
+  .providers["openai-codex"].modelOverrides["gpt-6-astra"] |=
+    (.contextWindow = 272000 | .maxTokens = 64000)
+  | .providers.local = {baseUrl: "http://localhost:11434/v1"}
+' "$MODELS" > "$TMP/models.json"
+mv "$TMP/models.json" "$MODELS"
+HOME="$HOME_DIR" "$REPO/install.sh" </dev/null >/dev/null
+jq -e '
+  .providers["openai-codex"].modelOverrides["gpt-6-astra"] ==
+    {contextWindow: 1050000, maxTokens: 64000}
+  and .providers.local == {baseUrl: "http://localhost:11434/v1"}
+' "$MODELS" >/dev/null
+cp "$MODELS" "$TMP/models-before.json"
+HOME="$HOME_DIR" "$REPO/install.sh" </dev/null >/dev/null
+cmp "$TMP/models-before.json" "$MODELS"
+
+printf 'headless installation passed (Astra context, local settings, idempotence)\n'

@@ -41,6 +41,7 @@ agent-config/
 │   ├── themes/                 # pi-only themes
 │   ├── pi-blackhole/           # managed pi-blackhole configuration
 │   ├── settings.fragment.json  # merged into ~/.pi/agent/settings.json
+│   ├── models.fragment.json    # merged into ~/.pi/agent/models.json
 │   └── keybindings.fragment.json
 ├── claude/
 │   └── settings.fragment.json  # merged into ~/.claude/settings.json
@@ -67,6 +68,7 @@ agent-config/
 5. **Merges settings fragments** idempotently:
    - `pi/settings.fragment.json` + `machines/$HOSTNAME/settings.fragment.json` → `~/.pi/agent/settings.json`
    - `pi/keybindings.fragment.json` → `~/.pi/agent/keybindings.json`
+   - `pi/models.fragment.json` → `~/.pi/agent/models.json`; sets `openai-codex/gpt-6-astra` to a 1,050,000-token context window on every machine, preserving unrelated local model settings.
    - `claude/settings.fragment.json` → `~/.claude/settings.json`
 6. **Prompts for the OpenRouter API key** during interactive installation if it is absent from `~/.pi/agent/auth.json`; headless runs skip this step.
 7. **Installs the pre-commit hook** (`scripts/check-no-secrets.sh`) into this repo's `.git/hooks/`.

@@ -186,6 +186,7 @@ merge_settings() {
   fi
 
   "$MERGE" "$REPO/pi/keybindings.fragment.json"              "$PI_DIR/keybindings.json"
+  "$MERGE" "$REPO/pi/models.fragment.json"                  "$PI_DIR/models.json"
 
   # Claude
   "$MERGE" "$REPO/claude/settings.fragment.json"             "$CLAUDE_DIR/settings.json"
