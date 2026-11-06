@@ -63,7 +63,7 @@ agent-config/
 2. **Creates symlinks:**
    - Each `skills/<category>/<name>/` → `~/.claude/skills/<name>` and `~/.agents/skills/<name>`
    - `pi/{extensions,prompts,themes}/` → `~/.pi/agent/{extensions,prompts,themes}`
-3. **Installs extension configuration:** copies the Blackhole config into `~/.pi/agent/` and the Ponytail config into `${XDG_CONFIG_HOME:-$HOME/.config}/ponytail/`. Ponytail defaults to `full` mode through the shared configuration for Pi, Claude Code, and Codex. All Pi subagents load it, including Scout, which allows only the Ponytail extension. Run `/ponytail off` to disable it for a session.
+3. **Installs extension configuration:** copies the Blackhole config into `~/.pi/agent/` and the Ponytail config into `${XDG_CONFIG_HOME:-$HOME/.config}/ponytail/`. Ponytail defaults to `full` mode through the shared configuration for Pi, Claude Code, and Codex. All Pi subagents load it. Scout allows Ponytail and the `ssh-inspect.ts` extension. Run `/ponytail off` to disable it for a session.
 4. **Generates context files** (NOT symlinks): concatenates `machines/$HOSTNAME/context.md` + `shared/AGENTS.md` (machine first, shared second) into `~/.pi/agent/AGENTS.md`, `~/.claude/CLAUDE.md`, and `~/.codex/AGENTS.md`.
 5. **Merges settings fragments** idempotently:
    - `pi/settings.fragment.json` + `machines/$HOSTNAME/settings.fragment.json` → `~/.pi/agent/settings.json`
@@ -83,6 +83,25 @@ Add resources to the matching directory.
 - New pi theme: `pi/themes/<name>.ts`
 
 Re-run `./install.sh` after adding a skill so its individual links are created. Other resources appear through their existing directory links. The Pi `agent-bell.ts` extension is a regular file in `pi/extensions/`; it no longer depends on the Ubuntu configuration checkout.
+
+## Remote file discovery in pi
+
+`ssh_inspect` accepts structured arguments, not shell commands. Scout can use it for bounded remote discovery.
+
+```json
+{"host":"user@machine.tailnet.ts.net","operation":"read","path":"~/code/project/README.md","offset":1,"limit":100}
+{"host":"lab-alias","operation":"ls","path":"/srv/project"}
+{"host":"100.101.2.3","operation":"find","path":"/srv/project","pattern":"*.ts","maxDepth":5}
+{"host":"lab-alias","operation":"grep","path":"/srv/project","pattern":"registerTool"}
+```
+
+- Any SSH destination and readable remote path is permitted, including secrets. There are no host/path allowlists. This tool is not a security sandbox or account-level read-only enforcement. Use a restricted remote account for that boundary.
+- Local OpenSSH uses existing trusted identity/routing configuration, key-only noninteractive authentication, and strict known-host verification. Unknown hosts fail without prompting. Agent, X11, port/tunnel forwarding, configured local/remote commands, and connection multiplexing are disabled. Trusted SSH config may still run routing helpers (`ProxyCommand`, `ProxyJump`, `Match exec`); remote login startup files and filesystem reads may have side effects.
+- Requires a POSIX-compatible remote login shell, `sh`, and GNU `timeout`, `sed`, `ls`, `find`, and `grep` on Linux. No remote installation is performed. Hosts accept aliases, DNS/IP addresses, and `user@host`; use SSH config for custom ports. Paths are literal except `~`/`~/` expands remote HOME; relative paths use the login directory. Symlinks may resolve outside the requested tree when explicitly read.
+- `read` requires a readable regular file and returns line pages (`offset` 1–10,000,000; `limit` 1–2,000, default 200). Regular-file checks are not race-proof; execution limits also bound reads of changing or unusual files. `ls` includes dotfiles and escapes names. `find` matches basename globs, includes dotfiles, does not follow symlinks, and limits depth to 0–100 (default 5). `grep` searches recursively for case-sensitive literal single-line text, reports filename/line numbers, skips binary files/devices, and distinguishes no matches from errors. No shell expansion or regex matching is supported. Find/grep output uses newline-delimited names, which can be ambiguous for filenames containing newlines.
+- `timeout` is 1–60 seconds (default 20) remotely; the local SSH deadline adds 3 seconds, with Pi allowing up to 5 more seconds before forced termination. Cancellation stops local SSH; the remote deadline bounds surviving operations if disconnect does not stop them. At most 64 KiB of combined stdout/stderr is captured. Results retain at most 48 KiB/1,900 lines plus status; truncation is explicit and the remainder is discarded, not saved. Narrow searches or request smaller read pages to continue.
+
+Test without a remote connection: `node --test tests/ssh-inspect.test.mjs` (Node 24 and installed Pi required).
 
 ## Per-machine customization
 

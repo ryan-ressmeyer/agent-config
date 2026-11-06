@@ -11,8 +11,8 @@ for field in \
   'auto-exit: true' \
   'async: true' \
   'session-mode: lineage-only' \
-  'tools: read,grep,find,ls,caller_ping' \
-  'extensions: git:github.com/DietrichGebert/ponytail@v4.9.0' \
+  'tools: read,grep,find,ls,ssh_inspect,caller_ping' \
+  'extensions: git:github.com/DietrichGebert/ponytail@v4.9.0, ~/.pi/agent/extensions/ssh-inspect.ts' \
   'skills: none' \
   'spawning: false' \
   'model: openai-codex/gpt-6-luna' \
@@ -32,6 +32,13 @@ grep -Eq 'scope .*miss|miss.*scope' "$AGENT" || {
 }
 grep -Eq 'ambiguity .*parent|parent .*ambiguity' "$AGENT" || {
   printf 'scout must escalate ambiguity to parent\n' >&2; exit 1;
+}
+
+[[ -f "$ROOT/pi/extensions/ssh-inspect.ts" ]] || {
+  printf 'scout remote inspection extension is missing\n' >&2; exit 1;
+}
+grep -q 'For remote discovery, use ssh_inspect' "$AGENT" || {
+  printf 'scout must document remote discovery with ssh_inspect\n' >&2; exit 1;
 }
 
 printf 'scout agent contract passed\n'
