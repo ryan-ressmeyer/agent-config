@@ -12,7 +12,7 @@
   "midRunCompaction": "off",
   "observeAfterTokens": 20000,
   "reflectAfterTokens": 40000,
-  "compactAfterTokens": 180000,
+  "compactAfterRatio": 0.8,
   "observationsPoolMaxTokens": 40000,
   "fullFoldAlways": true,
   "observationsPoolTargetTokens": 20000,
