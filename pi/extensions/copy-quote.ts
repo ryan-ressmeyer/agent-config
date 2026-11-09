@@ -57,7 +57,39 @@ function lastBlockquote(markdown: string): string | undefined {
 	return lastQuote;
 }
 
-function findLatestQuote(branch: SessionEntry[]): string | undefined {
+function lastBashBlock(markdown: string): string | undefined {
+	let fence: string | undefined;
+	let shell = false;
+	let lines: string[] = [];
+	let lastBlock: string | undefined;
+
+	for (const rawLine of markdown.split(/(?<=\n)/)) {
+		const line = rawLine.replace(/\r?\n$/, "");
+		if (fence) {
+			const closing = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*$/)?.[1];
+			if (closing?.[0] === fence[0] && closing.length >= fence.length) {
+				const block = lines.join("").replace(/\r?\n$/, "");
+				if (shell && block.trim()) lastBlock = block;
+				fence = undefined;
+				lines = [];
+			} else if (shell) {
+				lines.push(rawLine);
+			}
+			continue;
+		}
+
+		const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+		if (!opening || (opening[1][0] === "`" && opening[2].includes("`"))) continue;
+		fence = opening[1];
+		shell = /^(bash|sh|shell)(?:[ \t]|$)/.test(opening[2].trim());
+	}
+	return lastBlock;
+}
+
+function findLatestBlock(
+	branch: SessionEntry[],
+	extract: (markdown: string) => string | undefined,
+): string | undefined {
 	for (let i = branch.length - 1; i >= 0; i--) {
 		const entry = branch[i];
 		if (entry.type !== "message" || entry.message.role !== "assistant") continue;
@@ -65,30 +97,35 @@ function findLatestQuote(branch: SessionEntry[]): string | undefined {
 		for (let j = entry.message.content.length - 1; j >= 0; j--) {
 			const content = entry.message.content[j];
 			if (content.type !== "text") continue;
-			const quote = lastBlockquote(content.text);
-			if (quote) return quote;
+			const block = extract(content.text);
+			if (block) return block;
 		}
 	}
 	return undefined;
 }
 
 export default function copyQuoteExtension(pi: ExtensionAPI, copy: CopyToClipboard = copyWithPi) {
-	pi.registerCommand("copy-quote", {
-		description: "Copy the latest assistant blockquote",
-		handler: async (_args, ctx) => {
-			const quote = findLatestQuote(ctx.sessionManager.getBranch());
-			if (!quote) {
-				ctx.ui.notify("No assistant blockquote found", "info");
-				return;
-			}
+	for (const [name, kind, label, extract] of [
+		["copy-quote", "blockquote", "quote", lastBlockquote],
+		["copy-bash", "bash block", "bash block", lastBashBlock],
+	] as const) {
+		pi.registerCommand(name, {
+			description: `Copy the latest assistant ${kind}`,
+			handler: async (_args, ctx) => {
+				const block = findLatestBlock(ctx.sessionManager.getBranch(), extract);
+				if (!block) {
+					ctx.ui.notify(`No assistant ${kind} found`, "info");
+					return;
+				}
 
-			try {
-				await copy(quote);
-				ctx.ui.notify("Copied quote to clipboard", "info");
-			} catch (error) {
-				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(`Could not copy quote: ${message}`, "error");
-			}
-		},
-	});
+				try {
+					await copy(block);
+					ctx.ui.notify(`Copied ${label} to clipboard`, "info");
+				} catch (error) {
+					const message = error instanceof Error ? error.message : String(error);
+					ctx.ui.notify(`Could not copy ${label}: ${message}`, "error");
+				}
+			},
+		});
+	}
 }
