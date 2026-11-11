@@ -131,7 +131,7 @@ Re-run `install.sh` after editing machine files to regenerate context and re-mer
 ## Skill categories
 
 - `agent-workflows/` — reusable agent process skills
-- `communication/` — manuscripts, reviews, presentations, and style
+- `communication/` — manuscripts, reviews, presentations, scientific figures, and style
 - `infrastructure/` — machine and server operations
 - `knowledge/` — literature discovery, paper summaries, and thematic synthesis
 - `research-computing/` — uv workspaces and marimo notebooks
