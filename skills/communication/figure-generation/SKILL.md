@@ -17,12 +17,14 @@ purpose; if several messages are plausible, propose a supported message and
 panel rationale for confirmation before implementation. Ask only what context
 cannot answer.
 
-Print-bound figures must fit within an 8.5 × 11 inch page ceiling, including
-actual margins and any same-page caption; that ceiling is not a default canvas.
-Screen-only output has more size flexibility. Check destination-specific rules.
+For print, the upper limit is the document's usable figure rectangle, after
+margins, column width, caption/spacing, and inclusion limits—not the physical page.
+Before choosing a canvas, read [placement constraints](references/matplotlib.md#layout-physical-size-and-export),
+even when not using Matplotlib. Establish unknown dimensions and verify scaling
+rather than assuming marginless letter paper. Screen-only output has more flexibility.
 
-**Complete when:** the question, supplied evidence, destination, and footprint
-are known, with consequential uncertainty resolved before implementation.
+**Complete when:** the question, evidence, destination, usable figure rectangle,
+and final placement scale are established, with consequential uncertainty resolved.
 
 ## 2. Design comparisons and inclusion
 
@@ -81,7 +83,7 @@ Give each unit image in scientific galleries its own calibrated scale bar.
 For same-unit x/y value comparisons, prefer a square plotting region and equal
 data scaling; otherwise choose aspect for the question, not a blanket square rule.
 
-For Matplotlib implementation/export, read [Matplotlib usage](references/matplotlib.md).
+For grids and Matplotlib, read [implementation](references/matplotlib.md).
 The optional [helper](scripts/figure_style.py) provides scoped defaults and explicit
 axis styling; import it only when useful, not as a replacement plotting framework.
 

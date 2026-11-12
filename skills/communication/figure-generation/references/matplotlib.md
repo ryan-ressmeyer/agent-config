@@ -82,11 +82,26 @@ The helper supplies no marker tuning or optimization.
 
 ## Layout, physical size, and export
 
-Prefer source dimensions matching final placed dimensions. If a figure is placed
-at a scale factor r, its text, strokes, and offsets become r times their source
-point sizes. Compensate at source or correct the placement; an 8 pt source label
-is not 8 pt after reduction. Add panel letters explicitly, e.g. with `ax.text`
-and the core's letter size/weight, rather than changing all typography.
+These placement constraints apply to all print figures, not only Matplotlib.
+Read the destination's page dimensions, margins, actual column/line width,
+caption and spacing budget, and inclusion width/height limits. In LaTeX, inspect
+`\linewidth`/`\columnwidth`, `\textheight`, and the `\includegraphics` options at
+the placement site. A single-column figure in a two-column document cannot use
+the full text-block width. Subtract any same-page caption and spacing from
+available height, then apply any tighter inclusion or journal limits. Keep
+unknown column widths and caption heights unresolved until you inspect the
+template or agree on an explicit budget; do not invent values. The maximum
+rectangle is a constraint, not a default canvas.
+
+For an existing figure of width w and height h fitted proportionally into a
+W × H rectangle, calculate r = min(W/w, H/h); placed dimensions are rw × rh and
+source text, marker lengths, strokes, and offsets scale by r. Verify the
+arithmetic with a calculator, code, or LaTeX dimension output, not mental
+estimates. Design and inspect at that placed size; prefer matching source
+dimensions or explicitly compensate sizes rather than silently shrinking labels
+and points. Confirm actual dimensions in the compiled document. An 8 pt source
+label is not 8 pt after reduction. Add panel letters explicitly, e.g. with
+`ax.text` and the core's letter size/weight, rather than changing all typography.
 
 Choose constrained layout or measured manual layout. Calling `tight_layout()`
 disables constrained layout; do not combine them. Avoid blind
@@ -97,7 +112,17 @@ Rasterize dense artists selectively; keep text and axes vector where possible.
 Use `set_aspect`/`set_box_aspect` explicitly only when scientific geometry calls
 for them. Equal units and a square box also require compatible displayed spans;
 do not silently change scientific limits to force both. Spatial images retain
-their calibrated geometry. Grid visibility and palettes remain caller decisions.
+their calibrated geometry. Palettes and whether to use grids remain caller decisions.
+
+When grids are used, default to interior-only lines: omit gridlines coincident
+with either axis limit so they do not form a perimeter box. Retain boundary ticks
+and labels, intended spines, and meaningful reference/zero baselines. Do not add
+grids to ungridded plots or remove image/colorbar borders to apply this rule.
+In Matplotlib, set limits, ticks, and spine positions first, then enable the
+chosen grid and hide only boundary ticks' `gridline` artists. Handle each enabled
+grid level and either axis direction; leave interior visibility/style unchanged.
+Reapply after changing limits/ticks and inspect the saved export, not just artist
+flags. An explicitly requested enclosing grid overrides this default.
 
 ## Synthetic smoke and checks
 
