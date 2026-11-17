@@ -28,13 +28,13 @@ grep -Eq 'Use `scout` .*search-heavy' "$ROOT/shared/AGENTS.md" || {
   exit 1
 }
 
-grep -Fxq 'model: openai-codex/gpt-6-astra' "$AGENT" || {
-  printf 'investigator agent must default to GPT-6 Astra\n' >&2
+grep -Fxq 'model: openai-codex/gpt-6.2-astra' "$AGENT" || {
+  printf 'investigator agent must default to GPT-6.2 Astra\n' >&2
   exit 1
 }
 
 grep -Fxq 'allow-model-override: false' "$AGENT" || {
-  printf 'investigator agent must remain pinned to GPT-6 Astra\n' >&2
+  printf 'investigator agent must remain pinned to GPT-6.2 Astra\n' >&2
   exit 1
 }
 

@@ -41,4 +41,9 @@ expected_roster=$'coder\ninvestigator\nqlmri\nscout'
   exit 1
 }
 
+grep -Fxq 'model: openai-codex/gpt-6.2-sol' "$target/coder.md" || {
+  printf 'installed coder must use GPT-6.2 Sol\n' >&2
+  exit 1
+}
+
 printf 'pi agent installation passed\n'

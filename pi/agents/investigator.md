@@ -9,7 +9,7 @@ tools: read,bash,grep,find,ls,web_search,web_fetch,batch_web_fetch,document_pars
 skills: all
 extensions: all
 spawning: false
-model: openai-codex/gpt-6-astra
+model: openai-codex/gpt-6.2-astra
 allow-model-override: false
 context-warn-threshold: 80%
 context-warn-step: 5%

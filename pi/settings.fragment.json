@@ -1,6 +1,6 @@
 {
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6-astra",
+  "defaultModel": "gpt-6.2-astra",
   "defaultThinkingLevel": "high",
   "retry": {
     "enabled": true
