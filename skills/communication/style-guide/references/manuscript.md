@@ -43,8 +43,8 @@ Em dashes are acceptable for a genuine parenthetical interruption or apposition 
 - Give each paragraph one main idea.
 - Begin with a functional topic sentence that establishes the paragraph's subject or claim. Do not turn it into a slogan or pull quote.
 - Arrange supporting sentences so that each follows from the previous sentence.
-- Use the final sentence to state the consequence or prepare the next logical move when that connection is needed.
-- Do not append a summary sentence when the evidence already completes the point.
+- State what the observations establish together. Stop once that point is clear.
+- Qualify the claim where you make it. Cut closing disclaimers about claims you never made. Put fitting assumptions with the method.
 - Split a paragraph when its sentences no longer support the same controlling idea.
 - Do not place an unrelated acquisition or preprocessing detail inside a paragraph about a biological result. Keep methods, findings, and interpretation in separate paragraphs unless the methodological detail directly supports the paragraph's claim.
 

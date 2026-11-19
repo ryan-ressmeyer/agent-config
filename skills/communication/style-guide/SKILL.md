@@ -52,17 +52,9 @@ passage; they hold the last few sentences. These four rules all follow from that
 and they take precedence over the sentence-level rules below — a paragraph with the wrong
 opening sentence or an undefined term is not improved by fixing its adverbs.
 
-### Open on the claim, not the approach to it
+### Give the reader a reason for the comparison
 
-The first sentence of a paragraph must assert something. If it licenses the analysis,
-orients the reader, or explains why the question matters, it is preparation. Delete it and
-start at the next sentence.
-
-Preparation reads as competent, which is why it survives self-review. It is nonetheless the
-single most frequently rejected thing an agent writes.
-
-**Check:** cover the first sentence. If the paragraph still stands and loses nothing but
-throat-clearing, that sentence was preparation.
+Open with the finding when the reader already knows the question. When a new comparison would otherwise seem arbitrary, state the specific question or prediction that motivates it. Cut an opener that contributes no premise the reader needs.
 
 ### Introduce before you use
 
@@ -275,7 +267,7 @@ preparation or uses an undefined term is wasted work.
 
 ### Passage
 
-- Does each paragraph open on a claim rather than preparation for one?
+- Can the reader tell why this comparison belongs here?
 - Is every technical term, condition name, and symbol introduced before its first use in
   reading order?
 - Does any shorthand require recalling a referent from more than a sentence or two back?
