@@ -108,7 +108,7 @@ When a figure from the database illustrates a point being discussed:
 
 - Consult theme documents for which papers relate to each other and how
 - Start broad, narrow to the specific question
-- Every factual claim needs a citation attributed to specific authors
+- Every factual claim must be supported by a citation to the relevant study
 - End with the gap your paper fills
 - Do not write "it is well known that" or "extensive work has shown" — state what specific papers found
 

@@ -9,7 +9,7 @@ Scientific claims should preserve the relationship between evidence, interpretat
 
 ## Evidence and attribution
 
-- Attribute empirical findings to the studies that reported them. Prefer “Burr et al. found…” over floating constructions such as “it has been shown.”
+- In a research manuscript, write the premise, comparison, or inference the paragraph needs. Cite the source parenthetically at the claim it supports. Use author-led wording only when the manuscript author supplied or requested it. In a review or paper summary, name the investigators when the comparison is about who found or argued what.
 - State what measurement supports a claim. A citation alone does not explain the evidentiary connection.
 - Distinguish reported results from authors’ interpretations. “The authors concluded X” is not equivalent to “X is the case.”
 - Preserve quantitative support when available: sample sizes, effect sizes, uncertainty intervals, test statistics, and figure references.
